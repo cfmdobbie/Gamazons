@@ -6,7 +6,7 @@
 /* the board size */
 #define BOARD_SIZE 10
 /* border around the board itself */
-#define BOARD_BORDER 15
+#define BOARD_BORDER 0
 /* cell size on the board */
 #define CELL_SIZE 40.0 
 /* cell padding */
@@ -16,7 +16,7 @@
 #define SQUARE_COLOR_2 "grey"
 
 #define THICKNESS 3.0
-#define QUEEN_OFFSET 15.0
+#define QUEEN_OFFSET 0
 
 /* Data structures */
 typedef gushort Square;

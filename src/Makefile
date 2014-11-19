@@ -108,10 +108,15 @@ gamazons_INCLUDES = -DGAMAZONS=1
 
 gamazons_CFLAGS = -O2 -DGAMAZONS=1
 
+gamazons_HELP = gamazons.html topic.dat
 gamazons_BITMAPS = white.png black.png
-EXTRA_DIST = $(gamazons_BITMAPS)
+
+EXTRA_DIST = $(gamazons_BITMAPS) $(gamazons_HELP)
 gamazonsbitmapsdir = $(datadir)/pixmaps
 gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
+
+gamazonshelpdir = $(datadir)/gnome/help/gamazons/C
+gamazonshelp_DATA = $(gamazons_HELP)
 
 gamazons_LDADD =  -L/home/yorgasor/garnome/lib -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -132,7 +137,7 @@ CFLAGS = -g -O2
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DATA =  $(gamazonsbitmaps_DATA)
+DATA =  $(gamazonsbitmaps_DATA) $(gamazonshelp_DATA)
 
 DIST_COMMON =  Makefile.am Makefile.in
 
@@ -220,6 +225,25 @@ uninstall-gamazonsbitmapsDATA:
 	@$(NORMAL_UNINSTALL)
 	list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
 	  rm -f $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
+	done
+
+install-gamazonshelpDATA: $(gamazonshelp_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(gamazonshelpdir)
+	@list='$(gamazonshelp_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonshelpdir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonshelpdir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonshelpdir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonshelpdir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-gamazonshelpDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(gamazonshelp_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(gamazonshelpdir)/$$p; \
 	done
 
 tags: TAGS
@@ -314,20 +338,22 @@ installcheck: installcheck-am
 install-exec-am: install-binPROGRAMS
 install-exec: install-exec-am
 
-install-data-am: install-gamazonsbitmapsDATA
+install-data-am: install-gamazonsbitmapsDATA install-gamazonshelpDATA
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-binPROGRAMS uninstall-gamazonsbitmapsDATA
+uninstall-am: uninstall-binPROGRAMS uninstall-gamazonsbitmapsDATA \
+		uninstall-gamazonshelpDATA
 uninstall: uninstall-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonsbitmapsdir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonsbitmapsdir) \
+		$(DESTDIR)$(gamazonshelpdir)
 
 
 mostlyclean-generic:
@@ -367,7 +393,8 @@ maintainer-clean: maintainer-clean-am
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
 maintainer-clean-compile uninstall-gamazonsbitmapsDATA \
-install-gamazonsbitmapsDATA tags mostlyclean-tags distclean-tags \
+install-gamazonsbitmapsDATA uninstall-gamazonshelpDATA \
+install-gamazonshelpDATA tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-exec-am \

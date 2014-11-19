@@ -22,6 +22,7 @@ extern moving_ai;
 int grabbed_queen;
 int new_game;
 GtkWidget *PlayerSettingsWindow;
+extern int moving_ai;
 
 
 void
@@ -32,7 +33,12 @@ on_new1_activate                       (GtkMenuItem     *menuitem,
    init_engine();
    init_game_board(main_window);
    load_values_from_file();
-   new_game = TRUE;
+
+   //if ai is currently moving, notify that function that the user has 
+   //decided to start a new game
+   if (moving_ai)
+      new_game = TRUE;
+   what_next = WAIT_FOR_AI;
    while (move_ai());  //if both players are AI, keeps on running
 }
 
@@ -128,7 +134,14 @@ void
 on_how_to_play1_activate               (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-
+    GError *error = NULL;
+    if (gnome_help_display("gamazons",NULL,&error))
+       printf("I should pop up the help display now\n");
+    else
+      {
+       printf("I couldn't display the help screen, sorry.\n");
+       printf("%s\n", error->message );
+      }
 }
 
 
@@ -136,7 +149,6 @@ void
 on_help2_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-
 }
 
 
@@ -144,6 +156,45 @@ void
 on_BT_UNDO_clicked                     (GtkButton       *button,
                                         gpointer         user_data)
 {
+   int temp;
+   GtkWidget *undo_button;
+
+   if (what_next == FIRE_ARROW) //Undo during mid-move
+     {
+      int to_col, from_col, to_row, from_row;
+
+      temp = board->from;
+      board->from = board->to;
+      board->to = temp;
+
+      try_move(board, board->selected_queen);
+
+      //roll back the state of the board
+      from_col = get_x_int_from_square(board->from);
+      from_row = get_y_int_from_square(board->from);
+
+      to_col = get_x_int_from_square(board->to);
+      to_row = get_y_int_from_square(board->to);
+
+      board->squares[to_row][to_col] = board->squares[from_row][from_col];
+      board->squares[from_row][from_col] = NOTHING;
+      gen_legal_moves(board->to); 
+
+      if (board->squares[to_row][to_col] == WHITE)
+	{
+	 what_next = MOVE_WHITE_QUEEN;
+	 update_status_bar();
+	}
+      else
+	{
+	 what_next = MOVE_BLACK_QUEEN;
+	 update_status_bar();
+	}
+
+      undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
+      gtk_widget_set_sensitive (undo_button, FALSE);
+     }
+
 
 }
 
@@ -206,7 +257,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int from_row, from_col, to_row, to_col;
    int from;
    int i,j;
-   GtkWidget *auto_button;
+   GtkWidget *auto_button, *undo_button;
 
    //printf("MainEvent = %d\n", event);
    if (data) {
@@ -238,13 +289,18 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
      }
 
 	   //Make sure it's time to move a queen before letting the user do it,
-	   //as well as make sure he's moving his own queen
+	   //as well as make sure he's moving his own queen.  Also make sure it's
+   	   //a human's turn!
 
 	   printf("checking row %d, col %d\n", from_row, from_col);
 	   square_contains(from);
 	   printf("board->squares = %d\n",board->squares[from_row][from_col]);
-	   if ((board->squares[from_row][from_col] == WHITE && what_next == MOVE_WHITE_QUEEN) ||
-	       (board->squares[from_row][from_col] == BLACK && what_next == MOVE_BLACK_QUEEN))
+	   if ((board->squares[from_row][from_col] == WHITE && 
+		       what_next == MOVE_WHITE_QUEEN && 
+		       options.white_player == HUMAN) ||
+	       (board->squares[from_row][from_col] == BLACK && 
+			what_next == MOVE_BLACK_QUEEN && 
+			options.black_player == HUMAN))
 	     {
 	      //Human is moving a queen
 	      printf("board->squares = %d, what_next = %d\n", board->squares[from_row][from_col], what_next);
@@ -354,9 +410,12 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	      else
 		{
 		 what_next = FIRE_ARROW;
+		 update_status_bar();
 
   	         auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
 		 gtk_widget_set_sensitive (auto_button, FALSE);
+  	         undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
+		 gtk_widget_set_sensitive (undo_button, TRUE);
 
 		 board->squares[to_row][to_col] = board->squares[from_row][from_col];
 		 board->squares[from_row][from_col] = NOTHING;
@@ -395,7 +454,7 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int row, col;
    state *s;
    move movelist[3000];
-   GtkWidget *auto_button;
+   GtkWidget *auto_button, *undo_button;
 
    count_queens();
    switch (event->type) 
@@ -406,8 +465,8 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   if (what_next != FIRE_ARROW)
 	      break;
 
-	   x_coord = event->button.x-8;
-	   y_coord = event->button.y-15;
+	   x_coord = event->button.x-4;
+	   y_coord = event->button.y-4;
 
 	   sq = get_square(x_coord, y_coord);
 	   if (!is_move_legal(sq))
@@ -430,11 +489,13 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   if (s->turn == WHITE_PLAYER)
 	     {
 	      what_next = MOVE_WHITE_QUEEN;
+	      update_status_bar();
 	      printf("white moves next\n");
 	     }
 	   else if (s->turn == BLACK_PLAYER)
 	     {
 	      what_next = MOVE_BLACK_QUEEN;
+	      update_status_bar();
 	      printf("black moves next\n");
 	     }
 	   else
@@ -443,6 +504,8 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
   	   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
 	   gtk_widget_set_sensitive (auto_button, TRUE);
+  	   undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
+	   gtk_widget_set_sensitive (undo_button, FALSE);
 	   
 	   //check for gameover
 	   if (game_over(movelist))
@@ -493,9 +556,9 @@ on_PlayerOKButton_clicked              (GtkButton       *button,
    gtk_widget_destroy(PlayerSettingsWindow);
 
    //checks to see if the AI is supposed to move after changes to the player have been made
-   while(move_ai());
-
-
+   //if the ai is already moving, don't muck things up by calling it again.
+   if (moving_ai == FALSE)
+      while(move_ai());
 
 }
 

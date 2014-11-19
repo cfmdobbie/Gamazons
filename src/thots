@@ -173,7 +173,7 @@ TODO
 	way I can pit one player up against the other without them "cheating" by
 	knowing what the other player will do.  
 
-* Generate the moves list
+* Generate the moves made list
 	I've got that nice fancy window taking up precious real estate.  I might
 	as well use it for what it was for.
 
@@ -199,3 +199,44 @@ TODO
 	I noticed gnome-chess stored the user config file in the .gnome
 	directory.  Perhaps there's a standard location for gnome's config files
 	that I can retreive via some gnome function call.
+
+* Create a help file
+	Gnome uses HTML files for help stuff.  Make a nice page that explains
+	the rules and what the buttons are for.  In general, they should be
+	installed in /usr/local/share/gnome/help/gamazons/.  Or I maybe
+	(PREFIX)/share/gnome/help/gamazons is more accurate.
+
+================================================================================
+FIXED BUGS
+================================================================================
+Black was set for a long run.  I shortened the think time.  Then I hit force
+move.   I think on black's next move he gained an extra queen and walked right
+over a queen & wall.  RESULT: Black suddenly had 5 amazons instead of 4.
+SOLUTION: when hitting 'OK', it called move_ai().  I added a global flag 
+' moving_ai' that it checks to see if move_ai() is already running.  If so, it 
+doesn't call it.
+
+After hitting Force Move, at the end of the game I pop open the player settings.
+It has both opponents set as AI (note, I should probably _always_ read in values
+from the .gamazons file instead of the widget's current values).  I hit ok,
+which saves those values to my .gamazons file, and then new game.  At this
+point, both players should be AI, but it insists on waiting for the human to
+move the AI.  Also when the game starts up in this state, it insists on waiting
+for the human to start.
+
+If both players are set to AI, and I have 'while(move_ai)' call in my main init
+function, the board doesn't have a chance to get drawn until the game is over.
+SOLUTION: Don't call 'while(move_ai)' from init_game_board().  If the user
+really wants the AIs to play against each other right away, he'll have to select
+New from the menu.
+
+ugh, now when I autofinish & select New game, I can't move my piece.  SOLUTION:
+move_ai() only changed the what_next variable if an AI player actually moved.
+Since New Game initialized what_next to WAIT_FOR_AI before calling move_ai() and
+White was set as a human player, we were stuck in WAIT_FOR_AI mode and couldn't
+move any pieces.  To solve this, I move the code that updated what_next outside
+of the "if AI is moving" block.
+
+================================================================================
+BUGS
+================================================================================

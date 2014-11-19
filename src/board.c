@@ -24,27 +24,37 @@ extern GtkWidget *main_window;
 extern int new_game;
 Square legal_moves[100];
 int state_hash;
+int moving_ai;
+
 
 void init_game_board(GtkWidget *GamazonsMain)
 {
    int i,j;
    char color[256];
    GtkWidget *w = (GtkWidget *) lookup_widget(GamazonsMain, BOARD_NAME);
-   GtkWidget *force_button;
+   GtkWidget *force_button, *undo_button;
    
+   if (w == NULL)
+      printf("Couldn't find board!!!!!!!!\n");
 
    board = (Board *) malloc(sizeof(Board));
    board->canvas = GNOME_CANVAS(w);
+   
+   gnome_canvas_set_scroll_region(board->canvas, 0.0, 0.0,
+	   400.0,
+	   400.0);
 
-   /* set where can the canvas scroll (our usable area) */
+   /*
+   // set where can the canvas scroll (our usable area) 
    gnome_canvas_set_scroll_region(board->canvas, 0.0, 0.0,
 	   BOARD_SIZE*CELL_SIZE + 2*BOARD_BORDER,
 	   BOARD_SIZE*CELL_SIZE + BOARD_BORDER);
 
-   /* set the size of the widget */
+   // set the size of the widget 
    gtk_widget_set_usize(w,
 	   BOARD_SIZE*CELL_SIZE + 2*BOARD_BORDER,
 	   BOARD_SIZE*CELL_SIZE + BOARD_BORDER);
+*/
 
 
    /* initialize pieces */
@@ -106,9 +116,15 @@ void init_game_board(GtkWidget *GamazonsMain)
 
    force_button = (GtkWidget *)lookup_widget(main_window, "BT_FORCEMOVE");
    gtk_widget_set_sensitive (force_button, FALSE);
+   undo_button = (GtkWidget *)lookup_widget(main_window, "BT_UNDO");
+   gtk_widget_set_sensitive (undo_button, FALSE);
    
    draw_board();
    what_next = MOVE_WHITE_QUEEN;
+   update_status_bar();
+
+   //check if the current settings require the ai to start moving
+   //while (move_ai);
 
 
 }
@@ -173,11 +189,19 @@ void draw_board()
 	{
 	 image = NULL;
 	 get_square_color(i+j, color);
+	 /*
 	 fill_a_square(gnome_canvas_root(board->canvas),
 		 BOARD_BORDER + i*CELL_SIZE,
 		 BOARD_BORDER + j*CELL_SIZE,
 		 BOARD_BORDER + i*(CELL_SIZE) + CELL_SIZE,
 		 BOARD_BORDER + j*(CELL_SIZE) + CELL_SIZE,
+		 color);
+		 */
+	 fill_a_square(gnome_canvas_root(board->canvas),
+		 i*CELL_SIZE,
+		 j*CELL_SIZE,
+		 i*(CELL_SIZE) + CELL_SIZE,
+		 j*(CELL_SIZE) + CELL_SIZE,
 		 color);
 	 if (board->squares[j][i] == WHITE)
 	   {
@@ -247,6 +271,10 @@ void draw_board()
 	   NULL);
 	   */
 
+
+   gtk_widget_show_now(main_window);
+   gtk_widget_queue_draw ((GtkWidget *) board->canvas);
+   gtk_widget_show_now((GtkWidget *) board->canvas);
 }
 
 
@@ -262,8 +290,10 @@ Square get_square (double x, double y)
    int x_square;
    int y_square;
 
-   x -= BOARD_BORDER;
-   y -= BOARD_BORDER;
+   /*
+   x -= (BOARD_BORDER - CELL_PAD);
+   y -= (BOARD_BORDER - CELL_PAD);
+   */
 
    if (x < 0)
       x = 0.0;
@@ -477,6 +507,7 @@ int move_ai()
    //presses it.  Perhaps the 'Force Move' button should be greyed out until the AI
    //is thinking, or since Force Move & Auto Finish are mutually exclusive, it would
    //be cool to have the button switch labels depending on the state of the game.
+   moving_ai = TRUE;
    auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
    force_button = (GtkWidget *) lookup_widget(main_window, "BT_FORCEMOVE");
    gtk_widget_set_sensitive (auto_button, FALSE);
@@ -503,6 +534,7 @@ int move_ai()
        ((states.s[states.current_state]->turn == BLACK_PLAYER) && (options.black_player == AI)))
      {
       what_next = WAIT_FOR_AI;
+      update_status_bar();
       ok = 1;
       ai = TRUE;
       start = time(NULL);
@@ -527,15 +559,18 @@ int move_ai()
       //register move on graphical board
       move_piece(temp);
       dup_state(s, states.s[++(states.current_state)]);
-      if (s->turn == WHITE_PLAYER)
-	 what_next = MOVE_WHITE_QUEEN;
-      if (s->turn == BLACK_PLAYER)
-	 what_next = MOVE_BLACK_QUEEN;
      }
    else
      {
       printf("the AI doesn't move next:\n");
      }
+
+   if (s->turn == WHITE_PLAYER)
+      what_next = MOVE_WHITE_QUEEN;
+   if (s->turn == BLACK_PLAYER)
+      what_next = MOVE_BLACK_QUEEN;
+
+   update_status_bar();
    if (options.white_player == AI)
       printf("White is AI\n");
    if (options.black_player == AI)
@@ -557,11 +592,13 @@ int move_ai()
    if (game_over(movelist))
      {
       //XXX should I set ai = FALSE?
+      ai = FALSE;
      }
 
 
    gtk_widget_set_sensitive (auto_button, TRUE);
    gtk_widget_set_sensitive (force_button, FALSE);
+   moving_ai = FALSE;
    return ai;
 }
 
@@ -827,13 +864,13 @@ void count_queens()
 	}
      }
    if (black > 4) 
-      printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n");
+      printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY Gained a black queen\n");
    if (white > 4)
-      printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
+      printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX Gained a white queen\n");
    if (black < 4)
-      printf("XYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYX\n");
+      printf("XYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXXYXYX Lost a black queen\n");
    if (white < 4)
-      printf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n");
+      printf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ Lost a white queen\n");
 }
 
 
@@ -913,3 +950,38 @@ int game_over(move *movelist)
 
 }
 
+/*==============================================================================
+ * update_status_bar
+ *
+ * Updates the status bar based on the current value of what_next
+ */
+update_status_bar()
+{
+   GtkStatusbar *status = (GtkStatusbar *) lookup_widget(main_window, "statusbar1");
+   guint context_id = what_next;
+
+   gtk_statusbar_pop(status, context_id);
+
+   switch (what_next) 
+     {
+       case FIRE_ARROW:
+	   gtk_statusbar_push(status, what_next, "Fire Arrow");
+	   break;
+       case MOVE_BLACK_QUEEN:
+	   gtk_statusbar_push(status, what_next, "Move Black Amazon");
+	   break;
+       case MOVE_WHITE_QUEEN:
+	   if (options.white_player == AI) //Starting new game, AI goes first
+	      gtk_statusbar_push(status, what_next, "Select Game->New to start game");
+	   else
+	      gtk_statusbar_push(status, what_next, "Move White Amazon");
+	   break;
+       case WAIT_FOR_AI:
+	   gtk_statusbar_push(status, what_next, "AI is thinking...");
+	   break;
+       default:
+	   gtk_statusbar_push(status, what_next, "I have no idea what to do next!");
+
+     }
+
+}
