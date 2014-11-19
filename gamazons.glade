@@ -1,0 +1,396 @@
+<?xml version="1.0" standalone="no"?> <!--*- mode: xml -*-->
+<!DOCTYPE glade-interface SYSTEM "http://glade.gnome.org/glade-2.0.dtd">
+
+<glade-interface>
+<requires lib="canvas"/>
+
+<widget class="GtkWindow" id="GamazonsMain">
+  <property name="width_request">740</property>
+  <property name="height_request">490</property>
+  <property name="visible">True</property>
+  <property name="title" translatable="yes">Gamazons</property>
+  <property name="type">GTK_WINDOW_TOPLEVEL</property>
+  <property name="window_position">GTK_WIN_POS_NONE</property>
+  <property name="modal">False</property>
+  <property name="resizable">False</property>
+  <property name="destroy_with_parent">True</property>
+  <signal name="destroy" handler="on_GamazonsMain_destroy" last_modification_time="Fri, 05 Jul 2002 23:38:43 GMT"/>
+
+  <child>
+    <widget class="GtkVBox" id="vbox1">
+      <property name="visible">True</property>
+      <property name="homogeneous">False</property>
+      <property name="spacing">0</property>
+
+      <child>
+	<widget class="GtkMenuBar" id="menubar1">
+	  <property name="visible">True</property>
+
+	  <child>
+	    <widget class="GtkMenuItem" id="file1">
+	      <property name="visible">True</property>
+	      <property name="stock_item">GNOMEUIINFO_MENU_GAME_TREE</property>
+
+	      <child>
+		<widget class="GtkMenu" id="file1_menu">
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="new1">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_NEW_ITEM</property>
+		      <property name="label" translatable="yes">_New</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_new1_activate" last_modification_time="Mon, 01 Jul 2002 23:04:13 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="open1">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_RESTART_GAME_ITEM</property>
+		      <signal name="activate" handler="on_open1_activate" last_modification_time="Mon, 01 Jul 2002 23:04:13 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="separator1">
+		      <property name="visible">True</property>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="quit1">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_EXIT_ITEM</property>
+		      <signal name="activate" handler="on_quit1_activate" last_modification_time="Mon, 01 Jul 2002 23:04:13 GMT"/>
+		    </widget>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+
+	  <child>
+	    <widget class="GtkMenuItem" id="edit1">
+	      <property name="visible">True</property>
+	      <property name="stock_item">GNOMEUIINFO_MENU_EDIT_TREE</property>
+
+	      <child>
+		<widget class="GtkMenu" id="edit1_menu">
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="undo_move2">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_UNDO_MOVE_ITEM</property>
+		      <signal name="activate" handler="on_undo_move2_activate" last_modification_time="Fri, 05 Jul 2002 21:59:42 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="redo_move3">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_REDO_MOVE_ITEM</property>
+		      <signal name="activate" handler="on_redo_move3_activate" last_modification_time="Fri, 05 Jul 2002 21:59:42 GMT"/>
+		    </widget>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+
+	  <child>
+	    <widget class="GtkMenuItem" id="preferences1">
+	      <property name="visible">True</property>
+	      <property name="stock_item">GNOMEUIINFO_MENU_SETTINGS_TREE</property>
+	      <signal name="activate" handler="on_preferences1_activate" last_modification_time="Mon, 01 Jul 2002 23:04:13 GMT"/>
+
+	      <child>
+		<widget class="GtkMenu" id="preferences1_menu">
+
+		  <child>
+		    <widget class="GtkMenuItem" id="network1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Network</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_network1_activate" last_modification_time="Fri, 05 Jul 2002 22:01:51 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="player1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Player</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_player1_activate" last_modification_time="Fri, 05 Jul 2002 22:01:51 GMT"/>
+		    </widget>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+
+	  <child>
+	    <widget class="GtkMenuItem" id="help1">
+	      <property name="visible">True</property>
+	      <property name="stock_item">GNOMEUIINFO_MENU_HELP_TREE</property>
+
+	      <child>
+		<widget class="GtkMenu" id="help1_menu">
+
+		  <child>
+		    <widget class="GtkMenuItem" id="how_to_play1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_How To Play</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_how_to_play1_activate" last_modification_time="Fri, 05 Jul 2002 22:02:53 GMT"/>
+		    </widget>
+		  </child>
+
+		  <child>
+		    <widget class="GtkImageMenuItem" id="about1">
+		      <property name="visible">True</property>
+		      <property name="stock_item">GNOMEUIINFO_MENU_ABOUT_ITEM</property>
+		      <signal name="activate" handler="on_about1_activate" last_modification_time="Mon, 01 Jul 2002 23:04:13 GMT"/>
+		    </widget>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">False</property>
+	  <property name="fill">False</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkScrolledWindow" id="scrolledwindow1">
+	  <property name="visible">True</property>
+	  <property name="can_focus">True</property>
+	  <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+	  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+	  <property name="shadow_type">GTK_SHADOW_NONE</property>
+	  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+	  <child>
+	    <widget class="GtkViewport" id="viewport1">
+	      <property name="visible">True</property>
+	      <property name="shadow_type">GTK_SHADOW_IN</property>
+
+	      <child>
+		<widget class="GtkHBox" id="hbox1">
+		  <property name="visible">True</property>
+		  <property name="homogeneous">False</property>
+		  <property name="spacing">0</property>
+
+		  <child>
+		    <widget class="GtkScrolledWindow" id="scrolledwindow2">
+		      <property name="visible">True</property>
+		      <property name="can_default">True</property>
+		      <property name="can_focus">True</property>
+		      <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+		      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+		      <property name="shadow_type">GTK_SHADOW_NONE</property>
+		      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+		      <child>
+			<widget class="GnomeCanvas" id="CNVS_GAMEBOARD">
+			  <property name="width_request">400</property>
+			  <property name="height_request">400</property>
+			  <property name="visible">True</property>
+			  <property name="can_focus">True</property>
+			  <property name="anti_aliased">False</property>
+			  <property name="scroll_x1">0</property>
+			  <property name="scroll_y1">0</property>
+			  <property name="scroll_x2">100</property>
+			  <property name="scroll_y2">100</property>
+			  <property name="pixels_per_unit">1</property>
+			</widget>
+		      </child>
+		    </widget>
+		    <packing>
+		      <property name="padding">0</property>
+		      <property name="expand">True</property>
+		      <property name="fill">True</property>
+		    </packing>
+		  </child>
+
+		  <child>
+		    <widget class="GtkVBox" id="vbox2">
+		      <property name="visible">True</property>
+		      <property name="homogeneous">False</property>
+		      <property name="spacing">0</property>
+
+		      <child>
+			<widget class="GtkVBox" id="vbox3">
+			  <property name="visible">True</property>
+			  <property name="homogeneous">False</property>
+			  <property name="spacing">0</property>
+
+			  <child>
+			    <widget class="GtkVBox" id="vbox4">
+			      <property name="visible">True</property>
+			      <property name="homogeneous">False</property>
+			      <property name="spacing">0</property>
+
+			      <child>
+				<widget class="GtkLabel" id="label1">
+				  <property name="height_request">44</property>
+				  <property name="visible">True</property>
+				  <property name="label" translatable="yes">Moves Made:</property>
+				  <property name="use_underline">False</property>
+				  <property name="use_markup">False</property>
+				  <property name="justify">GTK_JUSTIFY_LEFT</property>
+				  <property name="wrap">False</property>
+				  <property name="selectable">False</property>
+				  <property name="xalign">0.02</property>
+				  <property name="yalign">0.72</property>
+				  <property name="xpad">0</property>
+				  <property name="ypad">0</property>
+				</widget>
+				<packing>
+				  <property name="padding">0</property>
+				  <property name="expand">False</property>
+				  <property name="fill">False</property>
+				</packing>
+			      </child>
+
+			      <child>
+				<widget class="GtkScrolledWindow" id="scrolledwindow3">
+				  <property name="visible">True</property>
+				  <property name="can_focus">True</property>
+				  <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+				  <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+				  <property name="shadow_type">GTK_SHADOW_NONE</property>
+				  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+				  <child>
+				    <widget class="GtkTextView" id="textview1">
+				      <property name="border_width">8</property>
+				      <property name="height_request">300</property>
+				      <property name="visible">True</property>
+				      <property name="can_focus">True</property>
+				      <property name="editable">False</property>
+				      <property name="justification">GTK_JUSTIFY_LEFT</property>
+				      <property name="wrap_mode">GTK_WRAP_NONE</property>
+				      <property name="cursor_visible">True</property>
+				      <property name="pixels_above_lines">0</property>
+				      <property name="pixels_below_lines">0</property>
+				      <property name="pixels_inside_wrap">0</property>
+				      <property name="left_margin">0</property>
+				      <property name="right_margin">0</property>
+				      <property name="indent">0</property>
+				      <property name="text" translatable="yes"></property>
+				    </widget>
+				  </child>
+				</widget>
+				<packing>
+				  <property name="padding">0</property>
+				  <property name="expand">True</property>
+				  <property name="fill">True</property>
+				</packing>
+			      </child>
+			    </widget>
+			    <packing>
+			      <property name="padding">0</property>
+			      <property name="expand">True</property>
+			      <property name="fill">True</property>
+			    </packing>
+			  </child>
+
+			  <child>
+			    <widget class="GtkHButtonBox" id="hbuttonbox2">
+			      <property name="height_request">8</property>
+			      <property name="visible">True</property>
+			      <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
+			      <property name="spacing">5</property>
+
+			      <child>
+				<widget class="GtkButton" id="BT_UNDO">
+				  <property name="visible">True</property>
+				  <property name="tooltip" translatable="yes">Undo the last move</property>
+				  <property name="can_default">True</property>
+				  <property name="can_focus">True</property>
+				  <property name="label" translatable="yes">Undo</property>
+				  <property name="use_underline">True</property>
+				  <property name="relief">GTK_RELIEF_NORMAL</property>
+				  <signal name="clicked" handler="on_BT_UNDO_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:19 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkButton" id="BT_FORCEMOVE">
+				  <property name="visible">True</property>
+				  <property name="tooltip" translatable="yes">Force the computer to move</property>
+				  <property name="can_default">True</property>
+				  <property name="can_focus">True</property>
+				  <property name="label" translatable="yes">Force Move</property>
+				  <property name="use_underline">True</property>
+				  <property name="relief">GTK_RELIEF_NORMAL</property>
+				  <signal name="clicked" handler="on_BT_FORCEMOVE_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:30 GMT"/>
+				</widget>
+			      </child>
+
+			      <child>
+				<widget class="GtkButton" id="BT_AUTOFINISH">
+				  <property name="visible">True</property>
+				  <property name="tooltip" translatable="yes">Have the computer complete the game for you</property>
+				  <property name="can_default">True</property>
+				  <property name="can_focus">True</property>
+				  <property name="label" translatable="yes">Auto Finish</property>
+				  <property name="use_underline">True</property>
+				  <property name="relief">GTK_RELIEF_NORMAL</property>
+				  <signal name="clicked" handler="on_BT_AUTOFINISH_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:52 GMT"/>
+				</widget>
+			      </child>
+			    </widget>
+			    <packing>
+			      <property name="padding">0</property>
+			      <property name="expand">True</property>
+			      <property name="fill">True</property>
+			    </packing>
+			  </child>
+			</widget>
+			<packing>
+			  <property name="padding">0</property>
+			  <property name="expand">True</property>
+			  <property name="fill">True</property>
+			</packing>
+		      </child>
+		    </widget>
+		    <packing>
+		      <property name="padding">0</property>
+		      <property name="expand">True</property>
+		      <property name="fill">True</property>
+		    </packing>
+		  </child>
+		</widget>
+	      </child>
+	    </widget>
+	  </child>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">True</property>
+	  <property name="fill">True</property>
+	</packing>
+      </child>
+
+      <child>
+	<widget class="GtkStatusbar" id="statusbar1">
+	  <property name="visible">True</property>
+	  <property name="has_resize_grip">True</property>
+	</widget>
+	<packing>
+	  <property name="padding">0</property>
+	  <property name="expand">False</property>
+	  <property name="fill">False</property>
+	</packing>
+      </child>
+    </widget>
+  </child>
+</widget>
+
+</glade-interface>
