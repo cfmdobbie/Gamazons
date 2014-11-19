@@ -2,7 +2,7 @@
 
 > GNOME Amazons, taken from http://www.yorgalily.org/gamazons/
 
-> This software was written by *yorgasor*, dates from August to November 2002 and was released under the GPL at the above link.  Uploaded to GitHub for preservations reasons, and also to provide an easily-browseable version of the source code.
+> This software was written by *yorgasor*, dates from August to November 2002 and was released under the GPL at the above link.  Uploaded to GitHub for preservation reasons, and also to provide an easily-browseable version of the source code.
 
 > Below is a rough conversion of the source webpage to Markdown.
 
