@@ -21,22 +21,7 @@ gamazons_SOURCES = \
 
 gamazons_INCLUDES = -DGAMAZONS=1
 
-gamazons_CFLAGS = -O2 -DGAMAZONS=1
-
-gamazons_BITMAPS = white.png black.png
-EXTRA_DIST = $(gamazons_BITMAPS)
-gamazonsbitmapsdir = $(datadir)/pixmaps
-gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
-
+gamazons_DATA = white.png black.png
 
 gamazons_LDADD = @PACKAGE_LIBS@
 
-##amazons_SOURCES = \
-##	eval.c \
-##	moves.c \
-##	unit-test.c unit-test.h \
-##	amazons.h 
-##
-##amazons_CFLAGS = -O2
-##
-##amazons_LDADD = a_moves.o

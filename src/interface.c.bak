@@ -403,7 +403,7 @@ create_PlayerSettings (void)
   gtk_widget_show (hbox7);
   gtk_box_pack_start (GTK_BOX (vbox6), hbox7, TRUE, TRUE, 0);
 
-  TimeSpinner_adj = gtk_adjustment_new (5, 0, 100, 1, 10, 10);
+  TimeSpinner_adj = gtk_adjustment_new (5, 1, 100, 1, 10, 10);
   TimeSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (TimeSpinner_adj), 1, 0);
   gtk_widget_show (TimeSpinner);
   gtk_box_pack_start (GTK_BOX (hbox7), TimeSpinner, TRUE, TRUE, 10);

@@ -265,6 +265,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int i,j;
 
 
+   //printf("MainEvent = %d\n", event);
    if (data) {
       item = board->db_image [GPOINTER_TO_INT (data)];
       if (item == NULL && event->type != GDK_BUTTON_RELEASE) 
@@ -322,7 +323,8 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   break;
 
        case GDK_MOTION_NOTIFY:
-	   if ((event->motion.state & GDK_BUTTON1_MASK)) {
+	   if (event && (event->motion.state & GDK_BUTTON1_MASK)) 
+	     {
 	      if (!grabbed_queen)
 		 break;
 	      new_x = event->motion.x;
@@ -332,12 +334,14 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 		      new_x - board->curr_x,
 		      new_y - board->curr_y);
 
+	      /*
 	      if (board->selected != NULL)
 		 clear_square (&board->selected);
+		 */
 
 	      board->curr_x = new_x;
 	      board->curr_y = new_y;
-	   }
+	     }
 	   break;
 
        case GDK_BUTTON_RELEASE:
@@ -419,8 +423,10 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 
 	   try_move (board, item);
+	   /*
 	   if (board->selected)
 	      clear_square (&board->selected);
+	      */
 	   printf("what_next = %d\n", what_next);
 	   break;
        default:

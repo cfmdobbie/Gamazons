@@ -127,8 +127,6 @@ int board_x_to_engine_x(int brd_x);
 int board_y_to_engine_y(int brd_y);
 int get_square_from_engine(int x, int y);
 
-void draw_a_line(GnomeCanvasGroup *group, 
-	int x1, int y1, int x2, int y2, char *color);
 
 void fire_arrow(Square sq);
 void square_contains(Square sq);

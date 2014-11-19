@@ -106,6 +106,13 @@ gamazons_SOURCES = \
 
 gamazons_INCLUDES = -DGAMAZONS=1
 
+gamazons_CFLAGS = -O2 -DGAMAZONS=1
+
+gamazons_BITMAPS = white.png black.png
+EXTRA_DIST = $(gamazons_BITMAPS)
+gamazonsbitmapsdir = $(datadir)/pixmaps
+gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
+
 gamazons_LDADD = @PACKAGE_LIBS@
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -125,6 +132,8 @@ CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+DATA =  $(gamazonsbitmaps_DATA)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -193,6 +202,25 @@ maintainer-clean-compile:
 gamazons: $(gamazons_OBJECTS) $(gamazons_DEPENDENCIES)
 	@rm -f gamazons
 	$(LINK) $(gamazons_LDFLAGS) $(gamazons_OBJECTS) $(gamazons_LDADD) $(LIBS)
+
+install-gamazonsbitmapsDATA: $(gamazonsbitmaps_DATA)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(gamazonsbitmapsdir)
+	@list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
+	  if test -f $(srcdir)/$$p; then \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
+	  else if test -f $$p; then \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
+	  fi; fi; \
+	done
+
+uninstall-gamazonsbitmapsDATA:
+	@$(NORMAL_UNINSTALL)
+	list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
+	  rm -f $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
+	done
 
 tags: TAGS
 
@@ -286,20 +314,20 @@ installcheck: installcheck-am
 install-exec-am: install-binPROGRAMS
 install-exec: install-exec-am
 
-install-data-am:
+install-data-am: install-gamazonsbitmapsDATA
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am: uninstall-binPROGRAMS uninstall-gamazonsbitmapsDATA
 uninstall: uninstall-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS) $(DATA)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonsbitmapsdir)
 
 
 mostlyclean-generic:
@@ -338,7 +366,8 @@ maintainer-clean: maintainer-clean-am
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+maintainer-clean-compile uninstall-gamazonsbitmapsDATA \
+install-gamazonsbitmapsDATA tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend info-am info \
 dvi-am dvi check check-am installcheck-am installcheck install-exec-am \

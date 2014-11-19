@@ -27,7 +27,7 @@ void init_game_board(GtkWidget *GamazonsMain)
 {
    int i,j;
    char color[256];
-   GtkWidget *w = lookup_widget(GamazonsMain, BOARD_NAME);
+   GtkWidget *w = (GtkWidget *) lookup_widget(GamazonsMain, BOARD_NAME);
    
 
    board = (Board *) malloc(sizeof(Board));
@@ -107,38 +107,13 @@ void init_game_board(GtkWidget *GamazonsMain)
 
 }
 
-static void
-draw_a_line(GnomeCanvasGroup *group,
-       	int x1, int y1, int x2, int y2, char *color)
-{
-   GnomeCanvasPoints *points;
-
-   /* allocate a new points array */
-   points = gnome_canvas_points_new (2);
-
-   /* fill out the points */
-   points->coords[0] = x1;
-   points->coords[1] = y1;
-   points->coords[2] = x2;
-   points->coords[3] = y2;
-   /* draw the line */
-   gnome_canvas_item_new(group,
-	   gnome_canvas_line_get_type(),
-	   "points", points,
-	   "fill_color", color,
-	   "width_units", (double)THICKNESS,
-	   NULL);
-
-   /* free the points array */
-   gnome_canvas_points_free(points);
-}
 
 void fill_a_square(GnomeCanvasGroup *group,
        	double x1, double y1, double x2, double y2, char *color)
 {
-   /* draw the line */
+   /* draw a box*/
    gnome_canvas_item_new(group,
-	   GNOME_TYPE_CANVAS_RECT,
+	   gnome_canvas_rect_get_type(),
 	   "x1", x1,
 	   "y1", y1,
 	   "x2", x2,
@@ -146,7 +121,7 @@ void fill_a_square(GnomeCanvasGroup *group,
 	   "outline_color", "black",
 	   "fill_color", color,
 	   "width_pixels", (double)THICKNESS,
-	   NULL);
+	   NULL, NULL);
 
 }
 
@@ -170,14 +145,41 @@ void draw_board()
    
 
 
-   white_pb = gdk_pixbuf_new_from_file("/home/yorgasor/Projects/Gamazons/src/white.png", NULL);
+   white_pb = gdk_pixbuf_new_from_file("/usr/local/share/pixbufs/white.png", NULL);
    if (white_pb == NULL)
-      printf("error loading white.png\n");
+     {
+      white_pb = gdk_pixbuf_new_from_file("/usr/share/pixbufs/white.png", NULL);
+      if (white_pb == NULL)
+       	{
+	 white_pb = gdk_pixbuf_new_from_file("white.png", NULL);
+	 if (white_pb == NULL)
+	   {
+	    fprintf(stderr, "Cannot find white.png\n");
+	    exit(1);
+	   }
+	}
+     }
    else
       printf("loaded white.png just fine\n");
-   black_pb = gdk_pixbuf_new_from_file("/home/yorgasor/Projects/Gamazons/src/black.png", NULL);
+
+   black_pb = gdk_pixbuf_new_from_file("/usr/local/share/pixbufs/black.png", NULL);
    if (black_pb == NULL)
-      printf("error loading black.png\n");
+     {
+      black_pb = gdk_pixbuf_new_from_file("/usr/share/pixbufs/black.png", NULL);
+      if (black_pb == NULL)
+       	{
+	 black_pb = gdk_pixbuf_new_from_file("black.png", NULL);
+	 if (black_pb == NULL)
+	   {
+	    fprintf(stderr, "Cannot find black.png\n");
+	    exit(1);
+	   }
+	}
+     }
+   else
+      printf("loaded black.png just fine\n");
+
+
 
    /* fill alternate squares */
    for(j=0;j<BOARD_SIZE;j++) 
