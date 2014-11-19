@@ -84,7 +84,7 @@ POFILES =
 POSUB = po
 RANLIB = ranlib
 USE_NLS = yes
-VERSION = 0.1
+VERSION = 0.83rc3
 
 gamazonsbitmapsdir = $(datadir)/pixmaps/gamazons
 gamazons_BITMAPS = a_black.png \
@@ -103,6 +103,7 @@ gamazons_BITMAPS = a_black.png \
 			grey_square.png \
 			purple.png \
 			purple2.png \
+			gold.png \
 			white.png \
 			pearl.png \
 			white_square.png 

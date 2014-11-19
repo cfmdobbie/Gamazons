@@ -347,7 +347,7 @@ board.o: board.c /usr/include/time.h /usr/include/features.h \
   /usr/include/libgnomeui-2.0/libgnomeui/gnome-popup-menu.h \
   /usr/include/libgnomeui-2.0/libgnomeui/gnome-propertybox.h \
   /usr/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h amazons.h \
-  board.h callbacks.h
+  board.h bstate.h callbacks.h
 board.c :
 /usr/include/time.h :
 /usr/include/features.h :
@@ -752,4 +752,5 @@ board.c :
 /usr/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h :
 amazons.h :
 board.h :
+bstate.h :
 callbacks.h :

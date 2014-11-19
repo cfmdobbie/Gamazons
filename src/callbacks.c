@@ -3,24 +3,23 @@
 #endif
 
 #include <gnome.h>
+#include <libgen.h>
 
 #include "callbacks.h"
 #include "interface.h"
 #include "support.h"
 #include "amazons.h"
 #include "board.h"
+#include "bstate.h"
 
 extern Board *board;
 extern struct options options;
 extern struct game_states states;
-extern int what_next;
 extern Square legal_moves[100];
 extern int ok;
 extern GtkWidget *main_window;
 extern state_hash;
-extern moving_ai;
 int grabbed_queen;
-int new_game;
 GtkWidget *PlayerSettingsWindow;
 extern int moving_ai;
 
@@ -28,25 +27,34 @@ GtkWidget *file_selector;
 gchar *selected_filename;
 
 /* Local Prototypes */
-static void load_new_theme (GtkFileSelection *selector, gpointer user_data);
+void load_new_theme (GtkFileSelection *selector, gpointer user_data);
+void save_game_history(GtkFileSelection *selector, gpointer user_data);
+void on_ThemeCancelButton_clicked(GtkButton *button, gpointer user_data);
+void on_save_as1CancelButton_clicked(GtkButton *button, gpointer user_data);
+void on_OpenCancelButton_clicked(GtkButton *button, gpointer user_data);
+void load_saved_game(GtkFileSelection *selector, gpointer user_data);
 
 
 void
 on_new1_activate                       (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+   /*
+   if (bstate_get_moving_piece())
+     {
+      gnome_warning_dialog("Unable to start a new game while a piece is being moved.  Please try again.");
+      return;
+     }
+     */
    free_all_memory();
    init_engine();
    destroy_board();
    init_game_board(main_window);
    load_values_from_file();
 
-   //if ai is currently moving, notify that function that the user has 
-   //decided to start a new game
-   if (moving_ai)
-      new_game = TRUE;
-   what_next = WAIT_FOR_AI;
-   while (move_ai());  //if both players are AI, keeps on running
+   bstate_set_just_finished(NEW_GAME);
+   while (bstate_get_what_next() == WAIT_FOR_AI)
+      move_ai();  //if both players are AI, keeps on running
 }
 
 
@@ -58,6 +66,7 @@ on_quit1_activate                      (GtkMenuItem     *menuitem,
 {
 
    state_hash = 0;
+   bstate_set_just_finished(QUIT_GAME);
    gtk_main_quit();
 
 }
@@ -84,7 +93,40 @@ void
 on_about1_activate                     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+   static GtkWidget *about;
+   GdkPixbuf *pixbuf = NULL;
 
+   const gchar *authors[] = {"Ron Yorgason", "Sean McMillen", NULL};
+   gchar *documenters[] = {
+      NULL
+   };
+   /* Translator credits */
+   gchar *translator_credits = _("translator_credits");
+
+   if (about != NULL) {
+      gdk_window_raise (about->window);
+      gdk_window_show (about->window);
+      return;
+   }
+
+     {
+      char filename[1024];
+
+      strcpy(filename, PACKAGE_DATA_DIR "/pixmaps/gnome-gamazons.png");
+      pixbuf = gdk_pixbuf_new_from_file(filename, NULL);
+     }
+
+   about = gnome_about_new (_("Gamazons"), VERSION,
+	   "(C) 2002 Ronald Yorgason and Sean McMillen",
+	   _("Send comments and bug reports to: "
+	       "yorgasor@cs.pdx.edu"),
+	   (const char **)authors,
+	   (const char **)documenters,
+	   strcmp (translator_credits, "translator_credits") != 0 ? translator_credits : NULL,
+	   pixbuf);
+   g_signal_connect (G_OBJECT (about), "destroy", G_CALLBACK
+	   (gtk_widget_destroyed), &about);
+   gtk_widget_show (about);
 }
 
 
@@ -104,6 +146,10 @@ on_player1_activate                    (GtkMenuItem     *menuitem,
    GtkWidget *white_ai, *white_h, *black_ai, *black_h;
 
 
+   if (bstate_get_open_dialog())
+      return;
+
+   bstate_set_open_dialog(TRUE);
    PlayerSettingsWindow = create_PlayerSettings();
 
    /* grab all the widgets */
@@ -116,7 +162,10 @@ on_player1_activate                    (GtkMenuItem     *menuitem,
    black_h = lookup_widget(PlayerSettingsWindow, "BlackHumanRadio");
 
 
+
+
    /* Load current values */
+   load_values_from_file();
    gtk_spin_button_set_value( (GtkSpinButton *)time, options.engine.timeout);
    gtk_spin_button_set_value( (GtkSpinButton *)width, options.engine.maxwidth);
    gtk_spin_button_set_value( (GtkSpinButton *)depth, options.engine.maxdepth);
@@ -173,30 +222,38 @@ on_BT_UNDO_clicked                     (GtkButton       *button,
    GtkWidget *undo_button;
    int i;
 
-   if (what_next == FIRE_ARROW) //Undo during mid-move
+   if (bstate_get_moving_piece())
+      return;
+   if (bstate_get_open_dialog())
+      return;
+
+   if (bstate_get_what_next() == FIRE_ARROW) //Undo during mid-move
      {
       int to_col, from_col, to_row, from_row;
+      Square to, from;
 
-      temp = board->from;
-      board->from = board->to;
-      board->to = temp;
+      from = bstate_get_move_to();
+      to = bstate_get_move_from();
 
-      try_move(board, board->selected_queen);
+      bstate_set_move_to(to);
+      bstate_set_move_from(from);
+
+      move_piece_to (to, board->selected_queen);
 
       //roll back the state of the board
-      from_col = get_x_int_from_square(board->from);
-      from_row = get_y_int_from_square(board->from);
+      from_col = get_x_int_from_square(bstate_get_move_from());
+      from_row = get_y_int_from_square(bstate_get_move_from());
 
-      to_col = get_x_int_from_square(board->to);
-      to_row = get_y_int_from_square(board->to);
+      to_col = get_x_int_from_square(bstate_get_move_to());
+      to_row = get_y_int_from_square(bstate_get_move_to());
 
       board->squares[to_row][to_col] = board->squares[from_row][from_col];
       board->squares[from_row][from_col] = NOTHING;
-      gen_legal_moves(board->to); 
+      gen_legal_moves(bstate_get_move_to()); 
 
       if (board->squares[to_row][to_col] == WHITE)
 	{
-	 what_next = MOVE_WHITE_QUEEN;
+	 bstate_set_just_finished(UNDO);
 	 for (i=0; i<4; i++) //update queen to square mapping
 	   {
 	    if (board->square_to_wh_queen_map[i] == to_row*10 + to_col)
@@ -205,11 +262,10 @@ on_BT_UNDO_clicked                     (GtkButton       *button,
 	       break;
 	      }
 	   }
-	 update_status_bar();
 	}
       else
 	{
-	 what_next = MOVE_BLACK_QUEEN;
+	 bstate_set_just_finished(UNDO);
 	 for (i=0; i<4; i++) //update queen to square mapping
 	   {
 	    if (board->square_to_bl_queen_map[i] == to_row*10 + to_col)
@@ -218,11 +274,8 @@ on_BT_UNDO_clicked                     (GtkButton       *button,
 	       break;
 	      }
 	   }
-	 update_status_bar();
 	}
 
-      undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
-      gtk_widget_set_sensitive (undo_button, FALSE);
      }
 
 
@@ -239,6 +292,11 @@ void
 on_BT_FORCEMOVE_clicked                (GtkButton       *button,
                                         gpointer         user_data)
 {
+   if (bstate_get_moving_piece())
+      return;
+   if (bstate_get_open_dialog())
+      return;
+   bstate_set_just_finished(FORCE_MOVE);
    ok = 0;
 }
 
@@ -248,22 +306,23 @@ on_BT_FORCEMOVE_clicked                (GtkButton       *button,
  * This starts the auto-finish process if allowed.  This can't be done inbetween
  * a human player moving & firing an arrow, or while an AI is moving.
  *
- * XXX In a perfect world, the autofinish button would be grayed out when it 
- * can't be used.  That way the human knows why on earth the !@#$ button isn't 
- * doing anything ;)
  */
 void
 on_BT_AUTOFINISH_clicked               (GtkButton       *button,
                                         gpointer         user_data)
 {
-   //if (allow_auto_finish && !moving_ai)
-     //{
-      options.white_player = AI;
-      options.black_player = AI;
-      options.engine.timeout = 1;
-      options.engine.maxwidth = 15;
-      while (move_ai());  //if both players are AI, keeps on running
-     //}
+   if (bstate_get_moving_piece())
+      return;
+   if (bstate_get_open_dialog())
+      return;
+   options.white_player = AI;
+   options.black_player = AI;
+   options.engine.timeout = 1;
+   options.engine.maxdepth = 5;
+   options.engine.maxwidth = 15;
+   bstate_set_just_finished(AUTO_FINISH);
+   while (bstate_get_what_next() == WAIT_FOR_AI) 
+      move_ai();  //if both players are AI, keeps on running
 
 }
 
@@ -274,29 +333,46 @@ on_GamazonsMain_destroy                (GtkObject       *object,
 {
 
    state_hash = 0;
+   bstate_set_just_finished(QUIT_GAME);
    gtk_main_quit(); 
 
 }
 
 
-int
-board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
+/*==============================================================================
+ * board_press_cb
+ *
+ * This is the main board handling routine.  Determines what the user is clicking
+ * on and what a click means.  
+ */
+int board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 {
    double drop_x, drop_y;
    double new_x, new_y;
    int from_row, from_col, to_row, to_col;
-   int from;
+//   int from;
    int i,j,k;
    GtkWidget *auto_button, *undo_button;
+   static Square to;
+   static Square from;
 
-   //printf("MainEvent = %d\n", event);
-   /* Does this do anything?
-   if (data) {
-      item = board->db_image [GPOINTER_TO_INT (data)];
-      if (item == NULL && event->type != GDK_BUTTON_RELEASE) 
-	 return 0;
-   }
-   */
+   if (bstate_get_moving_piece())
+     {
+      //printf("Can't do that while a piece is moving\n");
+      return;
+     }
+   if (bstate_get_open_dialog())
+     {
+      //printf("Can't do that while another window is open\n");
+      return;
+     }
+   if (bstate_get_what_next() == NEW_GAME)
+     {
+      //printf("Can't do that while I'm expecting a new game to start\n");
+      return;
+     }
+   if (bstate_get_replay_mode())
+      return 0;
 
    switch (event->type) {
        case GDK_BUTTON_PRESS:
@@ -304,8 +380,9 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	      break;	
 
 #ifdef DEBUG
-	   printf("what_next = %d\n", what_next);
+	   printf("what_next = %d\n", bstate_get_what_next());
 #endif
+	   //Set where a piece is coming from
 	   board->orig_x = board->curr_x = event->button.x;
 	   board->orig_y = board->curr_y = event->button.y;
 	   from = get_square (board->curr_x, board->curr_y);
@@ -325,15 +402,15 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   printf("board->squares = %d\n",board->squares[from_row][from_col]);
 #endif
 	   if ((board->squares[from_row][from_col] == WHITE && 
-		       what_next == MOVE_WHITE_QUEEN && 
+		       bstate_get_what_next() == MOVE_WHITE_QUEEN && 
 		       options.white_player == HUMAN) ||
 	       (board->squares[from_row][from_col] == BLACK && 
-			what_next == MOVE_BLACK_QUEEN && 
+			bstate_get_what_next() == MOVE_BLACK_QUEEN && 
 			options.black_player == HUMAN))
 	     {
 	      //Human is moving a queen
 #ifdef DEBUG
-	      printf("board->squares = %d, what_next = %d\n", board->squares[from_row][from_col], what_next);
+	      printf("board->squares = %d, what_next = %d\n", board->squares[from_row][from_col], bstate_get_what_next());
 #endif
 	      grabbed_queen = TRUE;
 	      gen_legal_moves(from);
@@ -349,10 +426,10 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 	      board->selected_queen = item;
 	     }
-	   board->from = get_square (board->curr_x, board->curr_y);
-	   board->to = board->from;
+	   from = get_square (board->curr_x, board->curr_y);
+	   to = from;
 #ifdef DEBUG
-	   printf("GDK_BUTTON_PRESS: board->to = %d  board->from = %d\n", board->to, board->from);
+	   printf("GDK_BUTTON_PRESS: to = %d  from = %d\n", to, from);
 #endif
 	   break;
 
@@ -368,10 +445,6 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 		      new_x - board->curr_x,
 		      new_y - board->curr_y);
 
-	      /*
-	      if (board->selected != NULL)
-		 clear_square (&board->selected);
-		 */
 
 	      board->curr_x = new_x;
 	      board->curr_y = new_y;
@@ -382,7 +455,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   if (event->button.button != 1)
 	      break;
 #ifdef DEBUG
-	   printf("what_next = %d\n", what_next);
+	   printf("what_next = %d\n", bstate_get_what_next());
 #endif
 	   if (grabbed_queen == FALSE)
 	      break;
@@ -394,7 +467,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 
 #ifdef DEBUG
-	   printf("GDK_BUTTON_RELEASE: board->to = %d  board->from = %d\n", board->to, board->from);
+	   printf("GDK_BUTTON_RELEASE: to = %d  from = %d\n", to, from);
 #endif
 	   drop_x = event->button.x;
 	   drop_y = event->button.y;
@@ -402,65 +475,43 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   //something funny here?
 	   if (is_queen_square(get_square (drop_x, drop_y)))
 	     {
-	      try_move (board, item);
+	      move_piece_to (to, item);
 	      break;
 	     }
 
 #ifdef DEBUG
 	   printf("Queen is dropped at coords %f, %f\n", drop_x, drop_y);
 #endif
-	   board->to = get_square (drop_x, drop_y);
+	   to = get_square (drop_x, drop_y);
 #ifdef DEBUG
-	   printf("new square is %d\n", board->to);
+	   printf("new square is %d\n", to);
 #endif
-	   /*
-	   if (board->to == board->from && board->selected == NULL) {
-	      board->selected = board->squares [(int)drop_x * 8 + (int)drop_y];
-
-	      mark_square (board->selected);
-	      gnome_canvas_item_move (item, 
-		      board->orig_x - board->curr_x,
-		      board->orig_y - board->curr_y);
-
-	      printf("queen is now on square %d\n", board->to);
-	      board->selected_from = board->from;
-	      break;
-	      
-	      */
-	   //} else 
-	    //  if (board->to == board->from) 
-	//	 break;
-	      //board->from = board->selected_from;
 	
 	   /* Register the queen move with the board */
-	   from_col = get_x_int_from_square(board->from);
-	   from_row = get_y_int_from_square(board->from);
+	   from_col = get_x_int_from_square(from);
+	   from_row = get_y_int_from_square(from);
 
-	   to_col = get_x_int_from_square(board->to);
-	   to_row = get_y_int_from_square(board->to);
+	   to_col = get_x_int_from_square(to);
+	   to_row = get_y_int_from_square(to);
 #ifdef DEBUG
 	   printf("setting square %d%d to hold %d\n", to_row, to_col, board->squares[from_row][from_col]);
 #endif
 
 	   //Queen is being moved to a different square
-	   if (board->to != board->from) 
+	   if (to != from) 
 	     {
 	      //put the piece back if it's not a legal move
-	      if (!is_move_legal(board->to))
+	      if (!is_move_legal(to))
 		{
-		 board->to = board->from;
-		 try_move(board, item);
+		 //bstate_set_move_to(from);
+		 move_piece_to(from, item);
 		 break;
 		}
 	      else
 		{
-		 what_next = FIRE_ARROW;
-		 update_status_bar();
-
-  	         auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
-		 gtk_widget_set_sensitive (auto_button, FALSE);
-  	         undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
-		 gtk_widget_set_sensitive (undo_button, TRUE);
+		 bstate_set_move_to(to);
+		 bstate_set_move_from(from);
+		 bstate_set_just_finished(MOVE_WHITE_QUEEN);
 
 		 board->squares[to_row][to_col] = board->squares[from_row][from_col];
 		 for (k=0; k<4; k++) //update square to queen mapping
@@ -477,23 +528,19 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 		      }
 		   }
 		 board->squares[from_row][from_col] = NOTHING;
-		 gen_legal_moves(board->to); //prepare moves for arrow
+		 gen_legal_moves(to); //prepare moves for arrow
 		}
 	     }
 
 #ifdef DEBUG
-	   square_contains(board->to);
-	   square_contains(board->from);
+	   square_contains(to);
+	   square_contains(from);
 #endif
 
 
-	   try_move (board, item);
-	   /*
-	   if (board->selected)
-	      clear_square (&board->selected);
-	      */
+	   move_piece_to(to, item);
 #ifdef DEBUG
-	   printf("what_next = %d\n", what_next);
+	   printf("what_next = %d\n", bstate_get_what_next());
 #endif
 	   break;
        //default:
@@ -515,8 +562,16 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int sq;
    int row, col;
    state *s;
-   move movelist[3000];
-   GtkWidget *auto_button, *undo_button;
+   //GtkWidget *auto_button, *undo_button;
+
+   if (bstate_get_moving_piece())
+      return 0;
+   if (bstate_get_open_dialog())
+      return 0;
+   if (bstate_get_what_next() == NEW_GAME)
+      return 0;
+   if (bstate_get_replay_mode())
+      return 0;
 
    count_queens();
    switch (event->type) 
@@ -524,7 +579,7 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
        case GDK_BUTTON_PRESS:
 	   if (event->button.button != 1)
 	      break;	
-	   if (what_next != FIRE_ARROW)
+	   if (bstate_get_what_next() != FIRE_ARROW)
 	      break;
 
 	   x_coord = event->button.x-4;
@@ -539,7 +594,7 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   row = get_y_int_from_square(sq);
 
 #ifdef DEBUG
-	   printf("what_next = %d\n", what_next);
+	   printf("what_next = %d\n", bstate_get_what_next());
 	   printf("arrow fire:  ");
 	   square_contains(sq);
 #endif
@@ -550,37 +605,16 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   s = states.s[states.current_state];
 	   register_move_with_engine(sq);
 
-	   if (s->turn == WHITE_PLAYER)
-	     {
-	      what_next = MOVE_WHITE_QUEEN;
-	      update_status_bar();
-#ifdef DEBUG
-	      printf("white moves next\n");
-#endif
-	     }
-	   else if (s->turn == BLACK_PLAYER)
-	     {
-	      what_next = MOVE_BLACK_QUEEN;
-	      update_status_bar();
-#ifdef DEBUG
-	      printf("black moves next\n");
-#endif
-	     }
-	   else
-	      printf("XXXXXXXXXXXXXXX  BLARGH!  I don't know who's turn it is!\n");
+	   bstate_set_just_finished(FIRE_ARROW);
 
-
-  	   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
-	   gtk_widget_set_sensitive (auto_button, TRUE);
-  	   undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
-	   gtk_widget_set_sensitive (undo_button, FALSE);
 	   
 	   //check for gameover
-	   if (game_over(movelist))
+	   if (game_over())
 	      break;
 
 	   dup_state(s, states.s[++(states.current_state)]);
-	   move_ai();
+	   if (bstate_get_what_next() == WAIT_FOR_AI)
+	      move_ai();
        //default:
      }
 
@@ -588,6 +622,15 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 }
 
+/*==============================================================================
+ * on_PlayerOKButton_clicked
+ *
+ * This processes the information from the Player settings window.  If a change
+ * is made, sometimes the state of the game must reflect this change.  For 
+ * instance, if it was a humans turn, and this player was set to AI, the game
+ * state must stop waiting for the human to move and must instead instruct the
+ * AI to start thinking.
+ */
 void
 on_PlayerOKButton_clicked              (GtkButton       *button,
                                         gpointer         user_data)
@@ -605,6 +648,7 @@ on_PlayerOKButton_clicked              (GtkButton       *button,
    white_h = lookup_widget(PlayerSettingsWindow, "WhiteHumanRadio");
    black_ai = lookup_widget(PlayerSettingsWindow, "BlackAIRadio");
    black_h = lookup_widget(PlayerSettingsWindow, "BlackHumanRadio");
+
 
    /* Store new values */
    options.engine.timeout = gtk_spin_button_get_value_as_int( (GtkSpinButton *)time);
@@ -624,10 +668,17 @@ on_PlayerOKButton_clicked              (GtkButton       *button,
    store_values_in_file();
    gtk_widget_destroy(PlayerSettingsWindow);
 
+   bstate_update_player_settings();
+   bstate_set_open_dialog(FALSE);
    //checks to see if the AI is supposed to move after changes to the player have been made
    //if the ai is already moving, don't muck things up by calling it again.
-   if (moving_ai == FALSE)
-      while(move_ai());
+   if (!bstate_get_moving_ai())
+     {
+      while (bstate_get_what_next() == WAIT_FOR_AI) 
+       	{
+	 move_ai();
+       	}
+     }
 
 }
 
@@ -637,7 +688,7 @@ on_PlayerCancelButton_clicked          (GtkButton       *button,
                                         gpointer         user_data)
 {
    gtk_widget_destroy(PlayerSettingsWindow);
-
+   bstate_set_open_dialog(FALSE);
 }
 
 
@@ -646,6 +697,9 @@ on_theme1_activate                     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 
+   if (bstate_get_open_dialog())
+      return;
+   bstate_set_open_dialog(TRUE);
    file_selector = gtk_file_selection_new ("Pick your theme file.");
    
    gtk_file_selection_set_filename (GTK_FILE_SELECTION (file_selector), PACKAGE_DATA_DIR "/gamazons/");
@@ -653,6 +707,10 @@ on_theme1_activate                     (GtkMenuItem     *menuitem,
    g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
                      "clicked",
                      G_CALLBACK (load_new_theme),
+                     NULL);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                     "clicked",
+                     G_CALLBACK (on_ThemeCancelButton_clicked),
                      NULL);
    			   
    /* Ensure that the dialog box is destroyed when the user clicks a button. */
@@ -671,17 +729,346 @@ on_theme1_activate                     (GtkMenuItem     *menuitem,
    
    gtk_widget_show (file_selector);
 
-   //selected_filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
 
 }
 
-static void load_new_theme (GtkFileSelection *selector, gpointer user_data)
+void load_new_theme (GtkFileSelection *selector, gpointer user_data)
 {
-   selected_filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+   if (bstate_get_moving_piece())
+     {
+      gnome_warning_dialog("Warning: Theme can't be updated while a game piece is moving.  Please try again.");
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+
+   selected_filename = (gchar *) gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
    load_values_from_file(); //Get current settings
-   load_images_from_theme (selected_filename); //load new theme settings
+   if (!load_images_from_theme (selected_filename)) //load new theme settings
+     {
+      gnome_error_dialog("Theme file doesn't exist!\n");
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
    store_values_in_file();  //store new settings
    destroy_board();
    draw_board();
+   bstate_set_open_dialog(FALSE);
    
 }
+
+void on_ThemeCancelButton_clicked(GtkButton *button, gpointer user_data)
+{
+   bstate_set_open_dialog(FALSE);
+
+}
+
+void
+on_save_as1_activate                   (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+   //char home[256];
+   char *home_env;
+
+   if (bstate_get_open_dialog())
+      return;
+   bstate_set_open_dialog(TRUE);
+
+   file_selector = gtk_file_selection_new ("Save your move history to a file");
+
+   gtk_file_selection_set_filename (GTK_FILE_SELECTION (file_selector), options.hist_dir);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                     "clicked",
+                     G_CALLBACK (save_game_history),
+                     NULL);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                     "clicked",
+                     G_CALLBACK (on_save_as1CancelButton_clicked),
+                     NULL);
+   			   
+   /* Ensure that the dialog box is destroyed when the user clicks a button. */
+   
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy), 
+                             (gpointer) file_selector); 
+
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy),
+                             (gpointer) file_selector); 
+   
+   /* Display that dialog */
+   
+   gtk_widget_show (file_selector);
+
+
+}
+
+void save_game_history(GtkFileSelection *selector, gpointer user_data)
+{
+   FILE *history_fd;
+   GtkTextView *view; 
+   GtkTextBuffer *buffer;
+   GtkTextIter *iter_start = (GtkTextIter *) malloc(sizeof(GtkTextIter));
+   GtkTextIter *iter_end = (GtkTextIter *) malloc(sizeof(GtkTextIter));
+   gchar *text;
+   char *temp_dir;
+
+   selected_filename = (gchar *)gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+   if (strcmp(options.hist_dir, selected_filename) == 0)
+     {
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+
+   load_values_from_file(); //Get current settings
+   strcpy(options.hist_dir, selected_filename);
+   temp_dir = dirname(options.hist_dir);
+   strcpy(options.hist_dir, temp_dir);
+   options.hist_dir[strlen(options.hist_dir)+1] = '\0';
+   options.hist_dir[strlen(options.hist_dir)] = '/';
+   store_values_in_file(); //save new dir
+   
+   view = (GtkTextView *) lookup_widget(main_window, "textview1");
+   buffer = gtk_text_view_get_buffer (view);
+   gtk_text_buffer_get_start_iter(buffer, iter_start);
+   gtk_text_buffer_get_end_iter(buffer, iter_end);
+
+   text = gtk_text_buffer_get_text(buffer, iter_start, iter_end, FALSE);
+   history_fd = fopen(selected_filename, "w");
+
+   if (history_fd == NULL)
+     {
+      gnome_error_dialog("Unable to save move history");
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+
+   fprintf(history_fd, "%s", text);
+   fclose(history_fd);
+   bstate_set_open_dialog(FALSE);
+}
+
+void on_save_as1CancelButton_clicked(GtkButton *button, gpointer user_data)
+{
+   bstate_set_open_dialog(FALSE);
+}
+
+
+void
+on_open_activate                       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+   //char home[256];
+   char *home_env;
+
+   if (bstate_get_open_dialog())
+      return;
+   bstate_set_open_dialog(TRUE);
+
+   file_selector = gtk_file_selection_new ("Load saved Gamazons history file you wish to continue");
+
+   gtk_file_selection_set_filename (GTK_FILE_SELECTION (file_selector), options.hist_dir);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                     "clicked",
+                     G_CALLBACK (load_saved_game),
+                     NULL);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                     "clicked",
+                     G_CALLBACK (on_OpenCancelButton_clicked),
+                     NULL);
+   			   
+   /* Ensure that the dialog box is destroyed when the user clicks a button. */
+   
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy), 
+                             (gpointer) file_selector); 
+
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy),
+                             (gpointer) file_selector); 
+   
+   /* Display that dialog */
+   
+   gtk_widget_show (file_selector);
+
+
+}
+
+void load_saved_game(GtkFileSelection *selector, gpointer user_data)
+{
+
+   FILE *history_fd;
+   char *temp_dir;
+
+   selected_filename = (gchar *)gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+   if (strcmp(options.hist_dir, selected_filename) == 0)
+     {
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+
+   load_values_from_file(); //Get current settings
+   strcpy(options.hist_dir, selected_filename);
+   temp_dir = dirname(options.hist_dir);
+   strcpy(options.hist_dir, temp_dir);
+   options.hist_dir[strlen(options.hist_dir)+1] = '\0';
+   options.hist_dir[strlen(options.hist_dir)] = '/';
+   store_values_in_file();
+
+   history_fd = fopen(selected_filename, "ro");
+   if (history_fd == NULL)
+     {
+      gnome_error_dialog("Error opening history file\n");
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+   gtk_widget_destroy(file_selector);
+   bstate_set_open_dialog(FALSE);
+   bstate_set_replay_mode(FALSE);
+
+   free_all_memory();
+   init_engine();
+   destroy_board();
+   init_game_board(main_window);
+
+   if (read_in_moves(history_fd))
+      bstate_set_just_finished(LOAD_GAME);
+   else
+      gnome_error_dialog("Error: Corrupted history file\n");
+      
+
+   //printf("finished loading history file\n");
+   fclose(history_fd);
+
+   if (bstate_get_what_next() == NEW_GAME) //game over
+      return;
+   while (bstate_get_what_next() == WAIT_FOR_AI)
+      move_ai();  //if both players are AI, keeps on running
+
+}
+
+void on_OpenCancelButton_clicked(GtkButton *button, gpointer user_data)
+{
+   bstate_set_open_dialog(FALSE);
+}
+
+void
+on_BT_REPLAY_clicked                   (GtkButton       *button,
+                                        gpointer         user_data)
+{
+   //char home[256];
+   char *home_env;
+
+   if (bstate_get_open_dialog())
+      return;
+   bstate_set_open_dialog(TRUE);
+
+   file_selector = gtk_file_selection_new ("Load saved Gamazons history file you wish to replay");
+
+   gtk_file_selection_set_filename (GTK_FILE_SELECTION (file_selector), options.hist_dir);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                     "clicked",
+                     G_CALLBACK (replay_saved_game),
+                     NULL);
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                     "clicked",
+                     G_CALLBACK (on_OpenCancelButton_clicked),
+                     NULL);
+   			   
+   /* Ensure that the dialog box is destroyed when the user clicks a button. */
+   
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy), 
+                             (gpointer) file_selector); 
+
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy),
+                             (gpointer) file_selector); 
+   
+   /* Display that dialog */
+   
+   gtk_widget_show (file_selector);
+
+
+}
+
+void replay_saved_game(GtkFileSelection *selector, gpointer user_data)
+{
+
+   FILE *history_fd;
+   char *temp_dir;
+   int game_life = bstate_get_game_life();
+
+   selected_filename = (gchar *)gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+   if (strcmp(options.hist_dir, selected_filename) == 0)
+     {
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+
+   load_values_from_file(); //Get current settings
+   strcpy(options.hist_dir, selected_filename);
+   temp_dir = dirname(options.hist_dir);
+   strcpy(options.hist_dir, temp_dir);
+   options.hist_dir[strlen(options.hist_dir)+1] = '\0';
+   options.hist_dir[strlen(options.hist_dir)] = '/';
+   store_values_in_file();
+
+   history_fd = fopen(selected_filename, "ro");
+   if (history_fd == NULL)
+     {
+      gnome_error_dialog("Error opening history file\n");
+      bstate_set_open_dialog(FALSE);
+      return;
+     }
+   gtk_widget_destroy(file_selector);
+   bstate_set_open_dialog(FALSE);
+   bstate_set_just_finished(START_REPLAY);
+
+   free_all_memory();
+   init_engine();
+   destroy_board();
+   init_game_board(main_window);
+
+   //bstate_set_replay_mode(TRUE);
+   if (read_in_moves(history_fd))
+     {
+     }
+   else if (bstate_get_replay_mode()) //if still in replay mode, there must have been an error.  Otherwise
+     {				      //the stop button was pressed and all is well.
+      gnome_error_dialog("Error: Corrupted history file\n");
+     }
+   else if (game_life != bstate_get_game_life())
+     {
+      return;
+     }
+
+   bstate_set_just_finished(STOP_REPLAY); //cleans up replay mode if successfully finished
+   //bstate_set_replay_mode(FALSE);
+      
+
+   //printf("finished loading history file\n");
+   fclose(history_fd);
+
+   if (bstate_get_what_next() == NEW_GAME) //game over
+      return;
+   while (bstate_get_what_next() == WAIT_FOR_AI)
+      move_ai();  //if both players are AI, keeps on running
+
+}
+
+
+void
+on_BT_REPLAY_STOP_clicked              (GtkButton       *button,
+                                        gpointer         user_data)
+{
+   //bstate_set_replay_mode(FALSE);
+   bstate_set_just_finished(STOP_REPLAY);
+
+}
+

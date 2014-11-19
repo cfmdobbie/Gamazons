@@ -81,3 +81,24 @@ on_BT_FORCEMOVE_clicked                (GtkButton       *button,
 void
 on_BT_AUTOFINISH_clicked               (GtkButton       *button,
                                         gpointer         user_data);
+
+void on_ThemeCancelButton_clicked(GtkButton *button, gpointer user_data);
+
+void
+on_save_as1_activate                   (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_open_activate                       (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_BT_REPLAY_clicked                   (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_BT_REPLAY_STOP_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void replay_saved_game(GtkFileSelection *selector, gpointer user_data);
+

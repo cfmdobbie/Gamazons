@@ -79,7 +79,7 @@ POFILES =
 POSUB = po
 RANLIB = ranlib
 USE_NLS = yes
-VERSION = 0.1
+VERSION = 0.83rc3
 
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -95,6 +95,7 @@ gamazons_SOURCES = \
 	interface.c interface.h \
 	callbacks.c callbacks.h \
 	board.c board.h \
+	bstate.c bstate.h \
 	position.h \
 	eval.c \
 	moves.c \
@@ -125,7 +126,7 @@ CPPFLAGS =
 LDFLAGS = 
 LIBS = 
 gamazons_OBJECTS =  main.o support.o interface.o callbacks.o board.o \
-eval.o moves.o unit-test.o
+bstate.o eval.o moves.o unit-test.o
 gamazons_DEPENDENCIES = 
 gamazons_LDFLAGS = 
 CFLAGS = -g -O2
@@ -141,7 +142,7 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-DEP_FILES =  .deps/board.P .deps/callbacks.P .deps/eval.P \
+DEP_FILES =  .deps/board.P .deps/bstate.P .deps/callbacks.P .deps/eval.P \
 .deps/interface.P .deps/main.P .deps/moves.P .deps/support.P \
 .deps/unit-test.P
 SOURCES = $(gamazons_SOURCES)

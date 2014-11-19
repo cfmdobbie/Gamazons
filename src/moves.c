@@ -22,9 +22,9 @@ Project URL:     http://www.yorgalily.org/amazons/
 #include <ctype.h>
 #include <sys/poll.h>
 
-#ifdef GAMAZONS
+//#ifdef GAMAZONS
 #include <gnome.h>
-#endif
+//#endif
 
 #include "amazons.h"
 #include "unit-test.h"
@@ -37,8 +37,8 @@ Project URL:     http://www.yorgalily.org/amazons/
 
 // macros
 
-#define MIN(a,b)    (a < b ? a : b)
-#define MAX(a,b)    (a > b ? a : b)
+//#define MIN(a,b)    (a < b ? a : b)
+//#define MAX(a,b)    (a > b ? a : b)
 #define MMSET(p,q)    ((p) == 1 ? SHRT_MIN+q : SHRT_MAX-q)
 
 // constants
@@ -68,6 +68,7 @@ struct game_states states;
 
 #ifdef GAMAZONS
 extern int state_hash;
+extern GtkWidget *main_window;
 #endif
 
 // command line flags -- set defaults here
@@ -718,6 +719,7 @@ move isearch(state *s, int think)
    int i;
    move temp1, temp2;
    move even, odd;
+   int temp2_valid = FALSE;
 
    even.val = 0;
    odd.val = 0;
@@ -752,6 +754,7 @@ move isearch(state *s, int think)
       if (ok)          // using this global ok is pretty sloppy but works.
       	{
 	 temp2 = temp1;
+	 temp2_valid = TRUE;
        	}
       else
        	{
@@ -768,7 +771,10 @@ move isearch(state *s, int think)
        	}
 
      }
-   return temp2;
+   if (temp2_valid)
+      return temp2;
+   else
+      return temp1;
 }
 
 // NOT WORKING
@@ -1253,7 +1259,6 @@ int move_lookup(move *m, move movelist[], int move_count)
 	 continue;
       else
        	{
-	 printf("valid move\n");
 	 return TRUE;
        	}
      }
@@ -1350,6 +1355,7 @@ int makemove(state *s, move m)
 {
    if (s->turn == WHITE_PLAYER)
      {
+      //printf("registering move w/ engine for white\n");
       xor(s->white_bd, s->white_q_x[m.queen], s->white_q_y[m.queen]);
       s->white_q_x[m.queen] = m.tocol;
       s->white_q_y[m.queen] = m.torow;
@@ -1357,6 +1363,7 @@ int makemove(state *s, move m)
      }
    else
      {
+      //printf("registering move w/ engine for black\n");
       xor(s->black_bd, s->black_q_x[m.queen], s->black_q_y[m.queen]);
       s->black_q_x[m.queen] = m.tocol;
       s->black_q_y[m.queen] = m.torow;
@@ -1710,6 +1717,7 @@ void init_engine()
    //struct move m;
    move temp;
    int i;
+   char *home_env;
 
    srand(time(NULL));
 
@@ -1737,15 +1745,16 @@ void init_engine()
    options.black_player=HUMAN;
    options.print_statistics=FALSE;
 
+   home_env = getenv("HOME");
+   strcpy(options.hist_dir, home_env);
+   strcat(options.hist_dir, "/");
 
-   load_images_from_theme(PACKAGE_DATA_DIR "/gamazons/default.theme");
-   /*
-   strcpy(options.images.white_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/white.png");
-   strcpy(options.images.black_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/black.png");
-   strcpy(options.images.white_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/white_square.png");
-   strcpy(options.images.grey_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/grey_square.png");
-   strcpy(options.images.arrow_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/black_square.png");
-   */
+
+   if (!load_images_from_theme(PACKAGE_DATA_DIR "/gamazons/default.theme"))
+     {
+      fprintf(stderr, "Cannot find theme file %s\n", PACKAGE_DATA_DIR "/gamazons/default.theme");
+      exit(1);
+     }
 
 #ifdef DEBUG
    printf("white piece image = %s\n", options.images.white_piece);
@@ -1808,17 +1817,42 @@ void load_values_from_file()
       else if (strcmp(variable, "TIMEOUT") == 0)
 	{
 	 fscanf(rc_fd, "%d", &value);
-	 options.engine.timeout = value;
+	 if (value > 0)
+	    options.engine.timeout = value;
+	 else
+	    options.engine.timeout = 1;
 	}
       else if (strcmp(variable, "MAXWIDTH") == 0)
 	{
 	 fscanf(rc_fd, "%d", &value);
-	 options.engine.maxwidth = value;
+	 if (value > 0)
+	    options.engine.maxwidth = value;
+	 else
+	    options.engine.maxwidth = 1;
 	}
       else if (strcmp(variable, "MAXDEPTH") == 0)
 	{
 	 fscanf(rc_fd, "%d", &value);
-	 options.engine.maxdepth = value;
+	 if (value > 0)
+	    options.engine.maxdepth = value;
+	 else
+	    options.engine.maxdepth = 1;
+	}
+      else if (strcmp(variable, "REPLAY_DELAY") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
+	 if (value > 0)
+	    options.replay_delay = value;
+	 else
+	    options.replay_delay = 1;
+	}
+      else if (strcmp(variable, "MOVEMENT_SPEED") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
+	 if (value > 0 && value <= 10)
+	    options.movement_speed = value;
+	 else
+	    options.movement_speed = 1;
 	}
       else if (strcmp(variable, "WHITE_PIECE") == 0)
 	{
@@ -1844,6 +1878,11 @@ void load_values_from_file()
 	{
 	 fscanf(rc_fd, "%s", buffer);
 	 strcpy(options.images.arrow_sq, buffer);
+	}
+      else if (strcmp(variable, "HIST_DIR") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.hist_dir, buffer);
 	}
       else if (strcmp(variable, "DRAW_GRID") == 0)
 	{
@@ -1871,6 +1910,10 @@ void store_values_in_file()
 {
    char *home, file[256];
    FILE *rc_fd;
+#ifdef GAMAZONS
+   GtkWidget *delay = (GtkWidget *)lookup_widget(main_window, "ReplayDelaySpinner");
+   GtkWidget *speed = (GtkWidget *)lookup_widget(main_window, "MovementSpeedSpinner");
+#endif
 
    if (!(home = getenv("HOME")))
       return;
@@ -1915,11 +1958,24 @@ void store_values_in_file()
    fprintf(rc_fd, "ARROW_SQUARE = ");
    fprintf(rc_fd, "%s\n", options.images.arrow_sq);
 
+   fprintf(rc_fd, "HIST_DIR = ");
+   fprintf(rc_fd, "%s\n", options.hist_dir);
+
    fprintf(rc_fd, "DRAW_GRID = ");
    if (options.images.grid == TRUE)
       fprintf(rc_fd, "%s\n", "TRUE");
    else
       fprintf(rc_fd, "%s\n", "FALSE");
+
+#ifdef GAMAZONS
+   fprintf(rc_fd, "REPLAY_DELAY = ");
+   options.replay_delay = gtk_spin_button_get_value_as_int((GtkSpinButton *)delay);
+   fprintf(rc_fd, "%d\n", options.replay_delay);
+
+   fprintf(rc_fd, "MOVEMENT_SPEED = ");
+   options.movement_speed = gtk_spin_button_get_value_as_int((GtkSpinButton *)speed);
+   fprintf(rc_fd, "%d\n", options.movement_speed);
+#endif
 
    fclose(rc_fd);
 }
@@ -1930,7 +1986,7 @@ void store_values_in_file()
  * This file will read image paths from a theme file.  These values get loaded 
  * into the options struct, and subsequently used to draw the board.
  */
-void load_images_from_theme(char *theme)
+int load_images_from_theme(char *theme)
 {
    char *home, file[256];
    FILE *theme_fd;
@@ -1943,8 +1999,8 @@ void load_images_from_theme(char *theme)
    theme_fd = fopen(theme, "r");
    if(theme_fd == NULL)
      {
-      printf("Can't open theme file %s\n", theme);
-      exit(1);
+      fprintf(stderr, "Can't open theme file %s\n", theme);
+      return FALSE;
      }
 
    while (fscanf(theme_fd, "%s", variable) != EOF)
@@ -1952,7 +2008,7 @@ void load_images_from_theme(char *theme)
       while (ch = fgetc(theme_fd))
 	{
 	 if (ch == EOF)
-	    return;
+	    return TRUE;
 	 if (ch == '=')
 	    break;
 	}
@@ -2000,8 +2056,7 @@ void load_images_from_theme(char *theme)
      }
 
    fclose(theme_fd);
-
-
+   return TRUE;
 }
 #endif
 

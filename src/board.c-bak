@@ -4,7 +4,6 @@
 
 #include "amazons.h"
 #include "board.h"
-#include "bstate.h"
 #include "callbacks.h"
 
 /* local Prototypes */
@@ -25,8 +24,11 @@ extern struct game_states states;
 extern int ok;
 extern time_t start;
 extern GtkWidget *main_window;
+extern int new_game;
 Square legal_moves[100];
 int state_hash;
+
+static Board_State bstate;
 
 
 void init_game_board(GtkWidget *GamazonsMain)
@@ -37,7 +39,6 @@ void init_game_board(GtkWidget *GamazonsMain)
    GtkWidget *force_button, *undo_button;
    GtkTextView *view;
    GtkTextBuffer *buffer;
-   GtkWidget *speed, *delay;
    static int first_run = TRUE;
    
    if (w == NULL)
@@ -97,16 +98,9 @@ void init_game_board(GtkWidget *GamazonsMain)
    undo_button = (GtkWidget *)lookup_widget(main_window, "BT_UNDO");
    gtk_widget_set_sensitive (undo_button, FALSE);
    
-
    draw_board();
    if (first_run)
      {
-      //Set spinner values
-      delay = (GtkWidget *)lookup_widget(main_window, "ReplayDelaySpinner");
-      gtk_spin_button_set_value((GtkSpinButton *)delay, options.replay_delay);
-      speed = (GtkWidget *)lookup_widget(main_window, "MovementSpeedSpinner");
-      gtk_spin_button_set_value((GtkSpinButton *)speed, options.movement_speed);
-
       first_run = FALSE;
       bstate_set_just_finished(START_GAME);
      }
@@ -409,32 +403,22 @@ void clear_square (GnomeCanvasItem **square)
 }
 
 /*==============================================================================
- * move_piece_to
+ * try_move
  *
- * This moves the given piece to the given square.  This is a very tricky function
- * because the user can do many things to upset the state of the board while a 
- * piece is sliding, so various checks must take place throughout the movement 
- * process to make sure the board still exists as it thinks it does.
- *
- * The piece can also move at different speeds.  Originally, it moved one pixel at
- * a time, but it now gets its value from the MovementSpeedSpinner widget.  This
- * makes it so the pieces can move at acceptable speeds on slower computers, but 
- * adds more complexity in trying to calculate the distance a piece should move.
+ * Attempts to move a piece from one square to the next.  If the piece successfully
+ * arrives to its destination, it returns TRUE.  If the move is aborted, returns
+ * FALSE
  */
-void move_piece_to(Square to, GnomeCanvasItem *item)
+int try_move (Board *board, GnomeCanvasItem *item)
 {
    double Lx, Uy, Rx, By;
    double to_Lx, to_Uy;
    int x, y;
+   int inc = 1;
    int i,j;
-   int game_life;
-   GtkWidget *speed = (GtkWidget *)lookup_widget(main_window, "MovementSpeedSpinner");
-   int inc = gtk_spin_button_get_value_as_int((GtkSpinButton *)speed);
-   int count = 0;
 
-   game_life = bstate_get_game_life();
-   to_Lx = get_x_from_square(to);
-   to_Uy = get_y_from_square(to);
+   to_Lx = get_x_from_square(board->to);
+   to_Uy = get_y_from_square(board->to);
       
 #ifdef DEBUG
    printf("We want the queen at coords %f, %f\n", to_Lx, to_Uy);
@@ -443,90 +427,53 @@ void move_piece_to(Square to, GnomeCanvasItem *item)
 #ifdef DEBUG
    printf("The queen is at coords %f, %f\n", Lx, Uy);
 #endif
-   if (bstate_get_dont_slide())
+   while (Lx != to_Lx || Uy != to_Uy)
      {
-      gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
-      gnome_canvas_item_move (item, 
-	      get_x_from_square(to) - Lx,
-	      get_y_from_square(to) - Uy);
+      bstate_set_moving_piece(TRUE);
+      if (Lx < to_Lx)
+	 x = inc;
+      else if (Lx > to_Lx)
+	 x = -inc;
+      else
+	 x = 0;
+
+      if (Uy < to_Uy)
+	 y = inc;
+      else if (Uy > to_Uy)
+	 y = -inc;
+      else
+	 y = 0;
+
+
+      gnome_canvas_item_move (item, (double)x, (double)y);
       gnome_canvas_item_raise_to_top (item);
-     }
-   else
-     {
-      while (Lx != to_Lx || Uy != to_Uy)
-       	{
-#ifdef DEBUG
-	 if (count++ < 20)
-	    printf("Lx = %g;  to_Lx = %g; Uy = %g; to_Uy = %g\n", Lx, to_Lx, Uy, to_Uy);
-#endif
-	 bstate_set_moving_piece(TRUE);
-	 if ((int)Lx == (int)to_Lx)
-	    x = 0;
-	 else if (Lx < to_Lx && (to_Lx - Lx) >= inc)
-	    x = inc;
-	 else if (Lx < to_Lx && (to_Lx - Lx) <= inc)
-	    x = to_Lx - Lx;
-	 else if (Lx > to_Lx && (Lx - to_Lx) >= inc)
-	    x = -inc;
-	 else if (Lx > to_Lx && (Lx - to_Lx) <= inc)
-	    x = to_Lx - Lx;
 
-	 if ((int)Uy == (int)to_Uy)
-	    y = 0;
-	 else if (Uy < to_Uy && (to_Uy - Uy) >= inc)
-	    y = inc;
-	 else if (Uy < to_Uy && (to_Uy - Uy) <= inc)
-	    y = to_Uy - Uy;
-	 else if (Uy > to_Uy && (Uy - to_Uy) >= inc)
-	    y = -inc;
-	 else if (Uy > to_Uy && (Uy - to_Uy) <= inc)
-	    y = to_Uy - Uy;
+      //update the board
+      while (gtk_events_pending())
+	 gtk_main_iteration();
 
-#ifdef DEBUG
-	 if (count < 20)
-	    printf("x = %d, y = %d\n", x, y);
-#endif
+      if (bstate_get_quit_game())
+	 exit(0);
 
-	 if (bstate_get_game_life() != game_life)
-	   {
-	    bstate_set_moving_piece(FALSE);
-	    return;
-	   }
-	 gnome_canvas_item_move (item, (double)x, (double)y);
-	 gnome_canvas_item_raise_to_top (item);
-
-	 //update the board
-         while (gtk_events_pending())
-	    gtk_main_iteration();
-
-	 if (bstate_get_quit_game())
-	    exit(0);
-	 if (bstate_get_game_life() != game_life)
-	   {
-	    bstate_set_moving_piece(FALSE);
-	    return;
-	   }
-	 gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
-       	}
+      if (bstate_get_stop_moving())
+	{
+	 bstate_set_stop_moving(FALSE);
+	 return FALSE;
+	}
+      gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
      }
 
-   if (bstate_get_game_life() != game_life)
-     {
-      bstate_set_moving_piece(FALSE);
-      return;
-     }
    gnome_canvas_item_raise_to_top (item);
    bstate_set_moving_piece(FALSE);
 	   //see where it landed
    gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
 #ifdef DEBUG
    printf("The queen landed at coords %f, %f\n", Lx, Uy);
-   printf("this time the queen is on square %d\n", to);
+   printf("this time the queen is on square %d\n", board->to);
 #endif
+   return TRUE;
 }
 
-
-   
 
 double get_x_from_square(int sq)
 {
@@ -661,60 +608,102 @@ int move_ai()
 {
    state *s = states.s[states.current_state];
    move temp;
+   move movelist[3000];
    int ai = FALSE;
    int current_hash;
-   int game_life = bstate_get_game_life();
    //GtkWidget *auto_button, *force_button;
 
    current_hash = state_hash = create_hash(s);
 
+   //It's sometimes necessary to know if we're in the middle of a move, because
+   //if an event causes another move to start and that event is processed and then
+   //this function finishes, it leaves the board in an unstable result
+
+   //XXX This should call a function to disable certain event handling instead of
+   //just having a silly global variable.  For instance, it could gray out the
+   //Auto Finish button so the user knows it's not going to do anything when he 
+   //presses it.  Perhaps the 'Force Move' button should be greyed out until the AI
+   //is thinking, or since Force Move & Auto Finish are mutually exclusive, it would
+   //be cool to have the button switch labels depending on the state of the game.
+   /*
+   moving_ai = TRUE;
+   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+   force_button = (GtkWidget *) lookup_widget(main_window, "BT_FORCEMOVE");
+   gtk_widget_set_sensitive (auto_button, FALSE);
+   gtk_widget_set_sensitive (force_button, TRUE);
+   */
+
+
+
+
    //quit this function if a 'New Game' option was selected since this
    //function was started.
-   /*
    if (bstate_get_new_game())
      {
       bstate_set_new_game(FALSE);
       return FALSE;
      }
-     */
-   ok = 1;
-   ai = TRUE;
-   start = time(NULL);
-   temp = isearch(s, NOTHINK);
-   if (s->winner) //XXX does this if statement do any good?  I thot winner was handled elsewhere
-      return FALSE;
-   makemove(s,temp);
 
-   //update the board before drawing the new move
-   //the program would segfault if you closed it while it was thinking
-   while (gtk_events_pending())
-      gtk_main_iteration();
-   if (current_hash != state_hash)
-      return FALSE;
-
+   //gnome_canvas_item_request_update(board->canvas);
    /*
+   if (((states.s[states.current_state]->turn == WHITE_PLAYER) && (options.white_player == AI)) ||
+       ((states.s[states.current_state]->turn == BLACK_PLAYER) && (options.black_player == AI)))
+     {
+      what_next = WAIT_FOR_AI;
+      update_status_bar();
+     */
+      ok = 1;
+      ai = TRUE;
+      start = time(NULL);
+      temp = isearch(s, NOTHINK);
+      if (s->winner) //XXX does this if statement do any good?  I thot winner was handled elsewhere
+	 return FALSE;
+      makemove(s,temp);
+
+      //update the board before drawing the new move
+      //the program would segfault if you closed it while it was thinking
+      while (gtk_events_pending())
+	 gtk_main_iteration();
+      if (current_hash != state_hash)
+	 return FALSE;
+
    if (bstate_get_new_game())
      {
       bstate_set_new_game(FALSE);
       return FALSE;
      }
-     */
 
    if (bstate_get_quit_game())
       exit(0);
 
-   if (bstate_get_game_life() != game_life)
-      return FALSE;
 
+      //register move on graphical board
+      if (move_piece(temp))
+	{
+	 print_move_in_text_window(&temp);
+	 dup_state(s, states.s[++(states.current_state)]);
+	}
+      else
+	 return FALSE;
+      /*
+     }
+   else
+     {
+#ifdef DEBUG
+      printf("the AI doesn't move next:\n");
+#endif
+     }
+     */
 
-   //register move on graphical board
-   move_piece(temp);
-   if (bstate_get_game_life() != game_life)
-      return FALSE;
-   print_move_in_text_window(&temp);
-   dup_state(s, states.s[++(states.current_state)]);
+   /*
+   if (s->turn == WHITE_PLAYER)
+      what_next = MOVE_WHITE_QUEEN;
+   if (s->turn == BLACK_PLAYER)
+      what_next = MOVE_BLACK_QUEEN;
+   update_status_bar();
+   */
    bstate_set_just_finished(WAIT_FOR_AI);
-
+      
 
 #ifdef DEBUG
    if (options.white_player == AI)
@@ -724,13 +713,19 @@ int move_ai()
    printf("Turn is %d\n", states.s[states.current_state]->turn );
 #endif
 
-   if (game_over())
+   if (game_over(movelist))
      {
       //XXX should I set ai = FALSE?
       ai = FALSE;
       return (ai);
      }
 
+
+   /*
+   gtk_widget_set_sensitive (auto_button, TRUE);
+   gtk_widget_set_sensitive (force_button, FALSE);
+   moving_ai = FALSE;
+   */
    return ai;
 }
 
@@ -739,24 +734,25 @@ int move_ai()
  *
  * Takes a move struct generated by the engine, and extracts the necessary info
  * to update the GUI data structs and have the GUI reflect the move.
+ *
+ * Returns FALSE if the move failed or aborted, TRUE if successful.
  */
-void move_piece(move m)
+int move_piece(move m)
 {
    GnomeCanvasItem *item;
    int from_row, from_col;
    int to_row, to_col;
-   int game_life = bstate_get_game_life();
 
-   bstate_set_move_to(get_square_from_engine(m.tocol, m.torow));
-   to_col = get_x_int_from_square(bstate_get_move_to());
-   to_row = get_y_int_from_square(bstate_get_move_to());
+   board->to = get_square_from_engine(m.tocol, m.torow);
+   to_col = get_x_int_from_square(board->to);
+   to_row = get_y_int_from_square(board->to);
    //Note: by the time the state gets here, it's signaled the other player's turn
    //so if it says it's white's turn, black just moved and we need to move black's
    //piece.
    if (states.s[states.current_state]->turn == WHITE_PLAYER)
      {
-      bstate_set_move_from(get_square_from_engine(states.s[states.current_state -1]->black_q_x[m.queen],
-	      states.s[states.current_state -1]->black_q_y[m.queen]));
+      board->from = get_square_from_engine(states.s[states.current_state -1]->black_q_x[m.queen],
+	      states.s[states.current_state -1]->black_q_y[m.queen]);
       
       board->squares[to_row][to_col] = BLACK;
 #ifdef DEBUG
@@ -767,8 +763,8 @@ void move_piece(move m)
      }
    else
      {
-      bstate_set_move_from(get_square_from_engine(states.s[states.current_state -1]->white_q_x[m.queen],
-	      states.s[states.current_state -1]->white_q_y[m.queen]));
+      board->from = get_square_from_engine(states.s[states.current_state -1]->white_q_x[m.queen],
+	      states.s[states.current_state -1]->white_q_y[m.queen]);
       board->squares[to_row][to_col] = WHITE;
 #ifdef DEBUG
       printf("Moving white queen\n");
@@ -778,21 +774,20 @@ void move_piece(move m)
      }
 
 
-   from_col = get_x_int_from_square(bstate_get_move_from());
-   from_row = get_y_int_from_square(bstate_get_move_from());
+   from_col = get_x_int_from_square(board->from);
+   from_row = get_y_int_from_square(board->from);
    board->squares[from_row][from_col] = NOTHING;
 
-   move_piece_to(bstate_get_move_to(), item);
+   if (try_move(board, item))
+      fire_arrow(get_square_from_engine(m.wallcol, m.wallrow));
+   else 
+      return FALSE;
 #ifdef DEBUG
    printf("Engine coords for arrow: %d, %d\n", m.wallcol, m.wallrow);
-#endif
-   if (game_life != bstate_get_game_life())
-      return;
-   fire_arrow(get_square_from_engine(m.wallcol, m.wallrow));
-#ifdef DEBUG
    printf("fired arrow to square %d\n", get_square_from_engine(m.wallcol, m.wallrow));
    pmove(m);
 #endif
+   return TRUE;
 }
 
 /*==============================================================================
@@ -829,8 +824,8 @@ void register_move_with_engine(Square arrow_sq)
       fprintf(stderr, "Error registering move w/ AI engine!  Game play will now be weird.\n");
 
    m.queen = i;
-   m.torow = board_y_to_engine_y(get_y_int_from_square(bstate_get_move_to()));
-   m.tocol = board_x_to_engine_x(get_x_int_from_square(bstate_get_move_to()));
+   m.torow = board_y_to_engine_y(get_y_int_from_square(board->to));
+   m.tocol = board_x_to_engine_x(get_x_int_from_square(board->to));
 
    m.wallrow = board_y_to_engine_y(get_y_int_from_square(arrow_sq));
    m.wallcol = board_x_to_engine_x(get_x_int_from_square(arrow_sq));
@@ -1104,10 +1099,9 @@ int create_hash(state *s)
  * Checks to see if the game is over and generates a pop-up stating who the 
  * winner is.  Returns TRUE if the game is over.
  */
-int game_over()
+int game_over(move *movelist)
 {
    state *s = states.s[states.current_state];
-   move movelist[3000];
 //   GtkWidget *auto_button, *force_button;
 
    if (children(s, movelist) == 0)
@@ -1147,7 +1141,6 @@ update_status_bar()
 
    gtk_statusbar_pop(status, context_id);
 
-   //printf("Updating status bar for state %d\n", bstate_get_what_next());
    switch (bstate_get_what_next()) 
      {
        case FIRE_ARROW:
@@ -1165,10 +1158,6 @@ update_status_bar()
        case NEW_GAME:
 	   gtk_statusbar_push(status, context_id, "Select Game->New to start game");
 	   break;
-       case STOP_REPLAY:
-	   gtk_statusbar_push(status, context_id, "Replaying a game...");
-	   break;
-
        default:
 	   gtk_statusbar_push(status, context_id, "I have no idea what to do next!");
 
@@ -1305,177 +1294,431 @@ void get_move_str(move *m, char move_str[])
 	   to_alpha, to_num, arrow_alpha, arrow_num);
 }
 
+   
+
 /*==============================================================================
- * get_move_from_str
+ * bstate_set_just_finished
  *
- * This generates a move struct from a move string of the format 1. a4-a6, b6
- * If the string is not in a valid format, the return value will be FALSE to 
- * inform the calling routine that the returned move struct does not contain
- * valid information.  If everything goes well, TRUE will be returned.
+ * tells the internal state machine what state was just finished.  It then 
+ * figures out from that what the next state should be.  This is designed to 
+ * eliminate the redundant code scattered all around that tries to figure
+ * this out.
  */
-int get_move_from_str(move *m, char move_str[])
+int bstate_set_just_finished(int finished)
 {
-   int i=0, j;
-   int from_row, from_col;
-   int to_row, to_col;
-   int arrow_row, arrow_col;
-   Square queen_sq;
-   int queen_i = -1;
+   GtkWidget *auto_button, *force_button, *undo_button, *settings_menu;
 
-   //Ignore move number
-   while (move_str[i++] != ' ')
+   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+   force_button = (GtkWidget *) lookup_widget(main_window, "BT_FORCEMOVE");
+   undo_button = (GtkWidget *) lookup_widget(main_window, "BT_UNDO");
+   settings_menu = (GtkWidget *) lookup_widget(main_window, "Settings");
 
-   if (i > 4)
+   switch(finished)
      {
-      fprintf(stderr, "Space is in wrong place: %d\n", i);
-      return FALSE;  //Ack! this can't be right!
-     }
-   
-   from_col = move_str[i++] - 'a';
-   from_row = move_str[i++] - '1';
-   if (move_str[i] == '0')
-     {
-      from_row = 9;
-      i++;
-     }
+       case FIRE_ARROW:
+	   if (bstate.turn == BLACK_PLAYER)
+	     {
+	      if (options.white_player == AI)
+		{
+		 bstate.what_next = WAIT_FOR_AI;
+		 bstate.moving_ai = TRUE;
 
-   if (move_str[i++] != '-')
-     {
-      fprintf(stderr, "Expected a hyphen at index %d\n", i);
-      return FALSE;  //Ack!!  I expected a '-' here, this is not a valid move string
-     }
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, FALSE);
+		 gtk_widget_set_sensitive (force_button, TRUE);
+		}
+	      else
+		{
+		 bstate.what_next = MOVE_WHITE_QUEEN;
+		 bstate.moving_ai = FALSE;
 
-   to_col = move_str[i++] - 'a';
-   to_row = move_str[i++] - '1';
-   if (move_str[i] == '0')
-     {
-      to_row = 9;
-      i++;
-     }
-   
-   if (move_str[i++] != ',')
-     {
-      fprintf(stderr, "Expected a comma at index %d\n", i);
-      return FALSE;  //Ack!!  I expected a ',' here, this is not a valid move string
-     }
-   if (move_str[i++] != ' ')
-     {
-      fprintf(stderr, "Expected a space at index %d\n", i);
-      return FALSE;  //Ack!!  I expected a ' ' here, this is not a valid move string
-     }
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, TRUE);
+		 gtk_widget_set_sensitive (force_button, FALSE);
+		}
+	      bstate.turn = WHITE_PLAYER;
+	     }
+	   else
+	     {
+	      if (options.black_player == AI)
+		{
+		 bstate.what_next = WAIT_FOR_AI;
+		 bstate.moving_ai = TRUE;
 
-   arrow_col = move_str[i++] - 'a';
-   arrow_row = move_str[i++] - '1';
-   if (move_str[i++] == '0')
-      arrow_row = 9;
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, FALSE);
+		 gtk_widget_set_sensitive (force_button, TRUE);
+		}
+	      else
+		{
+		 bstate.what_next = MOVE_BLACK_QUEEN;
+		 bstate.moving_ai = FALSE;
 
-   //Find the index to the appropriate queen
-   queen_sq = get_square_from_engine(from_col, from_row);
-   for(j=0; j<4; j++)
-     {
-      if (queen_sq == board->square_to_wh_queen_map[j])
-	{
-	 queen_i = j;
-	 //printf("found move for white queen\n");
-	}
-      if (queen_sq == board->square_to_bl_queen_map[j])
-	{
-	 queen_i = j;
-	 //printf("found move for black queen\n");
-	}
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, TRUE);
+		 gtk_widget_set_sensitive (force_button, FALSE);
+		}
+	      bstate.turn = BLACK_PLAYER;
+	     }
+	   gtk_widget_set_sensitive (settings_menu, TRUE);
+	   break;
+       case MOVE_BLACK_QUEEN:
+	   bstate.what_next = FIRE_ARROW;
+	   gtk_widget_set_sensitive (undo_button, TRUE);
+	   gtk_widget_set_sensitive (auto_button, FALSE);
+	   gtk_widget_set_sensitive (settings_menu, FALSE);
+	   break;
+       case MOVE_WHITE_QUEEN:
+	   bstate.what_next = FIRE_ARROW;
+	   gtk_widget_set_sensitive (undo_button, TRUE);
+	   gtk_widget_set_sensitive (auto_button, FALSE);
+	   gtk_widget_set_sensitive (settings_menu, FALSE);
+	   break;
+       case WAIT_FOR_AI:
+	   if (bstate.turn == BLACK_PLAYER)
+	     {
+	      if (options.white_player == AI)
+		{
+		 bstate.what_next = WAIT_FOR_AI;
+		 bstate.moving_ai = TRUE;
+
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, FALSE);
+		 gtk_widget_set_sensitive (force_button, TRUE);
+		}
+	      else
+		{
+		 bstate.what_next = MOVE_WHITE_QUEEN;
+		 bstate.moving_ai = FALSE;
+
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, TRUE);
+		 gtk_widget_set_sensitive (force_button, FALSE);
+		}
+	      bstate.turn = WHITE_PLAYER;
+	     }
+	   else
+	     {
+	      if (options.black_player == AI)
+		{
+		 bstate.what_next = WAIT_FOR_AI;
+		 bstate.moving_ai = TRUE;
+
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, FALSE);
+		 gtk_widget_set_sensitive (force_button, TRUE);
+		}
+	      else
+		{
+		 bstate.what_next = MOVE_BLACK_QUEEN;
+		 bstate.moving_ai = FALSE;
+
+		 gtk_widget_set_sensitive (undo_button, FALSE);
+		 gtk_widget_set_sensitive (auto_button, TRUE);
+		 gtk_widget_set_sensitive (force_button, FALSE);
+		}
+	      bstate.turn = BLACK_PLAYER;
+	     }
+	   break;
+       case UNDO:
+	   if (bstate.turn == BLACK_PLAYER)
+	     {
+	      bstate.what_next = MOVE_BLACK_QUEEN;
+	     }
+	   else
+	     {
+	      bstate.what_next = MOVE_WHITE_QUEEN;
+	     }
+	   gtk_widget_set_sensitive (settings_menu, TRUE);
+	   gtk_widget_set_sensitive (undo_button, FALSE);
+	   gtk_widget_set_sensitive (auto_button, TRUE);
+	   break;
+       case AUTO_FINISH:
+	   bstate.what_next = WAIT_FOR_AI;
+	   gtk_widget_set_sensitive (settings_menu, FALSE);
+	   gtk_widget_set_sensitive (undo_button, FALSE);
+	   gtk_widget_set_sensitive (auto_button, FALSE);
+	   break;
+       case FORCE_MOVE:
+	   gtk_widget_set_sensitive (force_button, FALSE);
+	   break;
+       case START_GAME:
+	   if (options.white_player == AI)
+	     {
+	      bstate.what_next = NEW_GAME;
+	      gtk_widget_set_sensitive (undo_button, FALSE);
+	      gtk_widget_set_sensitive (auto_button, FALSE);
+	      gtk_widget_set_sensitive (force_button, FALSE);
+	     }
+	   else
+	     {
+	      bstate.what_next = MOVE_WHITE_QUEEN;
+	      gtk_widget_set_sensitive (undo_button, FALSE);
+	      gtk_widget_set_sensitive (auto_button, TRUE);
+	      gtk_widget_set_sensitive (force_button, FALSE);
+	     }
+	   gtk_widget_set_sensitive (settings_menu, TRUE);
+	   bstate.turn = WHITE_PLAYER;
+	   bstate.from = INVALID_SQUARE_VALUE;
+	   bstate.to = INVALID_SQUARE_VALUE;
+	   bstate.last_arrow = INVALID_SQUARE_VALUE;
+	   bstate.moving_ai = FALSE;
+	   bstate.open_dialog = FALSE;
+	   bstate.new_game = FALSE;
+	   bstate.quit_game = FALSE;
+	   break;
+       case NEW_GAME:
+	   if (bstate.moving_ai) //in the middle of an AI move
+	      bstate.new_game = TRUE;
+	   else
+	      bstate.new_game = FALSE;
+
+	   if (bstate.moving_piece)
+	      bstate.stop_moving = TRUE;
+
+	   if (options.white_player == AI)
+	     {
+	      bstate.what_next = WAIT_FOR_AI;
+	      bstate.moving_ai = TRUE;
+	      gtk_widget_set_sensitive (undo_button, FALSE);
+	      gtk_widget_set_sensitive (auto_button, FALSE);
+	      gtk_widget_set_sensitive (force_button, TRUE);
+	     }
+	   else
+	     {
+	      bstate.what_next = MOVE_WHITE_QUEEN;
+	      bstate.moving_ai = FALSE;
+	      gtk_widget_set_sensitive (undo_button, FALSE);
+	      gtk_widget_set_sensitive (auto_button, TRUE);
+	      gtk_widget_set_sensitive (force_button, FALSE);
+	     }
+	   gtk_widget_set_sensitive (settings_menu, TRUE);
+	   bstate.turn = WHITE_PLAYER;
+	   bstate.from = INVALID_SQUARE_VALUE;
+	   bstate.to = INVALID_SQUARE_VALUE;
+	   bstate.last_arrow = INVALID_SQUARE_VALUE;
+	   bstate.quit_game = FALSE;
+
+	   break;
+
+       case LOAD_GAME:
+	   break;
+       case GAME_OVER:
+	   gtk_widget_set_sensitive (undo_button, FALSE);
+	   gtk_widget_set_sensitive (auto_button, FALSE);
+	   gtk_widget_set_sensitive (force_button, FALSE);
+	   gtk_widget_set_sensitive (settings_menu, TRUE);
+	   bstate.what_next = NEW_GAME;
+	   break;
+
+       case QUIT_GAME:
+	   bstate.quit_game = TRUE;
+	   break;
+       default:
+	   bstate.what_next = CONFUSED;
      }
-   if (queen_i == -1)
-     {
-      fprintf(stderr, "Couldn't find a queen at square %d\n", queen_sq);
-      return FALSE;  //Couldn't find queen index!
-     }
-
-   m->queen = queen_i;
-   m->tocol = to_col;
-   m->torow = to_row;
-   m->wallcol = arrow_col;
-   m->wallrow = arrow_row;
-
-   return TRUE;
+   update_status_bar();
+#ifdef DEBUG
+   print_bstate();
+#endif
+   return bstate.what_next;
 
 }
+
+/*==============================================================================
+ * bstate_store_what_next
+ *
+ * This initializes the internal board state machine.  Use of this is discouraged
+ * and should instead use bstate_set_just_finished.
+void bstate_store_what_next(int next)
+{
+   switch(next)
+     {
+       case FIRE_ARROW:
+	   bstate.what_next = FIRE_ARROW;
+	   break;
+       case MOVE_BLACK_QUEEN:
+	   if (options.black_player == AI)
+	      bstate.what_next = WAIT_FOR_AI;
+	   else
+	      bstate.what_next = MOVE_BLACK_QUEEN;
+	   bstate.turn = BLACK_PLAYER;
+	   break;
+       case MOVE_WHITE_QUEEN:
+	   if (options.white_player == AI)
+	      bstate.what_next = WAIT_FOR_AI;
+	   else
+	      bstate.what_next = MOVE_WHITE_QUEEN;
+	   bstate.turn = WHITE_PLAYER;
+	   break;
+       case WAIT_FOR_AI:
+	   bstate.what_next = WAIT_FOR_AI;
+	   break;
+       default:
+	   bstate.what_next = CONFUSED;
+     }
+   update_status_bar();
+}
+ */
+
+/*==============================================================================
+ * bstate_get_what_next
+ *
+ * This is the method for code throughout the program to find out what input
+ * is expected next.
+ */
+int bstate_get_what_next()
+{
+   return bstate.what_next;
+}
+
+/*==============================================================================
+ * bstate_set_move_from
+ *
+ * This lets the internal board state know that a queen has just been moved from
+ * a given square.
+ */
+void bstate_set_move_from(Square from)
+{
+   bstate.from = from;
+}
+
+/*==============================================================================
+ * bstate_set_move_from
+ *
+ * This lets the internal board state know that a queen has just been moved to
+ * a given square.
+ */
+void bstate_set_move_to(Square to)
+{
+   bstate.to = to;
+}
+
+/*==============================================================================
+ * bstate_get_move_from
+ *
+ * This lets the internal board state know that a queen has just been moved from
+ * a given square.
+ */
+Square bstate_get_move_from()
+{
+   return bstate.from;
+}
+
+/*==============================================================================
+ * bstate_get_move_from
+ *
+ * This lets the internal board state know that a queen has just been moved to
+ * a given square.
+ */
+Square bstate_get_move_to()
+{
+   return bstate.to;
+}
+
+int bstate_get_moving_ai()
+{
+   return bstate.moving_ai;
+}
+/*
+void bstate_set_moving_ai(int moving)
+{
+   bstate.moving_ai = moving;
+}
+*/
+int bstate_get_new_game()
+{
+   return bstate.new_game;
+}
+void bstate_set_new_game(int new_game)
+{
+    bstate.new_game = new_game;
+}
+
+void bstate_set_moving_piece(int moving)
+{
+   bstate.moving_piece = moving;
+}
+int bstate_get_moving_piece()
+{
+   return bstate.moving_piece;
+}
+
+int bstate_get_turn()
+{
+   return bstate.turn;
+}
+
+int bstate_get_open_dialog()
+{
+   return bstate.open_dialog;
+}
+
+void bstate_set_open_dialog(int dialog)
+{
+   bstate.open_dialog = dialog;
+}
+
+void bstate_update_player_settings()
+{
+   if (bstate.turn == WHITE_PLAYER && options.white_player == HUMAN)
+      bstate.what_next = MOVE_WHITE_QUEEN;
+   if (bstate.turn == BLACK_PLAYER && options.black_player == HUMAN)
+      bstate.what_next = MOVE_BLACK_QUEEN;
+
+   if (bstate.what_next == NEW_GAME)
+      return;
    
+   if (bstate.turn == WHITE_PLAYER && options.white_player == AI)
+      bstate.what_next = WAIT_FOR_AI;
+   if (bstate.turn == BLACK_PLAYER && options.black_player == AI)
+      bstate.what_next = WAIT_FOR_AI;
+   update_status_bar();
+
+}
+
+int bstate_get_quit_game()
+{
+   return bstate.quit_game;
+}
+
+int bstate_get_stop_moving()
+{
+   return bstate.stop_moving;
+}
+
+void bstate_set_stop_moving(int stop_moving)
+{
+   bstate.stop_moving = stop_moving;
+}
+
+
+void print_bstate()
+{
+   printf("turn = %d\n", bstate.turn);
+   printf("what_next = %d\n", bstate.what_next);
+   printf("moving_ai = %d\n", bstate.moving_ai);
+   printf("new_game = %d\n", bstate.new_game);
+}
+
+
 
 int read_in_moves(FILE *history_fd)
 {
    char *buffer=NULL;
    size_t buf_size = 30;
 
-   state *s;
-   move m;
-   int replay_mode = bstate_get_replay_mode();
-   int replay_delay = 0;
-   int game_life = bstate_get_game_life();
-   GtkWidget *delay;
-
-   if (replay_mode)
-     {
-      delay = (GtkWidget *)lookup_widget(main_window, "ReplayDelaySpinner");
-     }
-   else
-     {
-      bstate_set_dont_slide(TRUE);
-     }
-   //printf("History contents:\n");
+   printf("History contents:\n");
    while (getline(&buffer, &buf_size, history_fd) != -1)
      {
-      if (replay_mode && !bstate_get_replay_mode()) //If not in replay mode anymore, drop out
-	 return FALSE;
-      s = states.s[states.current_state];
-      /*
       if (buffer != NULL)
 	 printf("%s", buffer);
-      */
-      if (get_move_from_str(&m, buffer))
-	{
-	 makemove(s,m);  //register w/ engine
-	 move_piece(m); //register w/ board
-	 if (game_life != bstate_get_game_life())
-	    return FALSE;
-	 print_move_in_text_window(&m);
-	 dup_state(s, states.s[++(states.current_state)]);
-	}
-      else
-	{
-	 fprintf(stderr, "Move string is invalid\n");
-	 bstate_set_dont_slide(FALSE);
-	 return FALSE;
-	}
       free(buffer);
       buffer = NULL;
-
-      if (replay_mode) //Delay for appropriate amount of time
-       	{
-	 replay_delay = gtk_spin_button_get_value_as_int((GtkSpinButton *)delay);
-	 rest(replay_delay); 
-	 if (game_life != bstate_get_game_life())
-	    return FALSE;
-	}
      }
    
 
-   bstate_set_dont_slide(FALSE);
    return TRUE;
 
 }
-
-void rest(int duration)
-{
-   time_t start = time(NULL);
-   time_t end = start + duration;
-
-   while (time(NULL) < end)
-     {
-      usleep(10000);
-      while (gtk_events_pending())
-	 gtk_main_iteration();
-     }
-      
-}
-
 

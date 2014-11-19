@@ -13,6 +13,7 @@ gamazons_SOURCES = \
 	interface.c interface.h \
 	callbacks.c callbacks.h \
 	board.c board.h \
+	bstate.c bstate.h \
 	position.h \
 	eval.c \
 	moves.c \

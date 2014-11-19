@@ -125,7 +125,7 @@
 #define PACKAGE "gamazons"
 
 /* Version number of package */
-#define VERSION "0.1"
+#define VERSION "0.83rc3"
 
 /* Define if your <locale.h> file defines LC_MESSAGES. */
 #define HAVE_LC_MESSAGES 1

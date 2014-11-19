@@ -79,7 +79,7 @@ POFILES =
 POSUB = po
 RANLIB = ranlib
 USE_NLS = yes
-VERSION = 0.1
+VERSION = 0.83rc3
 
 SUBDIRS = src po pixmaps
 

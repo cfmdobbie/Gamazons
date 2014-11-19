@@ -18,48 +18,21 @@
 #define THICKNESS 1.0
 #define QUEEN_OFFSET 0
 
+#define INVALID_SQUARE_VALUE 101
+
 /* Data structures */
 typedef gushort Square;
 typedef gchar   Piece;
-
-
-#define TYPE_POSITION	       (position_get_type ())
-#define POSITION(obj)          GTK_CHECK_CAST (obj, TYPE_POSITION, Position)
-#define POSITION_CLASS(klass)  GTK_CHECK_CLASS_CAST (klass, TYPE_POSITION, PositionClass)
-#define IS_POSITION(obj)       GTK_CHECK_TYPE (obj, TYPE_POSITION)
-
-typedef struct _Position        Position;
-typedef struct _PositionClass   PositionClass;
-typedef struct _PositionPrivate PositionPrivate;
-
-struct _PositionClass {
-	GtkObjectClass parent_class;
-};
-
-struct _Position {
-	GtkObject        object;
-
-	/* 10x10 board - extra for move generation */
-	Piece            square[120]; 
-
-	PositionPrivate *priv;
-};
-
-#define TYPE_BOARD			(board_get_type ())
-#define BOARD(obj)			(GTK_CHECK_CAST ((obj), TYPE_BOARD, Board))
-#define BOARD_CLASS(klass)		(GTK_CHECK_CLASS_CAST ((klass), TYPE_BOARD, BoardClass))
-#define IS_BOARD(obj)			(GTK_CHECK_TYPE ((obj), TYPE_BOARD))
-#define IS_BOARD_CLASS(klass)		(GTK_CHECK_CLASS_TYPE ((obj), TYPE_BOARD))
-
 
 
 struct amazon_board {
 
    // Gnome canvas counts coordinates w/ origin starting in top/left corner
    Square squares[BOARD_SIZE][BOARD_SIZE];
-   Square from;
-   Square to;
-   Square selected_from;
+   //These are really meant for temporary processing, and might not contain
+   //safe values.  They are currently candidates for downsizing.
+   //Square from;
+   //Square to;
 
    /* The AI engine queens were managed in an array w/ elements 0-3
     * this mapping is meant to keep track of which queen is on which
@@ -68,7 +41,6 @@ struct amazon_board {
    Square square_to_wh_queen_map[4];
    Square square_to_bl_queen_map[4];
 
-   GnomeCanvasItem *selected;
    GnomeCanvasItem *selected_queen;
    GnomeCanvasItem *white_queens[4];
    GnomeCanvasItem *black_queens[4];
@@ -83,10 +55,8 @@ struct amazon_board {
    GnomeCanvasGroup *root;
    GnomeCanvas *canvas;
 
-   Position *pos;
 
 };
-
 typedef struct amazon_board Board;
 
 
@@ -104,6 +74,17 @@ enum {
    MOVE_BLACK_QUEEN,
    MOVE_WHITE_QUEEN,
    WAIT_FOR_AI,
+   UNDO,
+   AUTO_FINISH,
+   FORCE_MOVE,
+   START_GAME,
+   NEW_GAME,
+   LOAD_GAME,
+   START_REPLAY,
+   STOP_REPLAY,
+   GAME_OVER,
+   QUIT_GAME,
+   CONFUSED
 };
 
 /* Prototypes */
@@ -115,7 +96,8 @@ void mark_square (GnomeCanvasItem *square);
 
 Square get_square (double x, double y);
 void clear_square (GnomeCanvasItem **square);
-void try_move (Board *board, GnomeCanvasItem *item);
+//void try_move (Board *board, GnomeCanvasItem *item);
+void move_piece_to (Square to, GnomeCanvasItem *item);
 
 void move_piece(move m);
 int move_ai();
@@ -128,8 +110,10 @@ int create_hash(state *s);
 void print_board();
 void destroy_board();
 void print_move_in_text_window(move *m);
-
-
+int read_in_moves(FILE *history_fd);
+void get_move_str(move *m, char move_str[]);
+int get_move_from_str(move *m, char move_str[]);
+void rest(int duration);
 
 
 // Coordinate conversion routines
@@ -147,6 +131,6 @@ int get_square_from_engine(int x, int y);
 void fire_arrow(Square sq);
 void square_contains(Square sq);
 void count_queens();
-int game_over(move *movelist);
+int game_over();
 
 

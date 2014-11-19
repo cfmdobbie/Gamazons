@@ -28,20 +28,15 @@
 static GnomeUIInfo file1_menu_uiinfo[] =
 {
   GNOMEUIINFO_MENU_NEW_ITEM (N_("_New"), NULL, on_new1_activate, NULL),
+  GNOMEUIINFO_MENU_OPEN_ITEM (on_open_activate, NULL),
+  GNOMEUIINFO_MENU_SAVE_AS_ITEM (on_save_as1_activate, NULL),
   GNOMEUIINFO_SEPARATOR,
   GNOMEUIINFO_MENU_EXIT_ITEM (on_quit1_activate, NULL),
   GNOMEUIINFO_END
 };
 
-static GnomeUIInfo preferences1_menu_uiinfo[] =
+static GnomeUIInfo Settings_menu_uiinfo[] =
 {
-  {
-    GNOME_APP_UI_ITEM, N_("_Network"),
-    NULL,
-    (gpointer) on_network1_activate, NULL, NULL,
-    GNOME_APP_PIXMAP_NONE, NULL,
-    0, (GdkModifierType) 0, NULL
-  },
   {
     GNOME_APP_UI_ITEM, N_("_Player"),
     NULL,
@@ -75,7 +70,7 @@ static GnomeUIInfo help1_menu_uiinfo[] =
 static GnomeUIInfo menubar1_uiinfo[] =
 {
   GNOMEUIINFO_MENU_GAME_TREE (file1_menu_uiinfo),
-  GNOMEUIINFO_MENU_SETTINGS_TREE (preferences1_menu_uiinfo),
+  GNOMEUIINFO_MENU_SETTINGS_TREE (Settings_menu_uiinfo),
   GNOMEUIINFO_MENU_HELP_TREE (help1_menu_uiinfo),
   GNOMEUIINFO_END
 };
@@ -154,6 +149,19 @@ create_GamazonsMain (void)
   GtkWidget *BT_FORCEMOVE;
   GtkWidget *BT_AUTOFINISH;
   GtkWidget *hbox12;
+  GtkWidget *vbox12;
+  GtkWidget *hseparator2;
+  GtkWidget *vbuttonbox2;
+  GtkWidget *BT_REPLAY;
+  GtkWidget *BT_REPLAY_STOP;
+  GtkWidget *label50;
+  GtkObject *ReplayDelaySpinner_adj;
+  GtkWidget *ReplayDelaySpinner;
+  GtkWidget *hseparator3;
+  GtkWidget *vbox13;
+  GtkWidget *label51;
+  GtkObject *MovementSpeedSpinner_adj;
+  GtkWidget *MovementSpeedSpinner;
   GtkWidget *scrolledwindow6;
   GtkWidget *textview1;
   GtkWidget *statusbar1;
@@ -491,12 +499,12 @@ create_GamazonsMain (void)
   gtk_widget_show (vbox4);
   gtk_box_pack_start (GTK_BOX (vbox3), vbox4, TRUE, TRUE, 0);
 
-  label1 = gtk_label_new (_("Moves Made:"));
+  label1 = gtk_label_new (_("Move History:"));
   gtk_widget_show (label1);
   gtk_box_pack_start (GTK_BOX (vbox4), label1, FALSE, FALSE, 0);
   gtk_widget_set_usize (label1, 0, 40);
   gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_RIGHT);
-  gtk_misc_set_alignment (GTK_MISC (label1), 0.59, 0.72);
+  gtk_misc_set_alignment (GTK_MISC (label1), 0.55, 0.72);
 
   scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow3);
@@ -555,6 +563,63 @@ create_GamazonsMain (void)
   gtk_widget_show (hbox12);
   gtk_box_pack_start (GTK_BOX (vbox9), hbox12, TRUE, TRUE, 0);
 
+  vbox12 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox12);
+  gtk_box_pack_start (GTK_BOX (hbox12), vbox12, TRUE, TRUE, 0);
+
+  hseparator2 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator2);
+  gtk_box_pack_start (GTK_BOX (vbox12), hseparator2, FALSE, FALSE, 7);
+
+  vbuttonbox2 = gtk_vbutton_box_new ();
+  gtk_widget_show (vbuttonbox2);
+  gtk_box_pack_start (GTK_BOX (vbox12), vbuttonbox2, FALSE, FALSE, 0);
+  gtk_button_box_set_spacing (GTK_BUTTON_BOX (vbuttonbox2), 7);
+
+  BT_REPLAY = gtk_button_new_with_mnemonic (_("Replay"));
+  gtk_widget_show (BT_REPLAY);
+  gtk_container_add (GTK_CONTAINER (vbuttonbox2), BT_REPLAY);
+  gtk_widget_set_usize (BT_REPLAY, 107, -2);
+  GTK_WIDGET_SET_FLAGS (BT_REPLAY, GTK_CAN_DEFAULT);
+
+  BT_REPLAY_STOP = gtk_button_new_with_mnemonic (_("Stop"));
+  gtk_widget_show (BT_REPLAY_STOP);
+  gtk_container_add (GTK_CONTAINER (vbuttonbox2), BT_REPLAY_STOP);
+  gtk_widget_set_usize (BT_REPLAY_STOP, 37, -2);
+  GTK_WIDGET_SET_FLAGS (BT_REPLAY_STOP, GTK_CAN_DEFAULT);
+
+  label50 = gtk_label_new (_("Replay Delay"));
+  gtk_widget_show (label50);
+  gtk_box_pack_start (GTK_BOX (vbox12), label50, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label50), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label50), 0.5, 0);
+  gtk_misc_set_padding (GTK_MISC (label50), 0, 4);
+
+  ReplayDelaySpinner_adj = gtk_adjustment_new (1, 1, 100, 1, 10, 10);
+  ReplayDelaySpinner = gtk_spin_button_new (GTK_ADJUSTMENT (ReplayDelaySpinner_adj), 1, 0);
+  gtk_widget_show (ReplayDelaySpinner);
+  gtk_box_pack_start (GTK_BOX (vbox12), ReplayDelaySpinner, FALSE, FALSE, 0);
+
+  hseparator3 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator3);
+  gtk_box_pack_start (GTK_BOX (vbox12), hseparator3, FALSE, FALSE, 7);
+
+  vbox13 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox13);
+  gtk_box_pack_start (GTK_BOX (vbox12), vbox13, TRUE, TRUE, 0);
+
+  label51 = gtk_label_new (_("Movement Speed"));
+  gtk_widget_show (label51);
+  gtk_box_pack_start (GTK_BOX (vbox13), label51, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label51), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (label51), 0.5, 0);
+  gtk_misc_set_padding (GTK_MISC (label51), 0, 4);
+
+  MovementSpeedSpinner_adj = gtk_adjustment_new (1, 1, 10, 1, 10, 10);
+  MovementSpeedSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (MovementSpeedSpinner_adj), 1, 0);
+  gtk_widget_show (MovementSpeedSpinner);
+  gtk_box_pack_start (GTK_BOX (vbox13), MovementSpeedSpinner, FALSE, FALSE, 0);
+
   scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow6);
   gtk_box_pack_start (GTK_BOX (hbox11), scrolledwindow6, TRUE, TRUE, 0);
@@ -583,6 +648,12 @@ create_GamazonsMain (void)
   gtk_signal_connect (GTK_OBJECT (BT_AUTOFINISH), "clicked",
                       GTK_SIGNAL_FUNC (on_BT_AUTOFINISH_clicked),
                       NULL);
+  gtk_signal_connect (GTK_OBJECT (BT_REPLAY), "clicked",
+                      GTK_SIGNAL_FUNC (on_BT_REPLAY_clicked),
+                      NULL);
+  gtk_signal_connect (GTK_OBJECT (BT_REPLAY_STOP), "clicked",
+                      GTK_SIGNAL_FUNC (on_BT_REPLAY_STOP_clicked),
+                      NULL);
 
   atko = gtk_widget_get_accessible (CNVS_GAMEBOARD);
   atk_object_set_name (atko, _("CNVS_GAMEBOARD"));
@@ -594,12 +665,13 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1, "menubar1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[0].widget, "file1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[0].widget, "new1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[1].widget, "separator1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[2].widget, "quit1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "preferences1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[0].widget, "network1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[1].widget, "player1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[2].widget, "theme1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[1].widget, "open");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[2].widget, "save_as1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[3].widget, "separator1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[4].widget, "quit1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "Settings");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, Settings_menu_uiinfo[0].widget, "player1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, Settings_menu_uiinfo[1].widget, "theme1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[2].widget, "help1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[0].widget, "how_to_play1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[1].widget, "about1");
@@ -670,6 +742,17 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, BT_FORCEMOVE, "BT_FORCEMOVE");
   GLADE_HOOKUP_OBJECT (GamazonsMain, BT_AUTOFINISH, "BT_AUTOFINISH");
   GLADE_HOOKUP_OBJECT (GamazonsMain, hbox12, "hbox12");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, vbox12, "vbox12");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, hseparator2, "hseparator2");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, vbuttonbox2, "vbuttonbox2");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, BT_REPLAY, "BT_REPLAY");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, BT_REPLAY_STOP, "BT_REPLAY_STOP");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, label50, "label50");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, ReplayDelaySpinner, "ReplayDelaySpinner");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, hseparator3, "hseparator3");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, vbox13, "vbox13");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, label51, "label51");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, MovementSpeedSpinner, "MovementSpeedSpinner");
   GLADE_HOOKUP_OBJECT (GamazonsMain, scrolledwindow6, "scrolledwindow6");
   GLADE_HOOKUP_OBJECT (GamazonsMain, textview1, "textview1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, statusbar1, "statusbar1");
@@ -827,13 +910,13 @@ create_PlayerSettings (void)
   gtk_box_pack_start (GTK_BOX (hbox7), TimeSpinner, TRUE, TRUE, 10);
   gtk_widget_set_usize (TimeSpinner, 10, -2);
 
-  DepthSpinner_adj = gtk_adjustment_new (0, 0, 100, 1, 10, 10);
+  DepthSpinner_adj = gtk_adjustment_new (1, 1, 100, 1, 10, 10);
   DepthSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (DepthSpinner_adj), 1, 0);
   gtk_widget_show (DepthSpinner);
   gtk_box_pack_start (GTK_BOX (hbox7), DepthSpinner, TRUE, TRUE, 10);
   gtk_widget_set_usize (DepthSpinner, 10, -2);
 
-  WidthSpinner_adj = gtk_adjustment_new (0, 0, 3000, 1, 10, 10);
+  WidthSpinner_adj = gtk_adjustment_new (1, 1, 3000, 1, 10, 10);
   WidthSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (WidthSpinner_adj), 1, 0);
   gtk_widget_show (WidthSpinner);
   gtk_box_pack_start (GTK_BOX (hbox7), WidthSpinner, TRUE, TRUE, 10);

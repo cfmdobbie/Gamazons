@@ -14,7 +14,7 @@
 
 GETTEXT_PACKAGE = gamazons
 PACKAGE = gamazons
-VERSION = 0.1
+VERSION = 0.83rc3
 
 SHELL = /bin/sh
 

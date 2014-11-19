@@ -2,6 +2,29 @@
 DONE
 ================================================================================
 
+* Maintaining game state
+	The problem is, what_next is getting tweaked everywhere.  Everything
+	that is supposed to be done when a state change might not be taking
+	place everywhere.  Perhaps what I should do is set an API to tweak the
+	state, perhaps set_state()/get_state() functions would be in order.
+
+* Create themes capability.  Instead of having game pieces hard coded in the
+	program, have various theme files for the user to choose from.  Make
+	this selectable and changeable at runtime without hosing the game state.
+
+* Where to store the .gamazons file
+	I noticed gnome-chess stored the user config file in the .gnome
+	directory.  Perhaps there's a standard location for gnome's config files
+	that I can retreive via some gnome function call.
+
+* Generate the moves made list
+	I've got that nice fancy window taking up precious real estate.  I might
+	as well use it for what it was for.
+
+* Install icons and menu features when game is installed.  gnome chess created a
+	desktop file in /usr/local/share/gnome/apps.  I'm not exactly sure how
+	to put the item in the game menu yet.
+
 * Redo board drawing method
 	Instead of generating squares and filling them in with squares, lets use
 	pngs of squares and place them on the board.  It might be useful to
@@ -26,15 +49,6 @@ DONE
        	so perhaps just making a " discover_board" function that can be called when 
 	exiting setup mode.
 
-
-* Different difficulty levels & Separate AI settings for each player
-	I want to create different difficulty levels for the AI player.
-	Starting with 0 = random and moving up to 10 or so, adding one more
-	heuristic at each level.  
-
-	But then I'd like to separate the AI level, time, width, and TT.  That
-	way I can pit one player up against the other without them "cheating" by
-	knowing what the other player will do.  
 
 * Create a help file
 	Gnome uses HTML files for help stuff.  Make a nice page that explains
@@ -157,13 +171,22 @@ DONE
        	and deletes them if they are.  I don't know if I need to draw the board after
        	the initial draw.
 
+* Text looks messed up with custom fonts & fixed game board size	
+	On Michael's computer, the game looked pretty screwy.  I dunno what
+	font settings he used, but it made it look pretty messed up.
+	Unfortunately, my board is designed to be precisely the size it is.  The
+	user doesn't have the ability to resize the game, board or pieces.
+	Unfortunately, this means people with high resolutions can't make the
+	board any bigger and people with low resolutions can't make it any
+	smaller.  To change this, I'd need to learn how to scale the pieces, the
+	game board, and redo all the calculations which determine where pieces
+	are and where to move them to.  If this were fixed, people with
+	different fonts could resize the board so it looked normal to them.
+	NOTE: Possibly fixed by just making more space for text
+
 ================================================================================
 TODO
 ================================================================================
-* Install icons and menu features when game is installed.  gnome chess created a
-	desktop file in /usr/local/share/gnome/apps.  I'm not exactly sure how
-	to put the item in the game menu yet.
-
 * Showing the latest square fired on:
   	The square the AI (or human) fired it's arrow on could be a different color 
 	or shade until the next move starts.
@@ -190,39 +213,27 @@ TODO
 	moving, so it should be disabled once move_ai() starts, and can be
 	renabled at the end.
 
+* Have AI verify legality of Human move?  Have GUI verify legality of  AI move
+	Would it be useful to, when registering a human move w/ AI for it to 
+	verify the move was legal?  How about the GUI verifying an AI move is
+	legal?  Having these checks might catch inconsistencies in the game
+	design, and perhaps end the game gracefully, warning the user a bug has
+	just occured.  When this happens, I could dump the GUI state & AI state
+	to a text file, along with the offending move attempt to enhance
+	debugging.
 
-* Generate the moves made list
-	I've got that nice fancy window taking up precious real estate.  I might
-	as well use it for what it was for.
+* Different difficulty levels & Separate AI settings for each player
+	I want to create different difficulty levels for the AI player.
+	Starting with 0 = random and moving up to 10 or so, adding one more
+	heuristic at each level.  
 
-* Text looks messed up with custom fonts & fixed game board size	
-	On Michael's computer, the game looked pretty screwy.  I dunno what
-	font settings he used, but it made it look pretty messed up.
-	Unfortunately, my board is designed to be precisely the size it is.  The
-	user doesn't have the ability to resize the game, board or pieces.
-	Unfortunately, this means people with high resolutions can't make the
-	board any bigger and people with low resolutions can't make it any
-	smaller.  To change this, I'd need to learn how to scale the pieces, the
-	game board, and redo all the calculations which determine where pieces
-	are and where to move them to.  If this were fixed, people with
-	different fonts could resize the board so it looked normal to them.
+	But then I'd like to separate the AI level, time, width, and TT.  That
+	way I can pit one player up against the other without them "cheating" by
+	knowing what the other player will do.  
 
-* Networking
-	Don't bother with a client/server relationship (eg freeciv).  This game should 
-	just be peer based.  Just pick some random unused port as a default.
-	The user should be able pick whatever port he wants, and whatever he
-	selects should be stored in the .gamazons file.
+* Have a preview pane for different themes.
+* Make option to just see game board
 
-* Where to store the .gamazons file
-	I noticed gnome-chess stored the user config file in the .gnome
-	directory.  Perhaps there's a standard location for gnome's config files
-	that I can retreive via some gnome function call.
-
-* Maintaining game state
-	The problem is, what_next is getting tweaked everywhere.  Everything
-	that is supposed to be done when a state change might not be taking
-	place everywhere.  Perhaps what I should do is set an API to tweak the
-	state, perhaps set_state()/get_state() functions would be in order.
 
 
 ================================================================================
@@ -261,6 +272,42 @@ start the game in a useable state.  It's white's turn to move, it's set as
 human, but what_next = MOVE_AI.  SOLUTION: Disable Autofinish & Force move at
 end of game.
 
+A4-C6, A7, undo moves the white piece on top of the black piece.  Solution: the
+new gui state machine only updates the to/from values when a legal move occurs.
+
+if you make a move, then change the theme, and press undo, the thing totally wigs 
+out. SOLUTION: Disable 'Settings' menu inbetween moving a piece and firing an
+arrow.
+
+move d1-d10, as it slides back, move a4-g10.  it freezes momentarily, now  move 
+j4 quickly to a7 and now x is dead or your window mgr freezes.  SOLUTION: Don't
+allow other game pieces to be picked up when another piece is sliding.
+
+search time = 1, max depth=0, max width = 0, white = AI, black = AI, press ok.
+You get a bazillion error messages and the pieces don't play.  SOLUTION: set the
+minimum max-depth value to be 1.
+
+After setting both players to AI, completing a game, selecting white as human
+and starting a new game, I can't pick up the white pieces.  SOLUTION: new board
+state machine fixed this.
+
+Playing with setting both players to AI, w/ time = 1, depth=1, width=0.  trying various
+combinations of depth=0/1 and width=0/1.  Sometimes I can't get the game to start w/
+both as AI, and switching to white=human, I can't pick up the pieces.  SOLUTION:
+new board state machine fixed this.
+
+settings->theme, press OK w/o selecting a theme.  Program quits w/ error, cannot
+open theme *.theme.  SOLUTION: have load theme from file return FALSE if it
+can't open the file, then handle the problem gracefully instead of trying to
+process it.
+
+Ack!  isearch() returns a move struct.  Not a pointer to a move struct.  Note: 
+the data holding this move struct is located in isearch(), and once this function
+returns, its value is no longer guaranteed to be valid!  It just _usually_ is. 
+This is the most likely cause of the repeated FORCE MOVE button coming back with
+wacked out moves.  I'm getting moves like: 50. g-6375-g-6408, d-6318 and 
+a1-g-6377, b-6358  SOLUTION: make sure isearch returns a valid move struct
+
 ================================================================================
 BUGS
 ================================================================================
@@ -269,3 +316,45 @@ Anca somehow managed to lose a queen in the middle of the game when it was moved
 to the right edge of the screen.  She was more inclined to miss her target
 square & hit undo, but so far I haven't been able to replicate it.
 
+When restarting a game, I should free the malloc'ed board struct.
+destroy_board() would probably be a good place for this.
+
+0.81 bugs:
+
+Have theme window open, press autofinish.  Select theme.  It's not autofinishing
+anymore, and the settings menu is blocked out.  Also, if the theme changes while
+a piece is in midmove, it wigs out. 
+
+Changing themes as a piece is moving makes it wig out.  
+
+If you have a settings window open, then make a partial move you can then change
+any settings and muck up the game. 
+
+Pressing undo again as the piece is sliding back loses a queen.
+
+dragging a queen off the board miscalculates its location: ie A4-D3 but further
+off to the right, the queen slides back to A2, during which time you can press
+undo and totally muck it up. 
+
+Set white=AI, black=HUMAN.  New Game.  White moves, change black to AI.  Black
+moves, white never moves again. 
+
+Move history is screwed up.  G1-G7, D7: history shows d10-g7, d7
+
+0.82 Todo
+
+when a window is open, ignore all clicks on the board.  This will keep people
+from opening settings windows, then making partial moves etc...
+	- What about only being able to open a single window?  Ie - if I have
+    two windows open, and I close one, the open_window count is set to false and
+    it doesn't know there are other windows open.  Instead of having TRUE/FALSE,
+    values, inc/dec the counter, and when it's zero it's safe to reenable
+    buttons.
+X Disable certain interrupts when a piece is sliding (ie theme changes, undo, etc)
+
+X Do error checking on board location.  If a piece is out of bounds, it's not a
+valid move.
+
+X Fix history window for human moves
+
+X Fix state machine processing of player setting changes.

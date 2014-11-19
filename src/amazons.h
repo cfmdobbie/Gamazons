@@ -110,6 +110,9 @@ struct options
    int white_player;
    int black_player;
    int print_statistics;
+   int replay_delay;
+   int movement_speed;
+   char hist_dir[512];
 
    struct engine engine;
    struct images images;
@@ -160,7 +163,7 @@ void dup_state(state *s_old, state *s_new);
 void init_engine();
 void load_values_from_file();
 void store_values_in_file();
-void load_images_from_theme(char *theme);
+int load_images_from_theme(char *theme);
 #endif
 
 
