@@ -11,7 +11,6 @@
 
 #include "interface.h"
 #include "support.h"
-#include "position.h"
 #include "amazons.h"
 #include "board.h"
 

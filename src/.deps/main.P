@@ -377,7 +377,7 @@ main.o: main.c ../config.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-popup-menu.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-propertybox.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h \
-  interface.h support.h position.h amazons.h board.h
+  interface.h support.h amazons.h board.h
 main.c :
 ../config.h :
 /home/yorgasor/garnome/include/libgnomeui-2.0/gnome.h :
@@ -784,6 +784,5 @@ main.c :
 /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h :
 interface.h :
 support.h :
-position.h :
 amazons.h :
 board.h :

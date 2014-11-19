@@ -20,6 +20,8 @@ extern struct options options;
 extern struct game_states states;
 extern int ok;
 extern time_t start;
+extern GtkWidget *main_window;
+extern int new_game;
 Square legal_moves[100];
 int state_hash;
 
@@ -28,6 +30,7 @@ void init_game_board(GtkWidget *GamazonsMain)
    int i,j;
    char color[256];
    GtkWidget *w = (GtkWidget *) lookup_widget(GamazonsMain, BOARD_NAME);
+   GtkWidget *force_button;
    
 
    board = (Board *) malloc(sizeof(Board));
@@ -101,6 +104,9 @@ void init_game_board(GtkWidget *GamazonsMain)
    board->squares[3][0] = BLACK;
    board->squares[3][9] = BLACK;
 
+   force_button = (GtkWidget *)lookup_widget(main_window, "BT_FORCEMOVE");
+   gtk_widget_set_sensitive (force_button, FALSE);
+   
    draw_board();
    what_next = MOVE_WHITE_QUEEN;
 
@@ -144,40 +150,19 @@ void draw_board()
    GnomeCanvasGroup *root = GNOME_CANVAS_GROUP(gnome_canvas_root (GNOME_CANVAS (board->canvas)));
    
 
-
-   white_pb = gdk_pixbuf_new_from_file("/usr/local/share/pixbufs/white.png", NULL);
+   white_pb = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/white.png", NULL);
    if (white_pb == NULL)
      {
-      white_pb = gdk_pixbuf_new_from_file("/usr/share/pixbufs/white.png", NULL);
-      if (white_pb == NULL)
-       	{
-	 white_pb = gdk_pixbuf_new_from_file("white.png", NULL);
-	 if (white_pb == NULL)
-	   {
-	    fprintf(stderr, "Cannot find white.png\n");
-	    exit(1);
-	   }
-	}
+      fprintf(stderr, "Cannot find white.png\n");
+      exit(1);
      }
-   else
-      printf("loaded white.png just fine\n");
 
-   black_pb = gdk_pixbuf_new_from_file("/usr/local/share/pixbufs/black.png", NULL);
+   black_pb = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/black.png", NULL);
    if (black_pb == NULL)
      {
-      black_pb = gdk_pixbuf_new_from_file("/usr/share/pixbufs/black.png", NULL);
-      if (black_pb == NULL)
-       	{
-	 black_pb = gdk_pixbuf_new_from_file("black.png", NULL);
-	 if (black_pb == NULL)
-	   {
-	    fprintf(stderr, "Cannot find black.png\n");
-	    exit(1);
-	   }
-	}
+      fprintf(stderr, "Cannot find black.png\n");
+      exit(1);
      }
-   else
-      printf("loaded black.png just fine\n");
 
 
 
@@ -312,39 +297,55 @@ void clear_square (GnomeCanvasItem **square)
 void try_move (Board *board, GnomeCanvasItem *item)
 {
    double Lx, Uy, Rx, By;
+   double to_Lx, to_Uy;
+   int x, y;
+   int inc = 1;
+   int i,j;
 
-   //board->to = position_move_normalize (board->pos, board->from, board->to);
-   //if (board->to) {
-    //  position_move (board->pos, board->from, board->to);
-    //  board_update (board);
-      //draw_board();
-      /*
-      gtk_signal_emit (GTK_OBJECT (board),
-	      board_signals [MOVE_SIGNAL],
-	      board->from,
-	      board->to);
-	      */
-      printf("We want the queen at coords %f, %f\n", 
-	      get_x_from_square(board->to),
-	      get_y_from_square(board->to));
-      gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
-      printf("The queen is at coords %f, %f\n", Lx, Uy);
-      gnome_canvas_item_move (item, 
-	      get_x_from_square(board->to) - Lx,
-	      get_y_from_square(board->to) - Uy);
+   to_Lx = get_x_from_square(board->to);
+   to_Uy = get_y_from_square(board->to);
+      
+   printf("We want the queen at coords %f, %f\n", to_Lx, to_Uy);
+   gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
+   printf("The queen is at coords %f, %f\n", Lx, Uy);
+   while (Lx != to_Lx || Uy != to_Uy)
+     {
+      if (Lx < to_Lx)
+	 x = inc;
+      else if (Lx > to_Lx)
+	 x = -inc;
+      else
+	 x = 0;
+
+      if (Uy < to_Uy)
+	 y = inc;
+      else if (Uy > to_Uy)
+	 y = -inc;
+      else
+	 y = 0;
+
+
+      gnome_canvas_item_move (item, (double)x, (double)y);
       gnome_canvas_item_raise_to_top (item);
-      //see where it landed
-      gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
-      printf("The queen landed at coords %f, %f\n", Lx, Uy);
-      printf("this time the queen is on square %d\n", board->to);
-      /*
-   } else if (item != NULL) {
-      gnome_canvas_item_move (item,
-	      board->orig_x - board->curr_x,
-	      board->orig_y - board->curr_y);
 
-   }
-   */
+      //update the board
+      while (gtk_events_pending())
+	 gtk_main_iteration();
+
+      gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
+     }
+
+   /*
+   gnome_canvas_item_move (item, 
+	   to_Lx - Lx,
+	   to_Uy - Uy);
+	   */
+
+   gnome_canvas_item_raise_to_top (item);
+	   //see where it landed
+   gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
+   printf("The queen landed at coords %f, %f\n", Lx, Uy);
+   printf("this time the queen is on square %d\n", board->to);
 }
 
 
@@ -462,14 +463,40 @@ int move_ai()
    move movelist[3000];
    int ai = FALSE;
    int current_hash;
+   GtkWidget *auto_button, *force_button;
 
    current_hash = state_hash = create_hash(s);
+
+   //It's sometimes necessary to know if we're in the middle of a move, because
+   //if an event causes another move to start and that event is processed and then
+   //this function finishes, it leaves the board in an unstable result
+
+   //XXX This should call a function to disable certain event handling instead of
+   //just having a silly global variable.  For instance, it could gray out the
+   //Auto Finish button so the user knows it's not going to do anything when he 
+   //presses it.  Perhaps the 'Force Move' button should be greyed out until the AI
+   //is thinking, or since Force Move & Auto Finish are mutually exclusive, it would
+   //be cool to have the button switch labels depending on the state of the game.
+   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+   force_button = (GtkWidget *) lookup_widget(main_window, "BT_FORCEMOVE");
+   gtk_widget_set_sensitive (auto_button, FALSE);
+   gtk_widget_set_sensitive (force_button, TRUE);
+
+
 
    //update the board
    while (gtk_events_pending())
       gtk_main_iteration();
    if (current_hash != state_hash)
       return FALSE;
+
+   //quit this function if a 'New Game' option was selected since this
+   //function was started.
+   if (new_game)
+     {
+      new_game = FALSE;
+      return FALSE;
+     }
 
    //gnome_canvas_item_request_update(board->canvas);
    if (((states.s[states.current_state]->turn == WHITE_PLAYER) && (options.white_player == AI)) ||
@@ -491,6 +518,12 @@ int move_ai()
       if (current_hash != state_hash)
 	 return FALSE;
 
+      if (new_game)
+	{
+	 new_game = FALSE;
+	 return FALSE;
+	}
+
       //register move on graphical board
       move_piece(temp);
       dup_state(s, states.s[++(states.current_state)]);
@@ -510,12 +543,25 @@ int move_ai()
    printf("Turn is %d\n", states.s[states.current_state]->turn );
 
    //check for gameover
+   /*
    if (children(s, movelist) == 0)
      {
-      printf("player %d wins!\n", s->turn^3);
+      //printf("player %d wins!\n", s->turn^3);
       s->winner = s->turn^3;
+      if (s->winner == BLACK)
+	 gnome_ok_dialog("White wins!");
+      else
+	 gnome_ok_dialog("Black wins!");
+     }
+     */
+   if (game_over(movelist))
+     {
+      //XXX should I set ai = FALSE?
      }
 
+
+   gtk_widget_set_sensitive (auto_button, TRUE);
+   gtk_widget_set_sensitive (force_button, FALSE);
    return ai;
 }
 
@@ -839,3 +885,31 @@ int create_hash(state *s)
 
    return( (board_u ^ board_l) % TT);
 }
+
+
+/*==============================================================================
+ * game_over
+ *
+ * Checks to see if the game is over and generates a pop-up stating who the 
+ * winner is.  Returns TRUE if the game is over.
+ */
+int game_over(move *movelist)
+{
+   state *s = states.s[states.current_state];
+
+   if (children(s, movelist) == 0)
+     {
+      //printf("player %d wins!\n", s->turn^3);
+      s->winner = s->turn^3;
+      if (s->winner == BLACK)
+	 gnome_ok_dialog("White wins!");
+      else
+	 gnome_ok_dialog("Black wins!");
+
+      return TRUE;
+     }
+   else
+      return FALSE;
+
+}
+

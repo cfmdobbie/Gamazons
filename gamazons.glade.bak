@@ -63,34 +63,6 @@
 	  </child>
 
 	  <child>
-	    <widget class="GtkMenuItem" id="edit1">
-	      <property name="visible">True</property>
-	      <property name="stock_item">GNOMEUIINFO_MENU_EDIT_TREE</property>
-
-	      <child>
-		<widget class="GtkMenu" id="edit1_menu">
-
-		  <child>
-		    <widget class="GtkImageMenuItem" id="undo_move2">
-		      <property name="visible">True</property>
-		      <property name="stock_item">GNOMEUIINFO_MENU_UNDO_MOVE_ITEM</property>
-		      <signal name="activate" handler="on_undo_move2_activate" last_modification_time="Fri, 05 Jul 2002 21:59:42 GMT"/>
-		    </widget>
-		  </child>
-
-		  <child>
-		    <widget class="GtkImageMenuItem" id="redo_move3">
-		      <property name="visible">True</property>
-		      <property name="stock_item">GNOMEUIINFO_MENU_REDO_MOVE_ITEM</property>
-		      <signal name="activate" handler="on_redo_move3_activate" last_modification_time="Fri, 05 Jul 2002 21:59:42 GMT"/>
-		    </widget>
-		  </child>
-		</widget>
-	      </child>
-	    </widget>
-	  </child>
-
-	  <child>
 	    <widget class="GtkMenuItem" id="preferences1">
 	      <property name="visible">True</property>
 	      <property name="stock_item">GNOMEUIINFO_MENU_SETTINGS_TREE</property>

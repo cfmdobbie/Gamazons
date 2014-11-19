@@ -33,13 +33,6 @@ static GnomeUIInfo file1_menu_uiinfo[] =
   GNOMEUIINFO_END
 };
 
-static GnomeUIInfo edit1_menu_uiinfo[] =
-{
-  GNOMEUIINFO_MENU_UNDO_MOVE_ITEM (on_undo_move2_activate, NULL),
-  GNOMEUIINFO_MENU_REDO_MOVE_ITEM (on_redo_move3_activate, NULL),
-  GNOMEUIINFO_END
-};
-
 static GnomeUIInfo preferences1_menu_uiinfo[] =
 {
   {
@@ -75,7 +68,6 @@ static GnomeUIInfo help1_menu_uiinfo[] =
 static GnomeUIInfo menubar1_uiinfo[] =
 {
   GNOMEUIINFO_MENU_GAME_TREE (file1_menu_uiinfo),
-  GNOMEUIINFO_MENU_EDIT_TREE (edit1_menu_uiinfo),
   GNOMEUIINFO_MENU_SETTINGS_TREE (preferences1_menu_uiinfo),
   GNOMEUIINFO_MENU_HELP_TREE (help1_menu_uiinfo),
   GNOMEUIINFO_END
@@ -229,13 +221,10 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[0].widget, "new1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[1].widget, "separator1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[2].widget, "quit1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "edit1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, edit1_menu_uiinfo[0].widget, "undo_move2");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, edit1_menu_uiinfo[1].widget, "redo_move3");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[2].widget, "preferences1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "preferences1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[0].widget, "network1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[1].widget, "player1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[3].widget, "help1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[2].widget, "help1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[0].widget, "how_to_play1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[1].widget, "about1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, scrolledwindow1, "scrolledwindow1");

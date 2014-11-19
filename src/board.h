@@ -131,4 +131,6 @@ int get_square_from_engine(int x, int y);
 void fire_arrow(Square sq);
 void square_contains(Square sq);
 void count_queens();
+int game_over(move *movelist);
+
 

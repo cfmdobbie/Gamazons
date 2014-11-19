@@ -18,9 +18,9 @@ extern Square legal_moves[100];
 extern int ok;
 extern GtkWidget *main_window;
 extern state_hash;
+extern moving_ai;
 int grabbed_queen;
-
-int allow_auto_finish;
+int new_game;
 GtkWidget *PlayerSettingsWindow;
 
 
@@ -31,32 +31,12 @@ on_new1_activate                       (GtkMenuItem     *menuitem,
    free_all_memory();
    init_engine();
    init_game_board(main_window);
+   load_values_from_file();
+   new_game = TRUE;
    while (move_ai());  //if both players are AI, keeps on running
 }
 
 
-void
-on_open1_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_save1_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_save_as1_activate                   (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
 
 
 void
@@ -70,40 +50,9 @@ on_quit1_activate                      (GtkMenuItem     *menuitem,
 }
 
 
-void
-on_cut1_activate                       (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_copy1_activate                      (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_paste1_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
 
 void
 on_clear1_activate                     (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_properties1_activate                (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 
@@ -123,21 +72,6 @@ on_about1_activate                     (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
 
-}
-
-
-void
-on_undo_move2_activate                 (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
-
-}
-
-
-void
-on_redo_move3_activate                 (GtkMenuItem     *menuitem,
-                                        gpointer         user_data)
-{
 }
 
 
@@ -227,19 +161,28 @@ on_BT_FORCEMOVE_clicked                (GtkButton       *button,
    ok = 0;
 }
 
-
+/*==============================================================================
+ * on_BT_AUTOFINISH_clicked               
+ *
+ * This starts the auto-finish process if allowed.  This can't be done inbetween
+ * a human player moving & firing an arrow, or while an AI is moving.
+ *
+ * XXX In a perfect world, the autofinish button would be grayed out when it 
+ * can't be used.  That way the human knows why on earth the !@#$ button isn't 
+ * doing anything ;)
+ */
 void
 on_BT_AUTOFINISH_clicked               (GtkButton       *button,
                                         gpointer         user_data)
 {
-   if (allow_auto_finish)
-     {
+   //if (allow_auto_finish && !moving_ai)
+     //{
       options.white_player = AI;
       options.black_player = AI;
       options.engine.timeout = 1;
       options.engine.maxwidth = 15;
       while (move_ai());  //if both players are AI, keeps on running
-     }
+     //}
 
 }
 
@@ -263,7 +206,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int from_row, from_col, to_row, to_col;
    int from;
    int i,j;
-
+   GtkWidget *auto_button;
 
    //printf("MainEvent = %d\n", event);
    if (data) {
@@ -411,7 +354,10 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	      else
 		{
 		 what_next = FIRE_ARROW;
-		 allow_auto_finish = FALSE;
+
+  	         auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+		 gtk_widget_set_sensitive (auto_button, FALSE);
+
 		 board->squares[to_row][to_col] = board->squares[from_row][from_col];
 		 board->squares[from_row][from_col] = NOTHING;
 		 gen_legal_moves(board->to); //prepare moves for arrow
@@ -449,6 +395,7 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int row, col;
    state *s;
    move movelist[3000];
+   GtkWidget *auto_button;
 
    count_queens();
    switch (event->type) 
@@ -493,15 +440,14 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   else
 	      printf("XXXXXXXXXXXXXXX  BLARGH!  I don't know who's turn it is!\n");
 
-	   //check for gameover
-	   if (children(s, movelist) == 0)
-	     {
-	      printf("player %d wins!\n", s->turn^3);
-	      s->winner = s->turn^3;
-	      break;
-	     }
 
-	   allow_auto_finish = TRUE;
+  	   auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+	   gtk_widget_set_sensitive (auto_button, TRUE);
+	   
+	   //check for gameover
+	   if (game_over(movelist))
+	      break;
+
 	   dup_state(s, states.s[++(states.current_state)]);
 	   move_ai();
        default:

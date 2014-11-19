@@ -2,6 +2,49 @@
 DONE
 ================================================================================
 
+
+* Redo
+	This is completely useless.  If an undo has been done a couple of times,
+	and a different move has been made, Redoing by moving up a state in the
+	state array would completely void the different move that just took
+	place.  If a user Undos once, he can just make the same move again if he
+	really wants.  This just looks like it would create more bugs and not
+	add any useful functionality.
+
+* Undo/Redo menu
+	There's already a convenient Undo button on the game board.  Having two
+	separate ways to access this feature is unnecessary and bug-prone.  I'd
+	have to make sure that whenever one is disabled, the other is disabled
+	too.  Just dump the menu options, it's not very useful.
+
+* Handling Interrupts 
+	move_ai() should call a function to disable certain event handling instead of
+       	just having a silly global variable.  For instance, it could gray out the
+       	Auto Finish button so the user knows it's not going to do anything when he 
+	presses it.  Perhaps the 'Force Move' button should be greyed out until the AI
+       	is thinking, or since Force Move & Auto Finish are mutually exclusive, it would
+       	be cool to have the button switch labels depending on the state of the game.
+
+	gtk_button_set_label(GtkButton *button, const gchar *label);
+	gtk_widget_set_sensitive (GtkWidget *widget, gboolean sensitive);
+   	time = lookup_widget(PlayerSettingsWindow, "TimeSpinner");
+
+* Have a popup declaring the winner
+* Computer moving queens:  
+	Instead of having the queens just pop around on the board when the
+	computer is moving, the queen should slide so the human can see what
+	piece is moving.  I should be able to do some kind of move, maybe one
+	pixel at a time.  Just calculate the origin and the destination, and
+	they _should_ just be straight diagonal (increment x coord by 1,
+	increment y coord by 1, draw), or horiz or vert.  If moving by 1 is too
+	slow, we could make it 2 or whatever.
+
+* Remembering values:
+	I need to store user options in a .gamazons file.  When the user presses
+	OK in the player preferences, the values should be stored in this file
+	as well as in the global options struct.  Then, init_engine() should read
+	in the values from a file (if it exists).
+
 * Website requirements:
 	Explain how I verified that my program works
 	Explain what it takes to compile and run the program
@@ -79,20 +122,9 @@ DONE
 TODO
 ================================================================================
 
-* Remembering values:
-	I need to store user options in a .gamazons file.  When the user presses
-	OK in the player preferences, the values should be stored in this file
-	as well as in the global options struct.  Then, init_engine() should read
-	in the values from a file (if it exists).
-
-* Computer moving queens:  
-	Instead of having the queens just pop around on the board when the
-	computer is moving, the queen should slide so the human can see what
-	piece is moving.  I should be able to do some kind of move, maybe one
-	pixel at a time.  Just calculate the origin and the destination, and
-	they _should_ just be straight diagonal (increment x coord by 1,
-	increment y coord by 1, draw), or horiz or vert.  If moving by 1 is too
-	slow, we could make it 2 or whatever.
+* Showing the latest square fired on:
+  	The square the AI (or human) fired it's arrow on could be a different color 
+	or shade until the next move starts.
 
 * Undo
 	Instead of having a straight state struct, maybe I should have an array
@@ -103,6 +135,19 @@ TODO
 	the engine side, and use the GUI state only for the current state of the
 	board?  I'm currently inclined to just have the array on the engine
 	side.
+
+	What should Undo do?  If a human player has moved a piece but not fired
+	yet, undo should just move the piece back.  In this case, the engine
+	wouldn't need to be notified because the move isn't registered to the
+	engine until the arrow is fired.  If the human is playing an AI, the
+	Undo should go back to the last human opponent.  
+
+	When can Undo be used?  Once autofinish has started, Undo won't be able
+	to find a human opponent.  So it should be disabled once autofinish
+	starts.  I don't want the AI interrupted by Undo once it has started
+	moving, so it should be disabled once move_ai() starts, and can be
+	renabled at the end.
+
 
 * Keeping up with option/game changes
 	Some options may change during the middle of the game.  For example, the
@@ -128,6 +173,29 @@ TODO
 	way I can pit one player up against the other without them "cheating" by
 	knowing what the other player will do.  
 
+* Generate the moves list
+	I've got that nice fancy window taking up precious real estate.  I might
+	as well use it for what it was for.
 
+* Text looks messed up with custom fonts & fixed game board size	
+	On Michael's computer, the game looked pretty screwy.  I dunno what
+	font settings he used, but it made it look pretty messed up.
+	Unfortunately, my board is designed to be precisely the size it is.  The
+	user doesn't have the ability to resize the game, board or pieces.
+	Unfortunately, this means people with high resolutions can't make the
+	board any bigger and people with low resolutions can't make it any
+	smaller.  To change this, I'd need to learn how to scale the pieces, the
+	game board, and redo all the calculations which determine where pieces
+	are and where to move them to.  If this were fixed, people with
+	different fonts could resize the board so it looked normal to them.
 
+* Networking
+	Don't bother with a client/server relationship (eg freeciv).  This game should 
+	just be peer based.  Just pick some random unused port as a default.
+	The user should be able pick whatever port he wants, and whatever he
+	selects should be stored in the .gamazons file.
 
+* Where to store the .gamazons file
+	I noticed gnome-chess stored the user config file in the .gnome
+	directory.  Perhaps there's a standard location for gnome's config files
+	that I can retreive via some gnome function call.
