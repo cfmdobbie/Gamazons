@@ -24,6 +24,12 @@ int new_game;
 GtkWidget *PlayerSettingsWindow;
 extern int moving_ai;
 
+GtkWidget *file_selector;
+gchar *selected_filename;
+
+/* Local Prototypes */
+static void load_new_theme (GtkFileSelection *selector, gpointer user_data);
+
 
 void
 on_new1_activate                       (GtkMenuItem     *menuitem,
@@ -31,6 +37,7 @@ on_new1_activate                       (GtkMenuItem     *menuitem,
 {
    free_all_memory();
    init_engine();
+   destroy_board();
    init_game_board(main_window);
    load_values_from_file();
 
@@ -136,10 +143,16 @@ on_how_to_play1_activate               (GtkMenuItem     *menuitem,
 {
     GError *error = NULL;
     if (gnome_help_display("gamazons",NULL,&error))
+      {
+#ifdef DEBUG
        printf("I should pop up the help display now\n");
+#endif
+      }
     else
       {
+#ifdef DEBUG
        printf("I couldn't display the help screen, sorry.\n");
+#endif
        printf("%s\n", error->message );
       }
 }
@@ -158,6 +171,7 @@ on_BT_UNDO_clicked                     (GtkButton       *button,
 {
    int temp;
    GtkWidget *undo_button;
+   int i;
 
    if (what_next == FIRE_ARROW) //Undo during mid-move
      {
@@ -183,11 +197,27 @@ on_BT_UNDO_clicked                     (GtkButton       *button,
       if (board->squares[to_row][to_col] == WHITE)
 	{
 	 what_next = MOVE_WHITE_QUEEN;
+	 for (i=0; i<4; i++) //update queen to square mapping
+	   {
+	    if (board->square_to_wh_queen_map[i] == to_row*10 + to_col)
+	      {
+	       board->square_to_wh_queen_map[i] = from_row*10 + from_col;
+	       break;
+	      }
+	   }
 	 update_status_bar();
 	}
       else
 	{
 	 what_next = MOVE_BLACK_QUEEN;
+	 for (i=0; i<4; i++) //update queen to square mapping
+	   {
+	    if (board->square_to_bl_queen_map[i] == to_row*10 + to_col)
+	      {
+	       board->square_to_bl_queen_map[i] = from_row*10 + from_col;
+	       break;
+	      }
+	   }
 	 update_status_bar();
 	}
 
@@ -256,45 +286,44 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    double new_x, new_y;
    int from_row, from_col, to_row, to_col;
    int from;
-   int i,j;
+   int i,j,k;
    GtkWidget *auto_button, *undo_button;
 
    //printf("MainEvent = %d\n", event);
+   /* Does this do anything?
    if (data) {
       item = board->db_image [GPOINTER_TO_INT (data)];
       if (item == NULL && event->type != GDK_BUTTON_RELEASE) 
 	 return 0;
    }
+   */
 
    switch (event->type) {
        case GDK_BUTTON_PRESS:
 	   if (event->button.button != 1)
 	      break;	
 
+#ifdef DEBUG
 	   printf("what_next = %d\n", what_next);
+#endif
 	   board->orig_x = board->curr_x = event->button.x;
 	   board->orig_y = board->curr_y = event->button.y;
 	   from = get_square (board->curr_x, board->curr_y);
 	   from_col = get_x_int_from_square(from);
 	   from_row = get_y_int_from_square(from);
 
-//DEBUG: print board
-   for (i=0; i<BOARD_SIZE; i++)
-     {
-      for (j=0; j<BOARD_SIZE; j++)
-	{
-	 printf(" %d", board->squares[i][j]);
-	}
-      printf("\n");
-     }
+#ifdef DEBUG
+	   print_board();
+#endif
 
 	   //Make sure it's time to move a queen before letting the user do it,
 	   //as well as make sure he's moving his own queen.  Also make sure it's
    	   //a human's turn!
-
+#ifdef DEBUG
 	   printf("checking row %d, col %d\n", from_row, from_col);
 	   square_contains(from);
 	   printf("board->squares = %d\n",board->squares[from_row][from_col]);
+#endif
 	   if ((board->squares[from_row][from_col] == WHITE && 
 		       what_next == MOVE_WHITE_QUEEN && 
 		       options.white_player == HUMAN) ||
@@ -303,10 +332,14 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 			options.black_player == HUMAN))
 	     {
 	      //Human is moving a queen
+#ifdef DEBUG
 	      printf("board->squares = %d, what_next = %d\n", board->squares[from_row][from_col], what_next);
+#endif
 	      grabbed_queen = TRUE;
 	      gen_legal_moves(from);
+#ifdef DEBUG
 	      printf("grabbing queen\n");
+#endif
 	      gnome_canvas_item_raise_to_top (item);
 	      gnome_canvas_item_grab (item,
 		      GDK_POINTER_MOTION_MASK | 
@@ -318,7 +351,9 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	     }
 	   board->from = get_square (board->curr_x, board->curr_y);
 	   board->to = board->from;
+#ifdef DEBUG
 	   printf("GDK_BUTTON_PRESS: board->to = %d  board->from = %d\n", board->to, board->from);
+#endif
 	   break;
 
        case GDK_MOTION_NOTIFY:
@@ -346,7 +381,9 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
        case GDK_BUTTON_RELEASE:
 	   if (event->button.button != 1)
 	      break;
+#ifdef DEBUG
 	   printf("what_next = %d\n", what_next);
+#endif
 	   if (grabbed_queen == FALSE)
 	      break;
 	   else
@@ -356,7 +393,9 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	      gnome_canvas_item_ungrab (item, event->button.time);
 
 
+#ifdef DEBUG
 	   printf("GDK_BUTTON_RELEASE: board->to = %d  board->from = %d\n", board->to, board->from);
+#endif
 	   drop_x = event->button.x;
 	   drop_y = event->button.y;
 
@@ -367,9 +406,13 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	      break;
 	     }
 
+#ifdef DEBUG
 	   printf("Queen is dropped at coords %f, %f\n", drop_x, drop_y);
+#endif
 	   board->to = get_square (drop_x, drop_y);
+#ifdef DEBUG
 	   printf("new square is %d\n", board->to);
+#endif
 	   /*
 	   if (board->to == board->from && board->selected == NULL) {
 	      board->selected = board->squares [(int)drop_x * 8 + (int)drop_y];
@@ -395,7 +438,9 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 	   to_col = get_x_int_from_square(board->to);
 	   to_row = get_y_int_from_square(board->to);
+#ifdef DEBUG
 	   printf("setting square %d%d to hold %d\n", to_row, to_col, board->squares[from_row][from_col]);
+#endif
 
 	   //Queen is being moved to a different square
 	   if (board->to != board->from) 
@@ -418,13 +463,28 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 		 gtk_widget_set_sensitive (undo_button, TRUE);
 
 		 board->squares[to_row][to_col] = board->squares[from_row][from_col];
+		 for (k=0; k<4; k++) //update square to queen mapping
+		   {
+		    if (board->square_to_wh_queen_map[k] == from_row*10 + from_col)
+		      {
+		       board->square_to_wh_queen_map[k] = to_row*10 + to_col;
+		       break;
+		      }
+		    if (board->square_to_bl_queen_map[k] == from_row*10 + from_col)
+		      {
+		       board->square_to_bl_queen_map[k] = to_row*10 + to_col;
+		       break;
+		      }
+		   }
 		 board->squares[from_row][from_col] = NOTHING;
 		 gen_legal_moves(board->to); //prepare moves for arrow
 		}
 	     }
 
+#ifdef DEBUG
 	   square_contains(board->to);
 	   square_contains(board->from);
+#endif
 
 
 	   try_move (board, item);
@@ -432,9 +492,11 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   if (board->selected)
 	      clear_square (&board->selected);
 	      */
+#ifdef DEBUG
 	   printf("what_next = %d\n", what_next);
+#endif
 	   break;
-       default:
+       //default:
    }
 
    return 1;
@@ -476,9 +538,11 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   col = get_x_int_from_square(sq);
 	   row = get_y_int_from_square(sq);
 
+#ifdef DEBUG
 	   printf("what_next = %d\n", what_next);
 	   printf("arrow fire:  ");
 	   square_contains(sq);
+#endif
 	   if (board->squares[row][col] != NOTHING)
 	      break;
 
@@ -490,13 +554,17 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	     {
 	      what_next = MOVE_WHITE_QUEEN;
 	      update_status_bar();
+#ifdef DEBUG
 	      printf("white moves next\n");
+#endif
 	     }
 	   else if (s->turn == BLACK_PLAYER)
 	     {
 	      what_next = MOVE_BLACK_QUEEN;
 	      update_status_bar();
+#ifdef DEBUG
 	      printf("black moves next\n");
+#endif
 	     }
 	   else
 	      printf("XXXXXXXXXXXXXXX  BLARGH!  I don't know who's turn it is!\n");
@@ -513,7 +581,7 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 	   dup_state(s, states.s[++(states.current_state)]);
 	   move_ai();
-       default:
+       //default:
      }
 
    return 0;
@@ -527,6 +595,7 @@ on_PlayerOKButton_clicked              (GtkButton       *button,
    GtkWidget *time, *width, *depth;
    GtkWidget *white_ai, *white_h, *black_ai, *black_h;
 
+   load_values_from_file();
 
    /* grab all the widgets */
    time = lookup_widget(PlayerSettingsWindow, "TimeSpinner");
@@ -571,3 +640,48 @@ on_PlayerCancelButton_clicked          (GtkButton       *button,
 
 }
 
+
+void
+on_theme1_activate                     (GtkMenuItem     *menuitem,
+                                        gpointer         user_data)
+{
+
+   file_selector = gtk_file_selection_new ("Pick your theme file.");
+   
+   gtk_file_selection_set_filename (GTK_FILE_SELECTION (file_selector), PACKAGE_DATA_DIR "/gamazons/");
+   gtk_file_selection_complete (GTK_FILE_SELECTION (file_selector), "*.theme");
+   g_signal_connect (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                     "clicked",
+                     G_CALLBACK (load_new_theme),
+                     NULL);
+   			   
+   /* Ensure that the dialog box is destroyed when the user clicks a button. */
+   
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->ok_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy), 
+                             (gpointer) file_selector); 
+
+   g_signal_connect_swapped (GTK_OBJECT (GTK_FILE_SELECTION (file_selector)->cancel_button),
+                             "clicked",
+                             G_CALLBACK (gtk_widget_destroy),
+                             (gpointer) file_selector); 
+   
+   /* Display that dialog */
+   
+   gtk_widget_show (file_selector);
+
+   //selected_filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+
+}
+
+static void load_new_theme (GtkFileSelection *selector, gpointer user_data)
+{
+   selected_filename = gtk_file_selection_get_filename (GTK_FILE_SELECTION (file_selector));
+   load_values_from_file(); //Get current settings
+   load_images_from_theme (selected_filename); //load new theme settings
+   store_values_in_file();  //store new settings
+   destroy_board();
+   draw_board();
+   
+}

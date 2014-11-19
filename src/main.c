@@ -27,6 +27,7 @@ int main (int argc, char *argv[])
 {
   GtkWidget *GamazonsMain;
 
+
 #ifdef ENABLE_NLS
   bindtextdomain (GETTEXT_PACKAGE, PACKAGE_LOCALE_DIR);
   bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -43,11 +44,14 @@ int main (int argc, char *argv[])
    * (except popup menus), just so that you see something after building
    * the project. Delete any components that you don't want shown initially.
    */
+
+  gnome_window_icon_set_default_from_file (PACKAGE_DATA_DIR "/pixmaps/gnome-gamazons.png");
+
+  init_engine();
   GamazonsMain = create_GamazonsMain ();
   main_window = GamazonsMain;
   init_game_board(GamazonsMain);
   gtk_widget_show (GamazonsMain);
-  init_engine();
 
   gtk_main ();
   return 0;

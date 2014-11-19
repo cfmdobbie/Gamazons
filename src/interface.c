@@ -49,6 +49,13 @@ static GnomeUIInfo preferences1_menu_uiinfo[] =
     GNOME_APP_PIXMAP_NONE, NULL,
     0, (GdkModifierType) 0, NULL
   },
+  {
+    GNOME_APP_UI_ITEM, N_("_Theme"),
+    NULL,
+    (gpointer) on_theme1_activate, NULL, NULL,
+    GNOME_APP_PIXMAP_NONE, NULL,
+    0, (GdkModifierType) 0, NULL
+  },
   GNOMEUIINFO_END
 };
 
@@ -58,7 +65,7 @@ static GnomeUIInfo help1_menu_uiinfo[] =
     GNOME_APP_UI_ITEM, N_("_How To Play"),
     NULL,
     (gpointer) on_how_to_play1_activate, NULL, NULL,
-    GNOME_APP_PIXMAP_NONE, NULL,
+    GNOME_APP_PIXMAP_STOCK, "gtk-help",
     0, (GdkModifierType) 0, NULL
   },
   GNOMEUIINFO_MENU_ABOUT_ITEM (on_about1_activate, NULL),
@@ -137,15 +144,19 @@ create_GamazonsMain (void)
   GtkWidget *vbox4;
   GtkWidget *label1;
   GtkWidget *scrolledwindow3;
-  GtkWidget *textview1;
-  GtkWidget *hbuttonbox2;
+  GtkWidget *viewport3;
+  GtkWidget *hbox11;
+  GtkWidget *scrolledwindow5;
+  GtkWidget *viewport4;
+  GtkWidget *vbox9;
+  GtkWidget *vbuttonbox1;
   GtkWidget *BT_UNDO;
   GtkWidget *BT_FORCEMOVE;
   GtkWidget *BT_AUTOFINISH;
+  GtkWidget *hbox12;
+  GtkWidget *scrolledwindow6;
+  GtkWidget *textview1;
   GtkWidget *statusbar1;
-  GtkTooltips *tooltips;
-
-  tooltips = gtk_tooltips_new ();
 
   GamazonsMain = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_set_usize (GamazonsMain, 770, 510);
@@ -483,46 +494,78 @@ create_GamazonsMain (void)
   label1 = gtk_label_new (_("Moves Made:"));
   gtk_widget_show (label1);
   gtk_box_pack_start (GTK_BOX (vbox4), label1, FALSE, FALSE, 0);
-  gtk_widget_set_usize (label1, -2, 44);
-  gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label1), 0.02, 0.72);
+  gtk_widget_set_usize (label1, 0, 40);
+  gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_RIGHT);
+  gtk_misc_set_alignment (GTK_MISC (label1), 0.59, 0.72);
 
   scrolledwindow3 = gtk_scrolled_window_new (NULL, NULL);
   gtk_widget_show (scrolledwindow3);
   gtk_box_pack_start (GTK_BOX (vbox4), scrolledwindow3, TRUE, TRUE, 0);
   gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow3), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
 
-  textview1 = gtk_text_view_new ();
-  gtk_widget_show (textview1);
-  gtk_container_add (GTK_CONTAINER (scrolledwindow3), textview1);
-  gtk_widget_set_usize (textview1, -2, 300);
-  gtk_container_set_border_width (GTK_CONTAINER (textview1), 8);
-  gtk_text_view_set_editable (GTK_TEXT_VIEW (textview1), FALSE);
+  viewport3 = gtk_viewport_new (NULL, NULL);
+  gtk_widget_show (viewport3);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow3), viewport3);
+  gtk_viewport_set_shadow_type (GTK_VIEWPORT (viewport3), GTK_SHADOW_NONE);
 
-  hbuttonbox2 = gtk_hbutton_box_new ();
-  gtk_widget_show (hbuttonbox2);
-  gtk_box_pack_start (GTK_BOX (vbox3), hbuttonbox2, TRUE, TRUE, 0);
-  gtk_widget_set_usize (hbuttonbox2, 1, 8);
-  gtk_button_box_set_layout (GTK_BUTTON_BOX (hbuttonbox2), GTK_BUTTONBOX_SPREAD);
-  gtk_button_box_set_spacing (GTK_BUTTON_BOX (hbuttonbox2), 5);
+  hbox11 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox11);
+  gtk_container_add (GTK_CONTAINER (viewport3), hbox11);
+
+  scrolledwindow5 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow5);
+  gtk_box_pack_start (GTK_BOX (hbox11), scrolledwindow5, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow5), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+  viewport4 = gtk_viewport_new (NULL, NULL);
+  gtk_widget_show (viewport4);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow5), viewport4);
+  gtk_widget_set_usize (viewport4, -2, 17);
+  gtk_viewport_set_shadow_type (GTK_VIEWPORT (viewport4), GTK_SHADOW_NONE);
+
+  vbox9 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox9);
+  gtk_container_add (GTK_CONTAINER (viewport4), vbox9);
+
+  vbuttonbox1 = gtk_vbutton_box_new ();
+  gtk_widget_show (vbuttonbox1);
+  gtk_box_pack_start (GTK_BOX (vbox9), vbuttonbox1, FALSE, TRUE, 0);
+  gtk_widget_set_usize (vbuttonbox1, -2, 105);
+  gtk_button_box_set_spacing (GTK_BUTTON_BOX (vbuttonbox1), 0);
 
   BT_UNDO = gtk_button_new_with_mnemonic (_("Undo"));
   gtk_widget_show (BT_UNDO);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox2), BT_UNDO);
+  gtk_container_add (GTK_CONTAINER (vbuttonbox1), BT_UNDO);
+  gtk_widget_set_usize (BT_UNDO, -2, 30);
   GTK_WIDGET_SET_FLAGS (BT_UNDO, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, BT_UNDO, _("Undo the last move"), NULL);
 
   BT_FORCEMOVE = gtk_button_new_with_mnemonic (_("Force Move"));
   gtk_widget_show (BT_FORCEMOVE);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox2), BT_FORCEMOVE);
+  gtk_container_add (GTK_CONTAINER (vbuttonbox1), BT_FORCEMOVE);
+  gtk_widget_set_usize (BT_FORCEMOVE, 106, 30);
   GTK_WIDGET_SET_FLAGS (BT_FORCEMOVE, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, BT_FORCEMOVE, _("Force the computer to move"), NULL);
 
-  BT_AUTOFINISH = gtk_button_new_with_mnemonic (_("Auto Finish"));
+  BT_AUTOFINISH = gtk_button_new_with_mnemonic (_("Autofinish"));
   gtk_widget_show (BT_AUTOFINISH);
-  gtk_container_add (GTK_CONTAINER (hbuttonbox2), BT_AUTOFINISH);
+  gtk_container_add (GTK_CONTAINER (vbuttonbox1), BT_AUTOFINISH);
+  gtk_widget_set_usize (BT_AUTOFINISH, -2, 30);
   GTK_WIDGET_SET_FLAGS (BT_AUTOFINISH, GTK_CAN_DEFAULT);
-  gtk_tooltips_set_tip (tooltips, BT_AUTOFINISH, _("Have the computer complete the game for you"), NULL);
+
+  hbox12 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox12);
+  gtk_box_pack_start (GTK_BOX (vbox9), hbox12, TRUE, TRUE, 0);
+
+  scrolledwindow6 = gtk_scrolled_window_new (NULL, NULL);
+  gtk_widget_show (scrolledwindow6);
+  gtk_box_pack_start (GTK_BOX (hbox11), scrolledwindow6, TRUE, TRUE, 0);
+  gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW (scrolledwindow6), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+
+  textview1 = gtk_text_view_new ();
+  gtk_widget_show (textview1);
+  gtk_container_add (GTK_CONTAINER (scrolledwindow6), textview1);
+  gtk_widget_set_usize (textview1, 120, -2);
+  gtk_text_view_set_editable (GTK_TEXT_VIEW (textview1), FALSE);
+  gtk_text_view_set_cursor_visible (GTK_TEXT_VIEW (textview1), FALSE);
 
   statusbar1 = gtk_statusbar_new ();
   gtk_widget_show (statusbar1);
@@ -556,6 +599,7 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "preferences1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[0].widget, "network1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[1].widget, "player1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, preferences1_menu_uiinfo[2].widget, "theme1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[2].widget, "help1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[0].widget, "how_to_play1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, help1_menu_uiinfo[1].widget, "about1");
@@ -616,13 +660,19 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, vbox4, "vbox4");
   GLADE_HOOKUP_OBJECT (GamazonsMain, label1, "label1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, scrolledwindow3, "scrolledwindow3");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, textview1, "textview1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, hbuttonbox2, "hbuttonbox2");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, viewport3, "viewport3");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, hbox11, "hbox11");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, scrolledwindow5, "scrolledwindow5");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, viewport4, "viewport4");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, vbox9, "vbox9");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, vbuttonbox1, "vbuttonbox1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, BT_UNDO, "BT_UNDO");
   GLADE_HOOKUP_OBJECT (GamazonsMain, BT_FORCEMOVE, "BT_FORCEMOVE");
   GLADE_HOOKUP_OBJECT (GamazonsMain, BT_AUTOFINISH, "BT_AUTOFINISH");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, hbox12, "hbox12");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, scrolledwindow6, "scrolledwindow6");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, textview1, "textview1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, statusbar1, "statusbar1");
-  GLADE_HOOKUP_OBJECT_NO_REF (GamazonsMain, tooltips, "tooltips");
 
   return GamazonsMain;
 }
@@ -666,7 +716,7 @@ create_PlayerSettings (void)
   GtkWidget *label9;
 
   PlayerSettings = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  gtk_widget_set_usize (PlayerSettings, 300, 185);
+  gtk_widget_set_usize (PlayerSettings, 370, 185);
   gtk_window_set_title (GTK_WINDOW (PlayerSettings), _("Player Settings"));
   gtk_window_set_default_size (GTK_WINDOW (PlayerSettings), 300, 185);
   gtk_window_set_resizable (GTK_WINDOW (PlayerSettings), FALSE);
@@ -684,14 +734,14 @@ create_PlayerSettings (void)
   WhitePlayerLabel = gtk_label_new (_("White Player:"));
   gtk_widget_show (WhitePlayerLabel);
   gtk_box_pack_start (GTK_BOX (hbox3), WhitePlayerLabel, FALSE, FALSE, 0);
-  gtk_widget_set_usize (WhitePlayerLabel, 85, -2);
+  gtk_widget_set_usize (WhitePlayerLabel, 100, -2);
   gtk_label_set_justify (GTK_LABEL (WhitePlayerLabel), GTK_JUSTIFY_LEFT);
   gtk_misc_set_alignment (GTK_MISC (WhitePlayerLabel), 0.3, 0.5);
 
   WhiteHumanRadio = gtk_radio_button_new_with_mnemonic (NULL, _("Human"));
   gtk_widget_show (WhiteHumanRadio);
   gtk_box_pack_start (GTK_BOX (hbox3), WhiteHumanRadio, FALSE, FALSE, 0);
-  gtk_widget_set_usize (WhiteHumanRadio, 65, -2);
+  gtk_widget_set_usize (WhiteHumanRadio, 85, -2);
   gtk_radio_button_set_group (GTK_RADIO_BUTTON (WhiteHumanRadio), WhiteHumanRadio_group);
   WhiteHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (WhiteHumanRadio));
 
@@ -709,13 +759,13 @@ create_PlayerSettings (void)
   BlackPlayerLabel = gtk_label_new (_("Black Player: "));
   gtk_widget_show (BlackPlayerLabel);
   gtk_box_pack_start (GTK_BOX (hbox4), BlackPlayerLabel, FALSE, FALSE, 0);
-  gtk_widget_set_usize (BlackPlayerLabel, 85, -2);
+  gtk_widget_set_usize (BlackPlayerLabel, 100, -2);
   gtk_label_set_justify (GTK_LABEL (BlackPlayerLabel), GTK_JUSTIFY_LEFT);
 
   BlackHumanRadio = gtk_radio_button_new_with_mnemonic (NULL, _("Human"));
   gtk_widget_show (BlackHumanRadio);
   gtk_box_pack_start (GTK_BOX (hbox4), BlackHumanRadio, FALSE, FALSE, 0);
-  gtk_widget_set_usize (BlackHumanRadio, 65, -2);
+  gtk_widget_set_usize (BlackHumanRadio, 85, -2);
   gtk_radio_button_set_group (GTK_RADIO_BUTTON (BlackHumanRadio), BlackHumanRadio_group);
   BlackHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (BlackHumanRadio));
 
@@ -752,18 +802,18 @@ create_PlayerSettings (void)
   TimeLabel = gtk_label_new (_("Search Time: "));
   gtk_widget_show (TimeLabel);
   gtk_box_pack_start (GTK_BOX (hbox6), TimeLabel, FALSE, FALSE, 0);
-  gtk_widget_set_usize (TimeLabel, 95, -2);
+  gtk_widget_set_usize (TimeLabel, 121, -2);
   gtk_label_set_justify (GTK_LABEL (TimeLabel), GTK_JUSTIFY_LEFT);
 
   SearchDepthLabel = gtk_label_new (_("Max Search Depth"));
   gtk_widget_show (SearchDepthLabel);
   gtk_box_pack_start (GTK_BOX (hbox6), SearchDepthLabel, FALSE, FALSE, 0);
-  gtk_widget_set_usize (SearchDepthLabel, 101, -2);
+  gtk_widget_set_usize (SearchDepthLabel, 127, -2);
 
   SearchWidthLabel = gtk_label_new (_("Max Search Width"));
   gtk_widget_show (SearchWidthLabel);
   gtk_box_pack_start (GTK_BOX (hbox6), SearchWidthLabel, FALSE, FALSE, 0);
-  gtk_widget_set_usize (SearchWidthLabel, 90, -2);
+  gtk_widget_set_usize (SearchWidthLabel, 112, -2);
   gtk_label_set_justify (GTK_LABEL (SearchWidthLabel), GTK_JUSTIFY_RIGHT);
   gtk_misc_set_alignment (GTK_MISC (SearchWidthLabel), 1, 0.5);
 

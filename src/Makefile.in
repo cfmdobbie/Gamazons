@@ -1,4 +1,4 @@
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -80,8 +80,6 @@ POSUB = @POSUB@
 RANLIB = @RANLIB@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
-WARN_CFLAGS = @WARN_CFLAGS@
-cxxflags_set = @cxxflags_set@
 
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
@@ -109,11 +107,8 @@ gamazons_INCLUDES = -DGAMAZONS=1
 gamazons_CFLAGS = -O2 -DGAMAZONS=1
 
 gamazons_HELP = gamazons.html topic.dat
-gamazons_BITMAPS = white.png black.png
 
-EXTRA_DIST = $(gamazons_BITMAPS) $(gamazons_HELP)
-gamazonsbitmapsdir = $(datadir)/pixmaps
-gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
+EXTRA_DIST = $(gamazons_HELP)
 
 gamazonshelpdir = $(datadir)/gnome/help/gamazons/C
 gamazonshelp_DATA = $(gamazons_HELP)
@@ -137,7 +132,7 @@ CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DATA =  $(gamazonsbitmaps_DATA) $(gamazonshelp_DATA)
+DATA =  $(gamazonshelp_DATA)
 
 DIST_COMMON =  Makefile.am Makefile.in
 
@@ -207,25 +202,6 @@ maintainer-clean-compile:
 gamazons: $(gamazons_OBJECTS) $(gamazons_DEPENDENCIES)
 	@rm -f gamazons
 	$(LINK) $(gamazons_LDFLAGS) $(gamazons_OBJECTS) $(gamazons_LDADD) $(LIBS)
-
-install-gamazonsbitmapsDATA: $(gamazonsbitmaps_DATA)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(gamazonsbitmapsdir)
-	@list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
-	  if test -f $(srcdir)/$$p; then \
-	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
-	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	  else if test -f $$p; then \
-	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
-	    $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	  fi; fi; \
-	done
-
-uninstall-gamazonsbitmapsDATA:
-	@$(NORMAL_UNINSTALL)
-	list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	done
 
 install-gamazonshelpDATA: $(gamazonshelp_DATA)
 	@$(NORMAL_INSTALL)
@@ -338,22 +314,20 @@ installcheck: installcheck-am
 install-exec-am: install-binPROGRAMS
 install-exec: install-exec-am
 
-install-data-am: install-gamazonsbitmapsDATA install-gamazonshelpDATA
+install-data-am: install-gamazonshelpDATA
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-binPROGRAMS uninstall-gamazonsbitmapsDATA \
-		uninstall-gamazonshelpDATA
+uninstall-am: uninstall-binPROGRAMS uninstall-gamazonshelpDATA
 uninstall: uninstall-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonsbitmapsdir) \
-		$(DESTDIR)$(gamazonshelpdir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonshelpdir)
 
 
 mostlyclean-generic:
@@ -392,8 +366,7 @@ maintainer-clean: maintainer-clean-am
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile uninstall-gamazonsbitmapsDATA \
-install-gamazonsbitmapsDATA uninstall-gamazonshelpDATA \
+maintainer-clean-compile uninstall-gamazonshelpDATA \
 install-gamazonshelpDATA tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend info-am info \

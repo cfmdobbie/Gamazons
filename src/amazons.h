@@ -6,8 +6,16 @@
 #define TT 0x3d0925
 #define MAX_TT_SEARCH 30
 
-#define TRUE 1
-#define FALSE 0
+//#define TRUE 1
+//#define FALSE 0
+
+#ifndef	FALSE
+#define	FALSE	(0)
+#endif
+
+#ifndef	TRUE
+#define	TRUE	(!FALSE)
+#endif
 
 #define WHITE_PLAYER 1  //player 1
 #define BLACK_PLAYER 2  //player 2
@@ -16,6 +24,7 @@
 #define THINK   1
 
 #define GAMAZONS
+#undef DEBUG
 
 //#define DEBUG_HEVAL 
 //#define DEBUG_WEB
@@ -85,6 +94,17 @@ struct engine
    int maxwidth;
 };
 
+//paths to game pieces & squares
+struct images
+{
+   char white_piece[255];
+   char black_piece[255];
+   char white_sq[255];
+   char grey_sq[255];
+   char arrow_sq[255];
+   int grid;
+};
+
 struct options
 {
    int white_player;
@@ -92,6 +112,7 @@ struct options
    int print_statistics;
 
    struct engine engine;
+   struct images images;
 
 };
 
@@ -136,10 +157,10 @@ void clear_buf();
 int move_lookup(move *m, move movelist[], int move_count);
 void dup_state(state *s_old, state *s_new);
 #ifdef GAMAZONS
-int engine_init();
+void init_engine();
 void load_values_from_file();
 void store_values_in_file();
-
+void load_images_from_theme(char *theme);
 #endif
 
 

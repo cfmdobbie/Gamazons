@@ -2,6 +2,45 @@
 DONE
 ================================================================================
 
+* Redo board drawing method
+	Instead of generating squares and filling them in with squares, lets use
+	pngs of squares and place them on the board.  It might be useful to
+	store pointers to each square img in an array to allow easy access.
+	Once the tiles are placed on the board, then draw the grid on top of it.
+	This will make things much easier to replace board colors at will.  I
+	could make options that let people choose tiles & pieces.  Note: Created
+	theme capability so people can load new board theme on demand.
+
+
+* Keeping up with option/game changes
+	Some options may change during the middle of the game.  For example, the
+	autocomplete would make both players computer opponents.  The network
+	stuff wouldn't be able to change.  Each time the back end has to use one
+	of these changeable options, it should read it directly from the source.
+	
+	But if we had a setup mode, the user could switch off game playing, configure 
+	the board, and reenter game mode.  To accomplish this, I'd need to change game 
+	recognition from a linear model (W moved this queen here, so unmark the src 
+	and mark the dest as the WQ), to a discover mode (look at all the squares on 
+	the board and see what is on each).  That's not very efficient for most things,
+       	so perhaps just making a " discover_board" function that can be called when 
+	exiting setup mode.
+
+
+* Different difficulty levels & Separate AI settings for each player
+	I want to create different difficulty levels for the AI player.
+	Starting with 0 = random and moving up to 10 or so, adding one more
+	heuristic at each level.  
+
+	But then I'd like to separate the AI level, time, width, and TT.  That
+	way I can pit one player up against the other without them "cheating" by
+	knowing what the other player will do.  
+
+* Create a help file
+	Gnome uses HTML files for help stuff.  Make a nice page that explains
+	the rules and what the buttons are for.  In general, they should be
+	installed in /usr/local/share/gnome/help/gamazons/.  Or I maybe
+	(PREFIX)/share/gnome/help/gamazons is more accurate.
 
 * Redo
 	This is completely useless.  If an undo has been done a couple of times,
@@ -121,6 +160,9 @@ DONE
 ================================================================================
 TODO
 ================================================================================
+* Install icons and menu features when game is installed.  gnome chess created a
+	desktop file in /usr/local/share/gnome/apps.  I'm not exactly sure how
+	to put the item in the game menu yet.
 
 * Showing the latest square fired on:
   	The square the AI (or human) fired it's arrow on could be a different color 
@@ -149,30 +191,6 @@ TODO
 	renabled at the end.
 
 
-* Keeping up with option/game changes
-	Some options may change during the middle of the game.  For example, the
-	autocomplete would make both players computer opponents.  The network
-	stuff wouldn't be able to change.  Each time the back end has to use one
-	of these changeable options, it should read it directly from the source.
-	
-	But if we had a setup mode, the user could switch off game playing, configure 
-	the board, and reenter game mode.  To accomplish this, I'd need to change game 
-	recognition from a linear model (W moved this queen here, so unmark the src 
-	and mark the dest as the WQ), to a discover mode (look at all the squares on 
-	the board and see what is on each).  That's not very efficient for most things,
-       	so perhaps just making a " discover_board" function that can be called when 
-	exiting setup mode.
-
-
-* Different difficulty levels & Separate AI settings for each player
-	I want to create different difficulty levels for the AI player.
-	Starting with 0 = random and moving up to 10 or so, adding one more
-	heuristic at each level.  
-
-	But then I'd like to separate the AI level, time, width, and TT.  That
-	way I can pit one player up against the other without them "cheating" by
-	knowing what the other player will do.  
-
 * Generate the moves made list
 	I've got that nice fancy window taking up precious real estate.  I might
 	as well use it for what it was for.
@@ -200,11 +218,12 @@ TODO
 	directory.  Perhaps there's a standard location for gnome's config files
 	that I can retreive via some gnome function call.
 
-* Create a help file
-	Gnome uses HTML files for help stuff.  Make a nice page that explains
-	the rules and what the buttons are for.  In general, they should be
-	installed in /usr/local/share/gnome/help/gamazons/.  Or I maybe
-	(PREFIX)/share/gnome/help/gamazons is more accurate.
+* Maintaining game state
+	The problem is, what_next is getting tweaked everywhere.  Everything
+	that is supposed to be done when a state change might not be taking
+	place everywhere.  Perhaps what I should do is set an API to tweak the
+	state, perhaps set_state()/get_state() functions would be in order.
+
 
 ================================================================================
 FIXED BUGS
@@ -237,6 +256,16 @@ White was set as a human player, we were stuck in WAIT_FOR_AI mode and couldn't
 move any pieces.  To solve this, I move the code that updated what_next outside
 of the "if AI is moving" block.
 
+If you hit 'autofinish' after the game has ended, selecting 'new game' doesn't
+start the game in a useable state.  It's white's turn to move, it's set as
+human, but what_next = MOVE_AI.  SOLUTION: Disable Autofinish & Force move at
+end of game.
+
 ================================================================================
 BUGS
 ================================================================================
+
+Anca somehow managed to lose a queen in the middle of the game when it was moved
+to the right edge of the screen.  She was more inclined to miss her target
+square & hit undo, but so far I haven't been able to replicate it.
+

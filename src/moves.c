@@ -757,9 +757,13 @@ move isearch(state *s, int think)
        	{
 	 if (think)
 	   {
+#ifdef DEBUG
 	    printf("searched %d nodes on your time\n", nodes);
+#endif
 	   }
+#ifdef DEBUG
 	 printf("time's up at depth %d\n", i);
+#endif
 	 break;
        	}
 
@@ -846,7 +850,9 @@ move search(state *s, int depth, int alpha, int beta, int tdepth, int think)
      {
       if (depth == 0)
        	{
+#ifdef DEBUG
 	 printf("player %d wins!\n", s->turn^3);
+#endif
 	 s->winner = s->turn^3;
 	 if (options.print_statistics)
 	    print_stats();
@@ -1453,7 +1459,9 @@ int meta_init()
 {
    if (!movin)
      {
+#ifdef DEBUG
       printf("not using fifos\n");
+#endif
       movin = stdin;
       movout = stdout;
      }
@@ -1693,6 +1701,8 @@ int main(int argc, char *argv[])
 /*==============================================================================
  * init_engine
  *
+ * 
+ * 
  */
 void init_engine()
 {
@@ -1727,6 +1737,19 @@ void init_engine()
    options.black_player=HUMAN;
    options.print_statistics=FALSE;
 
+
+   load_images_from_theme(PACKAGE_DATA_DIR "/gamazons/default.theme");
+   /*
+   strcpy(options.images.white_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/white.png");
+   strcpy(options.images.black_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/black.png");
+   strcpy(options.images.white_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/white_square.png");
+   strcpy(options.images.grey_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/grey_square.png");
+   strcpy(options.images.arrow_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/black_square.png");
+   */
+
+#ifdef DEBUG
+   printf("white piece image = %s\n", options.images.white_piece);
+#endif
    load_values_from_file();
 
 }
@@ -1744,6 +1767,7 @@ void load_values_from_file()
    char *home, file[256];
    FILE *rc_fd;
    char variable[256];
+   char buffer[256];
    int value;
    char ch;
 
@@ -1753,7 +1777,9 @@ void load_values_from_file()
 
    strcpy(file, home);
    strcat(file, "/.gamazons");
+#ifdef DEBUG
    printf("looking for the file %s\n", file);
+#endif
 
    rc_fd = fopen(file, "r");
    if(rc_fd == NULL)
@@ -1768,18 +1794,67 @@ void load_values_from_file()
 	 if (ch == '=')
 	    break;
 	}
-      fscanf(rc_fd, "%d", &value);
 
       if (strcmp(variable, "WHITE_PLAYER") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
 	 options.white_player = value;
+	}
       else if (strcmp(variable, "BLACK_PLAYER") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
 	 options.black_player = value;
+	}
       else if (strcmp(variable, "TIMEOUT") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
 	 options.engine.timeout = value;
+	}
       else if (strcmp(variable, "MAXWIDTH") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
 	 options.engine.maxwidth = value;
+	}
       else if (strcmp(variable, "MAXDEPTH") == 0)
+	{
+	 fscanf(rc_fd, "%d", &value);
 	 options.engine.maxdepth = value;
+	}
+      else if (strcmp(variable, "WHITE_PIECE") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.images.white_piece, buffer);
+	}
+      else if (strcmp(variable, "BLACK_PIECE") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.images.black_piece, buffer);
+	}
+      else if (strcmp(variable, "WHITE_SQUARE") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.images.white_sq, buffer);
+	}
+      else if (strcmp(variable, "GREY_SQUARE") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.images.grey_sq, buffer);
+	}
+      else if (strcmp(variable, "ARROW_SQUARE") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 strcpy(options.images.arrow_sq, buffer);
+	}
+      else if (strcmp(variable, "DRAW_GRID") == 0)
+	{
+	 fscanf(rc_fd, "%s", buffer);
+	 if (strcmp(buffer, "TRUE") == 0)
+	    options.images.grid = TRUE;
+	 else
+	    options.images.grid = FALSE;
+	}
+
+
      }
 
    fclose(rc_fd);
@@ -1802,7 +1877,9 @@ void store_values_in_file()
 
    strcpy(file, home);
    strcat(file, "/.gamazons");
+#ifdef DEBUG
    printf("looking for the file %s\n", file);
+#endif
 
    rc_fd = fopen(file, "w");
    if (rc_fd == NULL)
@@ -1823,7 +1900,108 @@ void store_values_in_file()
    fprintf(rc_fd, "MAXDEPTH = ");
    fprintf(rc_fd, "%d\n", options.engine.maxdepth);
 
+   fprintf(rc_fd, "WHITE_PIECE = ");
+   fprintf(rc_fd, "%s\n", options.images.white_piece);
+
+   fprintf(rc_fd, "BLACK_PIECE = ");
+   fprintf(rc_fd, "%s\n", options.images.black_piece);
+
+   fprintf(rc_fd, "WHITE_SQUARE = ");
+   fprintf(rc_fd, "%s\n", options.images.white_sq);
+
+   fprintf(rc_fd, "GREY_SQUARE = ");
+   fprintf(rc_fd, "%s\n", options.images.grey_sq);
+
+   fprintf(rc_fd, "ARROW_SQUARE = ");
+   fprintf(rc_fd, "%s\n", options.images.arrow_sq);
+
+   fprintf(rc_fd, "DRAW_GRID = ");
+   if (options.images.grid == TRUE)
+      fprintf(rc_fd, "%s\n", "TRUE");
+   else
+      fprintf(rc_fd, "%s\n", "FALSE");
+
    fclose(rc_fd);
+}
+
+/*==============================================================================
+ * load_images_from_theme
+ *
+ * This file will read image paths from a theme file.  These values get loaded 
+ * into the options struct, and subsequently used to draw the board.
+ */
+void load_images_from_theme(char *theme)
+{
+   char *home, file[256];
+   FILE *theme_fd;
+   char variable[256];
+   char buffer[256];
+   int value;
+   char ch;
+
+
+   theme_fd = fopen(theme, "r");
+   if(theme_fd == NULL)
+     {
+      printf("Can't open theme file %s\n", theme);
+      exit(1);
+     }
+
+   while (fscanf(theme_fd, "%s", variable) != EOF)
+     {
+      while (ch = fgetc(theme_fd))
+	{
+	 if (ch == EOF)
+	    return;
+	 if (ch == '=')
+	    break;
+	}
+
+      if (strcmp(variable, "WHITE_PIECE") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 strcpy(options.images.white_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/");
+	 strcat(options.images.white_piece, buffer);
+	}
+      else if (strcmp(variable, "BLACK_PIECE") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 strcpy(options.images.black_piece, PACKAGE_DATA_DIR "/pixmaps/gamazons/");
+	 strcat(options.images.black_piece, buffer);
+	}
+      else if (strcmp(variable, "WHITE_SQUARE") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 strcpy(options.images.white_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/");
+	 strcat(options.images.white_sq, buffer);
+	}
+      else if (strcmp(variable, "GREY_SQUARE") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 strcpy(options.images.grey_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/");
+	 strcat(options.images.grey_sq, buffer);
+	}
+      else if (strcmp(variable, "ARROW_SQUARE") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 strcpy(options.images.arrow_sq, PACKAGE_DATA_DIR "/pixmaps/gamazons/");
+	 strcat(options.images.arrow_sq, buffer);
+	}
+      else if (strcmp(variable, "DRAW_GRID") == 0)
+	{
+	 fscanf(theme_fd, "%s", buffer);
+	 if (strcmp(buffer, "TRUE") == 0)
+	    options.images.grid = TRUE;
+	 else
+	    options.images.grid = FALSE;
+	}
+
+
+     }
+
+   fclose(theme_fd);
+
+
 }
 #endif
 
@@ -1884,12 +2062,18 @@ void parse_args(int argc, char *argv[])
 	      i++;
 	      break;
 	  case 'f':
+#ifdef DEBUG
 	      printf("opening movin\n");
+#endif
 	      movin = fopen(argv[++i], "r+");
+#ifdef DEBUG
 	      printf("success\n");
 	      printf("opening movout\n");
+#endif
 	      movout = fopen(argv[++i], "r+");
+#ifdef DEBUG
 	      printf("success\n");
+#endif
 	      //fprintf(fifop, "wubba wubba\n");
 	      //fflush(fifop);
 	      //printf("open success\n");
@@ -1953,7 +2137,9 @@ void dup_state(state *s_old, state *s_new)
      }
 
    s_new->turn = s_old->turn;
+#ifdef DEBUG
    printf("old turn is %d, new turn is %d\n", s_old->turn, s_new->turn);
+#endif
    s_new->value = s_old->value;
    s_new->depth = s_old->depth;
    s_new->winner = s_old->winner;

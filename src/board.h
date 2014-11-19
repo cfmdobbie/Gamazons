@@ -15,7 +15,7 @@
 #define SQUARE_COLOR_1 "white"
 #define SQUARE_COLOR_2 "grey"
 
-#define THICKNESS 3.0
+#define THICKNESS 1.0
 #define QUEEN_OFFSET 0
 
 /* Data structures */
@@ -52,11 +52,22 @@ struct _Position {
 #define IS_BOARD_CLASS(klass)		(GTK_CHECK_CLASS_TYPE ((obj), TYPE_BOARD))
 
 
+
 struct amazon_board {
+
+   // Gnome canvas counts coordinates w/ origin starting in top/left corner
    Square squares[BOARD_SIZE][BOARD_SIZE];
    Square from;
    Square to;
    Square selected_from;
+
+   /* The AI engine queens were managed in an array w/ elements 0-3
+    * this mapping is meant to keep track of which queen is on which
+    * square 
+    */
+   Square square_to_wh_queen_map[4];
+   Square square_to_bl_queen_map[4];
+
    GnomeCanvasItem *selected;
    GnomeCanvasItem *selected_queen;
    GnomeCanvasItem *white_queens[4];
@@ -68,8 +79,8 @@ struct amazon_board {
    double curr_y;
 
    char db[120];
-   GnomeCanvasItem *db_image[120];
    GnomeCanvasItem *square_items[100];
+   GnomeCanvasGroup *root;
    GnomeCanvas *canvas;
 
    Position *pos;
@@ -114,6 +125,11 @@ int is_move_legal(Square sq);
 int is_queen_square(Square sq);
 void free_all_memory();
 int create_hash(state *s);
+void print_board();
+void destroy_board();
+void print_move_in_text_window(move *m);
+
+
 
 
 // Coordinate conversion routines

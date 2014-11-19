@@ -1,5 +1,4 @@
-# Generated automatically from Makefile.in by configure.
-# Makefile.in generated automatically by automake 1.4-p5 from Makefile.am
+# Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
 # This Makefile.in is free software; the Free Software Foundation
@@ -16,6 +15,7 @@ SHELL = /bin/sh
 
 srcdir = .
 top_srcdir = ..
+
 prefix = /usr/local
 exec_prefix = ${prefix}
 
@@ -40,15 +40,15 @@ pkgincludedir = $(includedir)/gamazons
 
 top_builddir = ..
 
-ACLOCAL = aclocal
+ACLOCAL = aclocal-1.4
 AUTOCONF = autoconf
-AUTOMAKE = automake
+AUTOMAKE = automake-1.4
 AUTOHEADER = autoheader
 
 INSTALL = /usr/bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = ${INSTALL} -m 644
-INSTALL_SCRIPT = ${INSTALL_PROGRAM}
+INSTALL_SCRIPT = ${INSTALL}
 transform = s,x,x,
 
 NORMAL_INSTALL = :
@@ -72,21 +72,19 @@ MAINT = #
 MAKEINFO = makeinfo
 MKINSTALLDIRS = ./mkinstalldirs
 PACKAGE = gamazons
-PACKAGE_CFLAGS =  -I/home/yorgasor/garnome/include/libgnomeui-2.0 -I/home/yorgasor/garnome/include/libgnome-2.0 -I/home/yorgasor/garnome/include/libgnomecanvas-2.0 -I/home/yorgasor/garnome/include/gtk-2.0 -I/home/yorgasor/garnome/include/libart-2.0 -I/home/yorgasor/garnome/include/gconf/2 -I/home/yorgasor/garnome/include/libbonoboui-2.0 -I/home/yorgasor/garnome/include/glib-2.0 -I/home/yorgasor/garnome/lib/glib-2.0/include -I/home/yorgasor/garnome/include/orbit-2.0 -I/home/yorgasor/garnome/include/libbonobo-2.0 -I/home/yorgasor/garnome/include/gnome-vfs-2.0 -I/home/yorgasor/garnome/lib/gnome-vfs-2.0/include -I/home/yorgasor/garnome/include/linc-1.0 -I/home/yorgasor/garnome/include/bonobo-activation-2.0 -I/home/yorgasor/garnome/include/libxml2 -I/home/yorgasor/garnome/include/pango-1.0 -I/home/yorgasor/garnome/include -I/home/yorgasor/garnome/include/freetype2 -I/home/yorgasor/garnome/lib/gtk-2.0/include -I/home/yorgasor/garnome/include/atk-1.0 -I/usr/X11R6/include  
-PACKAGE_LIBS =  -L/home/yorgasor/garnome/lib -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
-PKG_CONFIG = /home/yorgasor/garnome/bin/pkg-config
+PACKAGE_CFLAGS =  -I/usr/include/libgnomeui-2.0 -I/usr/include/libgnome-2.0 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/gtk-2.0 -I/usr/include/libart-2.0 -I/usr/include/gconf/2 -I/usr/include/libbonoboui-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/orbit-2.0 -I/usr/include/libbonobo-2.0 -I/usr/include/gnome-vfs-2.0 -I/usr/lib/gnome-vfs-2.0/include -I/usr/include/linc-1.0 -I/usr/include/bonobo-activation-2.0 -I/usr/include/libxml2 -I/usr/include/pango-1.0 -I/usr/include/freetype2 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/Xft2 -I/usr/X11R6/include  
+PACKAGE_LIBS =  -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
+PKG_CONFIG = /usr/bin/pkg-config
 POFILES = 
 POSUB = po
 RANLIB = ranlib
 USE_NLS = yes
 VERSION = 0.1
-WARN_CFLAGS =  
-cxxflags_set = @cxxflags_set@
 
 INCLUDES = \
 	-DPACKAGE_DATA_DIR=\""$(datadir)"\" \
 	-DPACKAGE_LOCALE_DIR=\""$(datadir)/locale"\" \
-	 -I/home/yorgasor/garnome/include/libgnomeui-2.0 -I/home/yorgasor/garnome/include/libgnome-2.0 -I/home/yorgasor/garnome/include/libgnomecanvas-2.0 -I/home/yorgasor/garnome/include/gtk-2.0 -I/home/yorgasor/garnome/include/libart-2.0 -I/home/yorgasor/garnome/include/gconf/2 -I/home/yorgasor/garnome/include/libbonoboui-2.0 -I/home/yorgasor/garnome/include/glib-2.0 -I/home/yorgasor/garnome/lib/glib-2.0/include -I/home/yorgasor/garnome/include/orbit-2.0 -I/home/yorgasor/garnome/include/libbonobo-2.0 -I/home/yorgasor/garnome/include/gnome-vfs-2.0 -I/home/yorgasor/garnome/lib/gnome-vfs-2.0/include -I/home/yorgasor/garnome/include/linc-1.0 -I/home/yorgasor/garnome/include/bonobo-activation-2.0 -I/home/yorgasor/garnome/include/libxml2 -I/home/yorgasor/garnome/include/pango-1.0 -I/home/yorgasor/garnome/include -I/home/yorgasor/garnome/include/freetype2 -I/home/yorgasor/garnome/lib/gtk-2.0/include -I/home/yorgasor/garnome/include/atk-1.0 -I/usr/X11R6/include  
+	 -I/usr/include/libgnomeui-2.0 -I/usr/include/libgnome-2.0 -I/usr/include/libgnomecanvas-2.0 -I/usr/include/gtk-2.0 -I/usr/include/libart-2.0 -I/usr/include/gconf/2 -I/usr/include/libbonoboui-2.0 -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/orbit-2.0 -I/usr/include/libbonobo-2.0 -I/usr/include/gnome-vfs-2.0 -I/usr/lib/gnome-vfs-2.0/include -I/usr/include/linc-1.0 -I/usr/include/bonobo-activation-2.0 -I/usr/include/libxml2 -I/usr/include/pango-1.0 -I/usr/include/freetype2 -I/usr/lib/gtk-2.0/include -I/usr/include/atk-1.0 -I/usr/include/Xft2 -I/usr/X11R6/include  
 
 
 bin_PROGRAMS = gamazons 
@@ -109,16 +107,13 @@ gamazons_INCLUDES = -DGAMAZONS=1
 gamazons_CFLAGS = -O2 -DGAMAZONS=1
 
 gamazons_HELP = gamazons.html topic.dat
-gamazons_BITMAPS = white.png black.png
 
-EXTRA_DIST = $(gamazons_BITMAPS) $(gamazons_HELP)
-gamazonsbitmapsdir = $(datadir)/pixmaps
-gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
+EXTRA_DIST = $(gamazons_HELP)
 
 gamazonshelpdir = $(datadir)/gnome/help/gamazons/C
 gamazonshelp_DATA = $(gamazons_HELP)
 
-gamazons_LDADD =  -L/home/yorgasor/garnome/lib -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
+gamazons_LDADD =  -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
 CONFIG_CLEAN_FILES = 
@@ -137,7 +132,7 @@ CFLAGS = -g -O2
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
-DATA =  $(gamazonsbitmaps_DATA) $(gamazonshelp_DATA)
+DATA =  $(gamazonshelp_DATA)
 
 DIST_COMMON =  Makefile.am Makefile.in
 
@@ -207,25 +202,6 @@ maintainer-clean-compile:
 gamazons: $(gamazons_OBJECTS) $(gamazons_DEPENDENCIES)
 	@rm -f gamazons
 	$(LINK) $(gamazons_LDFLAGS) $(gamazons_OBJECTS) $(gamazons_LDADD) $(LIBS)
-
-install-gamazonsbitmapsDATA: $(gamazonsbitmaps_DATA)
-	@$(NORMAL_INSTALL)
-	$(mkinstalldirs) $(DESTDIR)$(gamazonsbitmapsdir)
-	@list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
-	  if test -f $(srcdir)/$$p; then \
-	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
-	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	  else if test -f $$p; then \
-	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p"; \
-	    $(INSTALL_DATA) $$p $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	  fi; fi; \
-	done
-
-uninstall-gamazonsbitmapsDATA:
-	@$(NORMAL_UNINSTALL)
-	list='$(gamazonsbitmaps_DATA)'; for p in $$list; do \
-	  rm -f $(DESTDIR)$(gamazonsbitmapsdir)/$$p; \
-	done
 
 install-gamazonshelpDATA: $(gamazonshelp_DATA)
 	@$(NORMAL_INSTALL)
@@ -338,22 +314,20 @@ installcheck: installcheck-am
 install-exec-am: install-binPROGRAMS
 install-exec: install-exec-am
 
-install-data-am: install-gamazonsbitmapsDATA install-gamazonshelpDATA
+install-data-am: install-gamazonshelpDATA
 install-data: install-data-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am: uninstall-binPROGRAMS uninstall-gamazonsbitmapsDATA \
-		uninstall-gamazonshelpDATA
+uninstall-am: uninstall-binPROGRAMS uninstall-gamazonshelpDATA
 uninstall: uninstall-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
-	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonsbitmapsdir) \
-		$(DESTDIR)$(gamazonshelpdir)
+	$(mkinstalldirs)  $(DESTDIR)$(bindir) $(DESTDIR)$(gamazonshelpdir)
 
 
 mostlyclean-generic:
@@ -392,8 +366,7 @@ maintainer-clean: maintainer-clean-am
 .PHONY: mostlyclean-binPROGRAMS distclean-binPROGRAMS clean-binPROGRAMS \
 maintainer-clean-binPROGRAMS uninstall-binPROGRAMS install-binPROGRAMS \
 mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile uninstall-gamazonsbitmapsDATA \
-install-gamazonsbitmapsDATA uninstall-gamazonshelpDATA \
+maintainer-clean-compile uninstall-gamazonshelpDATA \
 install-gamazonshelpDATA tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir mostlyclean-depend \
 distclean-depend clean-depend maintainer-clean-depend info-am info \

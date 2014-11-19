@@ -24,11 +24,8 @@ gamazons_INCLUDES = -DGAMAZONS=1
 gamazons_CFLAGS = -O2 -DGAMAZONS=1
 
 gamazons_HELP = gamazons.html topic.dat
-gamazons_BITMAPS = white.png black.png
 
-EXTRA_DIST = $(gamazons_BITMAPS) $(gamazons_HELP)
-gamazonsbitmapsdir = $(datadir)/pixmaps
-gamazonsbitmaps_DATA = $(gamazons_BITMAPS)
+EXTRA_DIST =  $(gamazons_HELP)
 
 gamazonshelpdir = $(datadir)/gnome/help/gamazons/C
 gamazonshelp_DATA = $(gamazons_HELP)

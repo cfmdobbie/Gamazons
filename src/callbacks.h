@@ -65,3 +65,19 @@ on_PlayerOKButton_clicked              (GtkButton       *button,
 void
 on_PlayerCancelButton_clicked          (GtkButton       *button,
                                         gpointer         user_data);
+
+void
+on_theme1_activate                     (GtkMenuItem     *menuitem,
+                                        gpointer         user_data);
+
+void
+on_BT_UNDO_clicked                     (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_BT_FORCEMOVE_clicked                (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_BT_AUTOFINISH_clicked               (GtkButton       *button,
+                                        gpointer         user_data);

@@ -12,6 +12,10 @@
 static void fill_a_square(GnomeCanvasGroup *group,
        	double x1, double y1, double x2, double y2, char *color);
 static void get_square_color(int square, char *color);
+static void draw_a_line(GnomeCanvasGroup *group, 
+	int x1, int y1, int x2, int y2, char *color);
+static void draw_grid();
+
 
 /* Globals */
 int what_next;	//
@@ -33,12 +37,17 @@ void init_game_board(GtkWidget *GamazonsMain)
    char color[256];
    GtkWidget *w = (GtkWidget *) lookup_widget(GamazonsMain, BOARD_NAME);
    GtkWidget *force_button, *undo_button;
+   GtkTextView *view;
+   GtkTextBuffer *buffer;
    
    if (w == NULL)
       printf("Couldn't find board!!!!!!!!\n");
 
    board = (Board *) malloc(sizeof(Board));
    board->canvas = GNOME_CANVAS(w);
+   board->root = GNOME_CANVAS_GROUP(gnome_canvas_item_new(gnome_canvas_root(board->canvas),
+	       gnome_canvas_group_get_type(),
+	       NULL));
    
    gnome_canvas_set_scroll_region(board->canvas, 0.0, 0.0,
 	   400.0,
@@ -104,6 +113,8 @@ void init_game_board(GtkWidget *GamazonsMain)
    board->squares[0][3] = BLACK;
    board->squares[9][3] = BLACK;
    */
+
+   //Place amazon queens on the board
    board->squares[9][3] = WHITE;
    board->squares[9][6] = WHITE;
    board->squares[6][0] = WHITE;
@@ -114,6 +125,22 @@ void init_game_board(GtkWidget *GamazonsMain)
    board->squares[3][0] = BLACK;
    board->squares[3][9] = BLACK;
 
+   board->square_to_wh_queen_map[0] = 96;
+   board->square_to_wh_queen_map[1] = 93;
+   board->square_to_wh_queen_map[2] = 60;
+   board->square_to_wh_queen_map[3] = 69;
+
+   board->square_to_bl_queen_map[0] = 3;
+   board->square_to_bl_queen_map[1] = 6;
+   board->square_to_bl_queen_map[2] = 30;
+   board->square_to_bl_queen_map[3] = 39;
+
+   //Set up move history window
+   view = (GtkTextView *) lookup_widget(main_window, "textview1");
+   buffer = gtk_text_buffer_new(NULL);
+   gtk_text_view_set_buffer(view, buffer);
+
+   //Initialize buttons
    force_button = (GtkWidget *)lookup_widget(main_window, "BT_FORCEMOVE");
    gtk_widget_set_sensitive (force_button, FALSE);
    undo_button = (GtkWidget *)lookup_widget(main_window, "BT_UNDO");
@@ -156,27 +183,97 @@ static void get_square_color(int square, char *color)
 }
 
 
+static void draw_grid()
+{
+   int x,y;
+
+   for (x=0; x<=10; x++)
+     {
+      for (y=0; y<=10; y++)
+	{
+	 //draw horiz
+	 draw_a_line(board->root, //gnome_canvas_root(board->canvas),
+		 0, y*CELL_SIZE, BOARD_SIZE*CELL_SIZE, y*CELL_SIZE, "black");
+
+	 //draw vert
+	 draw_a_line(board->root, //gnome_canvas_root(board->canvas),
+		 x*CELL_SIZE, 0, x*CELL_SIZE, BOARD_SIZE*CELL_SIZE, "black");
+	}
+     }
+
+
+}
+
+static void draw_a_line(GnomeCanvasGroup *group,
+       	int x1, int y1, int x2, int y2, char *color)
+{
+   GnomeCanvasPoints *points;
+
+   /* allocate a new points array */
+   points = gnome_canvas_points_new (2);
+
+   /* fill out the points */
+   points->coords[0] = x1;
+   points->coords[1] = y1;
+   points->coords[2] = x2;
+   points->coords[3] = y2;
+   /* draw the line */
+   gnome_canvas_item_new(group,
+	   gnome_canvas_line_get_type(),
+	   "points", points,
+	   "fill_color", color,
+	   "width_units", (double)THICKNESS,
+	   NULL);
+
+   /* free the points array */
+   gnome_canvas_points_free(points);
+}
+
 void draw_board()
 {
-   int i,j;
+   int i,j,k;
    int black_i = 0;
    GdkPixbuf *white_pb, *black_pb;
+   GdkPixbuf *white_sq, *grey_sq, *arrow_sq;
    char color[256];
    GnomeCanvasItem *image;
    GnomeCanvasGroup *root = GNOME_CANVAS_GROUP(gnome_canvas_root (GNOME_CANVAS (board->canvas)));
+   static int first_game = 1;
    
 
-   white_pb = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/white.png", NULL);
+
+   /* Find images */
+   white_pb = gdk_pixbuf_new_from_file(options.images.white_piece, NULL);
    if (white_pb == NULL)
      {
-      fprintf(stderr, "Cannot find white.png\n");
+      fprintf(stderr, "Cannot find white piece image: %s\n", options.images.white_piece);
       exit(1);
      }
 
-   black_pb = gdk_pixbuf_new_from_file(PACKAGE_DATA_DIR "/pixmaps/black.png", NULL);
+   black_pb = gdk_pixbuf_new_from_file(options.images.black_piece, NULL);
    if (black_pb == NULL)
      {
-      fprintf(stderr, "Cannot find black.png\n");
+      fprintf(stderr, "Cannot find black piece image: %s\n", options.images.black_piece);
+      exit(1);
+     }
+
+   white_sq = gdk_pixbuf_new_from_file(options.images.white_sq, NULL);
+   if (white_sq == NULL)
+     {
+      fprintf(stderr, "Cannot find white square image: %s\n", options.images.white_sq);
+      exit(1);
+     }
+
+   grey_sq = gdk_pixbuf_new_from_file(options.images.grey_sq, NULL);
+   if (grey_sq == NULL)
+     {
+      fprintf(stderr, "Cannot find grey square image: %s\n", options.images.grey_sq);
+      exit(1);
+     }
+   arrow_sq = gdk_pixbuf_new_from_file(options.images.arrow_sq, NULL);
+   if (arrow_sq == NULL)
+     {
+      fprintf(stderr, "Cannot find arrow square image: %s\n", options.images.arrow_sq);
       exit(1);
      }
 
@@ -187,9 +284,9 @@ void draw_board()
      {
       for(i=0;i<BOARD_SIZE;i++) 
 	{
-	 image = NULL;
-	 get_square_color(i+j, color);
+	 board->square_items[j*10+i] = NULL;
 	 /*
+	 get_square_color(i+j, color);
 	 fill_a_square(gnome_canvas_root(board->canvas),
 		 BOARD_BORDER + i*CELL_SIZE,
 		 BOARD_BORDER + j*CELL_SIZE,
@@ -197,16 +294,45 @@ void draw_board()
 		 BOARD_BORDER + j*(CELL_SIZE) + CELL_SIZE,
 		 color);
 		 */
+
+	 /*
 	 fill_a_square(gnome_canvas_root(board->canvas),
 		 i*CELL_SIZE,
 		 j*CELL_SIZE,
 		 i*(CELL_SIZE) + CELL_SIZE,
 		 j*(CELL_SIZE) + CELL_SIZE,
 		 color);
+		 */
+	 if ((i + j) % 2)
+	   {
+	    board->square_items[j*10+i] = gnome_canvas_item_new (board->root,
+		    gnome_canvas_pixbuf_get_type (),
+		    "x", i*CELL_SIZE+QUEEN_OFFSET, "y", j*CELL_SIZE+QUEEN_OFFSET,
+		    "width", CELL_SIZE, "height", CELL_SIZE,
+		    "width_set", TRUE, "height_set", TRUE,
+		    "pixbuf", grey_sq,
+		    NULL);
+	   }
+	 else
+	   {
+	    board->square_items[j*10+i] = gnome_canvas_item_new (board->root,
+		    gnome_canvas_pixbuf_get_type (),
+		    "x", i*CELL_SIZE+QUEEN_OFFSET, "y", j*CELL_SIZE+QUEEN_OFFSET,
+		    "width", CELL_SIZE, "height", CELL_SIZE,
+		    "width_set", TRUE, "height_set", TRUE,
+		    "pixbuf", white_sq,
+		    NULL);
+	   }
+
+
+
+	 //Place the queen images on the board in the right order
 	 if (board->squares[j][i] == WHITE)
 	   {
-	    printf("Square %dx%d contains a white queen\n",i,j);
-	    image = gnome_canvas_item_new (root,
+#ifdef DEBUG
+	    printf("Square %c%c contains a white queen\n",i+'a',10-j+'0');
+#endif
+	    image = gnome_canvas_item_new (board->root,
 		    gnome_canvas_pixbuf_get_type (),
 		    "x", i*CELL_SIZE+QUEEN_OFFSET, "y", j*CELL_SIZE+QUEEN_OFFSET,
 		    "width", CELL_SIZE, "height", CELL_SIZE,
@@ -215,52 +341,72 @@ void draw_board()
 		    NULL);
 	    //We need to do some funky checking to make sure board->white_queens[] matches
 	    //up exactly with state->white_q_x[], state->white_q_y[]
-	    if(i == 0)
+	    for (k=0; k<4; k++)
 	      {
-	       board->white_queens[2] = image;
-	       printf("registering queen 2\n");
+	       if(j*10 +i == board->square_to_wh_queen_map[k])
+		 {
+		  board->white_queens[k] = image;
+#ifdef DEBUG
+		  printf("registering queen %d\n", k);
+#endif
+		  break;
+		 }
 	      }
-	    else if (i == 3)
-	      {
-	       board->white_queens[1] = image;
-	       printf("registering queen 1\n");
-	      }
-	    else if (i == 6)
-	      {
-	       board->white_queens[0] = image;
-	       printf("registering queen 0\n");
-	      }
-	    else if (i == 9)
-	      {
-	       board->white_queens[3] = image;
-	       printf("registering queen 3\n");
-	      }
+
+#ifdef DEBUG
+	    printf("connecting signal to queen\n");
+#endif
+	    gtk_signal_connect(GTK_OBJECT(image), "event",
+		    GTK_SIGNAL_FUNC(board_press_cb), NULL);
 	   }
 	 else if (board->squares[j][i] == BLACK)
 	   {
-	    printf("Square %dx%d contains a black queen\n",i,j);
-	    image = gnome_canvas_item_new (root,
+#ifdef DEBUG
+	    printf("Square %c%c contains a black queen\n",i+'a',10-j+'0');
+#endif
+	    image = gnome_canvas_item_new (board->root,
 		    gnome_canvas_pixbuf_get_type (),
 		    "x", i*CELL_SIZE+QUEEN_OFFSET, "y", j*CELL_SIZE+QUEEN_OFFSET,
 		    "width", CELL_SIZE, "height", CELL_SIZE,
 		    "width_set", TRUE, "height_set", TRUE,
 		    "pixbuf", black_pb,
 		    NULL);
-	    //miraculously, these already match up perfectly so no funky stuff needed here
-	    board->black_queens[black_i++] = image;
-	   }
+	    for (k=0; k<4; k++)
+	      {
+	       if(j*10 +i == board->square_to_bl_queen_map[k])
+		 {
+		  board->black_queens[k] = image;
+#ifdef DEBUG
+		  printf("registering queen %d\n", k);
+#endif
+		  break;
+		 }
+	      }
 
-	 if (image != NULL)
-	   {
+#ifdef DEBUG
 	    printf("connecting signal to queen\n");
+#endif
 	    gtk_signal_connect(GTK_OBJECT(image), "event",
 		    GTK_SIGNAL_FUNC(board_press_cb), NULL);
-	    printf("connected signal to queen\n");
 	   }
-
+	 else if (board->squares[j][i] == ARROW)
+	   {
+	    image = gnome_canvas_item_new (board->root,
+		    gnome_canvas_pixbuf_get_type (),
+		    "x", i*CELL_SIZE+QUEEN_OFFSET, "y", j*CELL_SIZE+QUEEN_OFFSET,
+		    "width", CELL_SIZE, "height", CELL_SIZE,
+		    "width_set", TRUE, "height_set", TRUE,
+		    "pixbuf", arrow_sq,
+		    NULL);
+	   }
+	    
 
 	}
      }
+
+   if (options.images.grid == TRUE)
+      draw_grid();
+
    /*
    image = gnome_canvas_item_new (root,
 	   gnome_canvas_pixbuf_get_type (),
@@ -303,8 +449,10 @@ Square get_square (double x, double y)
    x_square = x / 40;
    y_square = y / 40;
 
+#ifdef DEBUG
    printf("x coord = %f   y coord = %f\n", x, y);
    printf("x coord = %d   y coord = %d\n", x_square, y_square);
+#endif
 
    from = x_square + y_square * 10;
    /*
@@ -335,9 +483,13 @@ void try_move (Board *board, GnomeCanvasItem *item)
    to_Lx = get_x_from_square(board->to);
    to_Uy = get_y_from_square(board->to);
       
+#ifdef DEBUG
    printf("We want the queen at coords %f, %f\n", to_Lx, to_Uy);
+#endif
    gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
+#ifdef DEBUG
    printf("The queen is at coords %f, %f\n", Lx, Uy);
+#endif
    while (Lx != to_Lx || Uy != to_Uy)
      {
       if (Lx < to_Lx)
@@ -374,8 +526,10 @@ void try_move (Board *board, GnomeCanvasItem *item)
    gnome_canvas_item_raise_to_top (item);
 	   //see where it landed
    gnome_canvas_item_get_bounds(item, &Lx, &Uy, &Rx, &By);
+#ifdef DEBUG
    printf("The queen landed at coords %f, %f\n", Lx, Uy);
    printf("this time the queen is on square %d\n", board->to);
+#endif
 }
 
 
@@ -410,6 +564,16 @@ int get_y_int_from_square(int sq)
    return(sq / 10);
 }
 
+int get_grid_num_from_square(int sq)
+{
+   return(10 - sq/10);
+}
+
+char get_grid_alpha_from_square(int sq)
+{
+   return('a' + sq % 10);
+}
+
 int engine_x_to_board_x(int eng_x)
 {
    return(eng_x);//hey, these are the same, no conversion necessary
@@ -439,18 +603,38 @@ int get_square_from_engine(int x, int y)
 void fire_arrow(Square sq)
 {
    int x,y;
+   GdkPixbuf *arrow_sq;
+   GnomeCanvasItem *image;
+   GnomeCanvasGroup *root = GNOME_CANVAS_GROUP(gnome_canvas_root (GNOME_CANVAS (board->canvas)));
 
    x = sq % 10;
    y = sq / 10;
 
    board->squares[y][x] = ARROW;
 
+   arrow_sq = gdk_pixbuf_new_from_file(options.images.arrow_sq, NULL);
+   if (arrow_sq == NULL)
+     {
+      fprintf(stderr, "Cannot find arrow image: %s\n", options.images.arrow_sq);
+      exit(1);
+     }
+
+   image = gnome_canvas_item_new (board->root,
+	   gnome_canvas_pixbuf_get_type (),
+	   "x", x*CELL_SIZE+QUEEN_OFFSET, "y", y*CELL_SIZE+QUEEN_OFFSET,
+	   "width", CELL_SIZE, "height", CELL_SIZE,
+	   "width_set", TRUE, "height_set", TRUE,
+	   "pixbuf", arrow_sq,
+	   NULL);
+
+   /*
    fill_a_square(gnome_canvas_root(board->canvas),
 	   BOARD_BORDER + x*CELL_SIZE,
 	   BOARD_BORDER + y*CELL_SIZE,
 	   BOARD_BORDER + x*(CELL_SIZE) + CELL_SIZE,
 	   BOARD_BORDER + y*(CELL_SIZE) + CELL_SIZE,
 	   "black");
+	   */
 }
 
 void square_contains(Square sq)
@@ -558,11 +742,14 @@ int move_ai()
 
       //register move on graphical board
       move_piece(temp);
+      print_move_in_text_window(&temp);
       dup_state(s, states.s[++(states.current_state)]);
      }
    else
      {
+#ifdef DEBUG
       printf("the AI doesn't move next:\n");
+#endif
      }
 
    if (s->turn == WHITE_PLAYER)
@@ -571,11 +758,13 @@ int move_ai()
       what_next = MOVE_BLACK_QUEEN;
 
    update_status_bar();
+#ifdef DEBUG
    if (options.white_player == AI)
       printf("White is AI\n");
    if (options.black_player == AI)
       printf("Black is AI\n");
    printf("Turn is %d\n", states.s[states.current_state]->turn );
+#endif
 
    //check for gameover
    /*
@@ -626,16 +815,22 @@ void move_piece(move m)
 	      states.s[states.current_state -1]->black_q_y[m.queen]);
       
       board->squares[to_row][to_col] = BLACK;
+#ifdef DEBUG
       printf("Moving black queen\n");
+#endif
       item = board->black_queens[m.queen];
+      board->square_to_bl_queen_map[m.queen] = to_row*10 +to_col;
      }
    else
      {
       board->from = get_square_from_engine(states.s[states.current_state -1]->white_q_x[m.queen],
 	      states.s[states.current_state -1]->white_q_y[m.queen]);
       board->squares[to_row][to_col] = WHITE;
+#ifdef DEBUG
       printf("Moving white queen\n");
+#endif
       item = board->white_queens[m.queen];
+      board->square_to_wh_queen_map[m.queen] = to_row*10 +to_col;
      }
 
 
@@ -644,10 +839,14 @@ void move_piece(move m)
    board->squares[from_row][from_col] = NOTHING;
 
    try_move(board, item);
+#ifdef DEBUG
    printf("Engine coords for arrow: %d, %d\n", m.wallcol, m.wallrow);
+#endif
    fire_arrow(get_square_from_engine(m.wallcol, m.wallrow));
+#ifdef DEBUG
    printf("fired arrow to square %d\n", get_square_from_engine(m.wallcol, m.wallrow));
    pmove(m);
+#endif
 }
 
 /*==============================================================================
@@ -677,7 +876,7 @@ void register_move_with_engine(Square arrow_sq)
      }
 
    if (!found)
-      printf("Yikes!  We didn't find the queen!!\n");
+      fprintf(stderr, "Error registering move w/ AI engine!  Game play will now be weird.\n");
 
    m.queen = i;
    m.torow = board_y_to_engine_y(get_y_int_from_square(board->to));
@@ -686,6 +885,7 @@ void register_move_with_engine(Square arrow_sq)
    m.wallrow = board_y_to_engine_y(get_y_int_from_square(arrow_sq));
    m.wallcol = board_x_to_engine_x(get_x_int_from_square(arrow_sq));
 
+   print_move_in_text_window(&m);
    makemove(s, m);
 
 }
@@ -806,11 +1006,13 @@ void gen_legal_moves(Square sq)
 
 
    legal_moves[arr_i] = 100;
+#ifdef DEBUG
    printf("legal move list for %d of length %d: \n", sq, arr_i);
    i = 0;
    while (legal_moves[i] < 100)
       printf(" %d", legal_moves[i++]);
    printf("\n");
+#endif
 
 }
 
@@ -824,21 +1026,27 @@ int is_move_legal(Square sq)
 {
    int i=0;
 
+#ifdef DEBUG
    printf("checking to see if a move is legal\n");
+#endif
    while (legal_moves[i] < 100)
      {
       if (sq == legal_moves[i++])
 	{
+#ifdef DEBUG
 	 printf("%d is a legal move\n", sq);
+#endif
 	 return TRUE;
 	}
      }
 
+#ifdef DEBUG
    printf("Can't move to square.  Legal moves are: %d\n", sq);
    i=0;
    while (legal_moves[i] < 100)
       printf(" %d", legal_moves[i++]);
    printf("\n");
+#endif
    return FALSE;
 }
 
@@ -933,6 +1141,7 @@ int create_hash(state *s)
 int game_over(move *movelist)
 {
    state *s = states.s[states.current_state];
+   GtkWidget *auto_button, *force_button;
 
    if (children(s, movelist) == 0)
      {
@@ -942,6 +1151,11 @@ int game_over(move *movelist)
 	 gnome_ok_dialog("White wins!");
       else
 	 gnome_ok_dialog("Black wins!");
+
+      auto_button = (GtkWidget *) lookup_widget(main_window, "BT_AUTOFINISH");
+      force_button = (GtkWidget *) lookup_widget(main_window, "BT_FORCEMOVE");
+      gtk_widget_set_sensitive (auto_button, FALSE);
+      gtk_widget_set_sensitive (force_button, FALSE);
 
       return TRUE;
      }
@@ -984,4 +1198,122 @@ update_status_bar()
 
      }
 
+}
+
+/*==============================================================================
+ * print_board
+ *
+ * prints out an ascii version of the board, useful for ensuring the board shows
+ * what it should show.
+ */
+void print_board()
+{
+   int i,j;
+
+   for (i=0; i<BOARD_SIZE; i++)
+     {
+      for (j=0; j<BOARD_SIZE; j++)
+	{
+	 if (board->squares[i][j] == 0)
+	    printf(" 0");
+	 if (board->squares[i][j] == 1)
+	    printf(" B");
+	 if (board->squares[i][j] == 2)
+	    printf(" W");
+	 if (board->squares[i][j] == 3)
+	    printf(" x");
+	}
+      printf("\n");
+     }
+}
+
+/*==============================================================================
+ * destroy_board
+ *
+ * Destroys the main board canvas group which contains all the square and piece
+ * images, and takes them with it.  Once done, it creates a new group that 
+ * draw_board() can take advantage of.
+ */
+void destroy_board()
+{
+   int i;
+   GtkWidget *CNVS_GAMEBOARD, *w, *scrolledwindow4, *table1;
+
+
+#ifdef DEBUG
+   printf("Destroying board now\n");
+#endif
+
+
+   gtk_object_destroy(GTK_OBJECT(board->root));
+   board->root = GNOME_CANVAS_GROUP(gnome_canvas_item_new(gnome_canvas_root(board->canvas),
+	       gnome_canvas_group_get_type(),
+	       NULL));
+}
+
+/*==============================================================================
+ * print_move_in_text_window
+ *
+ * Prints the given move in official amazon notation.  The move struct doesn't
+ * contain 'from' information, so that must be retrieved from the previous state
+ */
+void print_move_in_text_window(move *m)
+{
+   GtkTextView *view; 
+   GtkTextBuffer *buffer;
+   GtkTextIter *iter = (GtkTextIter *) malloc(sizeof(GtkTextIter));
+   char string_buf[32];
+   GtkScrolledWindow *w;
+   GtkAdjustment *adj;
+
+   Square to_sq, from_sq, arrow_sq;
+   int to_num, from_num, arrow_num;
+   char to_alpha, from_alpha, arrow_alpha;
+   int state_i = states.current_state;
+   int turn;
+
+   //Determine which side just moved:
+   turn = states.s[state_i]->turn^3;
+   if (turn == WHITE_PLAYER)
+     {
+      from_sq = get_square_from_engine(states.s[state_i-1]->white_q_x[m->queen],
+	      				states.s[state_i-1]->white_q_y[m->queen]);
+     }
+   else
+     {
+      from_sq = get_square_from_engine(states.s[state_i-1]->black_q_x[m->queen],
+	      				states.s[state_i-1]->black_q_y[m->queen]);
+     }
+   to_sq = get_square_from_engine(m->tocol, m->torow);
+   arrow_sq = get_square_from_engine(m->wallcol, m->wallrow);
+
+
+
+   view = (GtkTextView *) lookup_widget(main_window, "textview1");
+   buffer = gtk_text_view_get_buffer (view);
+   gtk_text_buffer_get_end_iter(buffer, iter);
+
+   from_alpha = get_grid_alpha_from_square(from_sq);
+   from_num = get_grid_num_from_square(from_sq);
+
+   to_alpha = get_grid_alpha_from_square(to_sq);
+   to_num = get_grid_num_from_square(to_sq);
+   
+   arrow_alpha = get_grid_alpha_from_square(arrow_sq);
+   arrow_num = get_grid_num_from_square(arrow_sq);
+   
+   sprintf(string_buf, "%d. %c%d-%c%d, %c%d\n", state_i-1, from_alpha, from_num,
+	   to_alpha, to_num, arrow_alpha, arrow_num);
+#ifdef DEBUG
+   printf("%s", string_buf);
+#endif
+   gtk_text_buffer_insert(buffer, iter, string_buf, -1);
+
+   w = (GtkScrolledWindow *) lookup_widget(main_window, "scrolledwindow6");
+   adj = gtk_scrolled_window_get_vadjustment(w);
+   gtk_adjustment_set_value(adj, adj->upper);
+   gtk_scrolled_window_set_vadjustment(w, adj);
+   
+
+   free (iter);
 }

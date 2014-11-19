@@ -88,6 +88,15 @@
 		      <signal name="activate" handler="on_player1_activate" last_modification_time="Fri, 05 Jul 2002 22:01:51 GMT"/>
 		    </widget>
 		  </child>
+
+		  <child>
+		    <widget class="GtkMenuItem" id="theme1">
+		      <property name="visible">True</property>
+		      <property name="label" translatable="yes">_Theme</property>
+		      <property name="use_underline">True</property>
+		      <signal name="activate" handler="on_theme1_activate" last_modification_time="Wed, 30 Oct 2002 02:35:58 GMT"/>
+		    </widget>
+		  </child>
 		</widget>
 	      </child>
 	    </widget>
@@ -102,11 +111,23 @@
 		<widget class="GtkMenu" id="help1_menu">
 
 		  <child>
-		    <widget class="GtkMenuItem" id="how_to_play1">
+		    <widget class="GtkImageMenuItem" id="how_to_play1">
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">_How To Play</property>
 		      <property name="use_underline">True</property>
 		      <signal name="activate" handler="on_how_to_play1_activate" last_modification_time="Fri, 05 Jul 2002 22:02:53 GMT"/>
+
+		      <child internal-child="image">
+			<widget class="GtkImage" id="image2">
+			  <property name="visible">True</property>
+			  <property name="stock">gtk-help</property>
+			  <property name="icon_size">1</property>
+			  <property name="xalign">0.5</property>
+			  <property name="yalign">0.5</property>
+			  <property name="xpad">0</property>
+			  <property name="ypad">0</property>
+			</widget>
+		      </child>
 		    </widget>
 		  </child>
 
@@ -1220,15 +1241,16 @@
 
 			      <child>
 				<widget class="GtkLabel" id="label1">
-				  <property name="height_request">44</property>
+				  <property name="width_request">0</property>
+				  <property name="height_request">40</property>
 				  <property name="visible">True</property>
 				  <property name="label" translatable="yes">Moves Made:</property>
 				  <property name="use_underline">False</property>
 				  <property name="use_markup">False</property>
-				  <property name="justify">GTK_JUSTIFY_LEFT</property>
+				  <property name="justify">GTK_JUSTIFY_RIGHT</property>
 				  <property name="wrap">False</property>
 				  <property name="selectable">False</property>
-				  <property name="xalign">0.02</property>
+				  <property name="xalign">0.59</property>
 				  <property name="yalign">0.72</property>
 				  <property name="xpad">0</property>
 				  <property name="ypad">0</property>
@@ -1250,22 +1272,155 @@
 				  <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
 
 				  <child>
-				    <widget class="GtkTextView" id="textview1">
-				      <property name="border_width">8</property>
-				      <property name="height_request">300</property>
+				    <widget class="GtkViewport" id="viewport3">
 				      <property name="visible">True</property>
-				      <property name="can_focus">True</property>
-				      <property name="editable">False</property>
-				      <property name="justification">GTK_JUSTIFY_LEFT</property>
-				      <property name="wrap_mode">GTK_WRAP_NONE</property>
-				      <property name="cursor_visible">True</property>
-				      <property name="pixels_above_lines">0</property>
-				      <property name="pixels_below_lines">0</property>
-				      <property name="pixels_inside_wrap">0</property>
-				      <property name="left_margin">0</property>
-				      <property name="right_margin">0</property>
-				      <property name="indent">0</property>
-				      <property name="text" translatable="yes"></property>
+				      <property name="shadow_type">GTK_SHADOW_NONE</property>
+
+				      <child>
+					<widget class="GtkHBox" id="hbox11">
+					  <property name="visible">True</property>
+					  <property name="homogeneous">False</property>
+					  <property name="spacing">0</property>
+
+					  <child>
+					    <widget class="GtkScrolledWindow" id="scrolledwindow5">
+					      <property name="visible">True</property>
+					      <property name="can_focus">True</property>
+					      <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+					      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+					      <property name="shadow_type">GTK_SHADOW_NONE</property>
+					      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+					      <child>
+						<widget class="GtkViewport" id="viewport4">
+						  <property name="height_request">17</property>
+						  <property name="visible">True</property>
+						  <property name="shadow_type">GTK_SHADOW_NONE</property>
+
+						  <child>
+						    <widget class="GtkVBox" id="vbox9">
+						      <property name="visible">True</property>
+						      <property name="homogeneous">False</property>
+						      <property name="spacing">0</property>
+
+						      <child>
+							<widget class="GtkVButtonBox" id="vbuttonbox1">
+							  <property name="height_request">105</property>
+							  <property name="visible">True</property>
+							  <property name="layout_style">GTK_BUTTONBOX_DEFAULT_STYLE</property>
+							  <property name="spacing">0</property>
+
+							  <child>
+							    <widget class="GtkButton" id="BT_UNDO">
+							      <property name="height_request">30</property>
+							      <property name="visible">True</property>
+							      <property name="can_default">True</property>
+							      <property name="can_focus">True</property>
+							      <property name="label" translatable="yes">Undo</property>
+							      <property name="use_underline">True</property>
+							      <property name="relief">GTK_RELIEF_NORMAL</property>
+							      <signal name="clicked" handler="on_BT_UNDO_clicked" last_modification_time="Wed, 06 Nov 2002 06:06:25 GMT"/>
+							    </widget>
+							  </child>
+
+							  <child>
+							    <widget class="GtkButton" id="BT_FORCEMOVE">
+							      <property name="width_request">106</property>
+							      <property name="height_request">30</property>
+							      <property name="visible">True</property>
+							      <property name="can_default">True</property>
+							      <property name="can_focus">True</property>
+							      <property name="label" translatable="yes">Force Move</property>
+							      <property name="use_underline">True</property>
+							      <property name="relief">GTK_RELIEF_NORMAL</property>
+							      <signal name="clicked" handler="on_BT_FORCEMOVE_clicked" last_modification_time="Wed, 06 Nov 2002 06:06:59 GMT"/>
+							    </widget>
+							  </child>
+
+							  <child>
+							    <widget class="GtkButton" id="BT_AUTOFINISH">
+							      <property name="height_request">30</property>
+							      <property name="visible">True</property>
+							      <property name="can_default">True</property>
+							      <property name="can_focus">True</property>
+							      <property name="label" translatable="yes">Autofinish</property>
+							      <property name="use_underline">True</property>
+							      <property name="relief">GTK_RELIEF_NORMAL</property>
+							      <signal name="clicked" handler="on_BT_AUTOFINISH_clicked" last_modification_time="Wed, 06 Nov 2002 06:07:11 GMT"/>
+							    </widget>
+							  </child>
+							</widget>
+							<packing>
+							  <property name="padding">0</property>
+							  <property name="expand">False</property>
+							  <property name="fill">True</property>
+							</packing>
+						      </child>
+
+						      <child>
+							<widget class="GtkHBox" id="hbox12">
+							  <property name="visible">True</property>
+							  <property name="homogeneous">False</property>
+							  <property name="spacing">0</property>
+
+							  <child>
+							    <placeholder/>
+							  </child>
+							</widget>
+							<packing>
+							  <property name="padding">0</property>
+							  <property name="expand">True</property>
+							  <property name="fill">True</property>
+							</packing>
+						      </child>
+						    </widget>
+						  </child>
+						</widget>
+					      </child>
+					    </widget>
+					    <packing>
+					      <property name="padding">0</property>
+					      <property name="expand">True</property>
+					      <property name="fill">True</property>
+					    </packing>
+					  </child>
+
+					  <child>
+					    <widget class="GtkScrolledWindow" id="scrolledwindow6">
+					      <property name="visible">True</property>
+					      <property name="can_focus">True</property>
+					      <property name="hscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+					      <property name="vscrollbar_policy">GTK_POLICY_AUTOMATIC</property>
+					      <property name="shadow_type">GTK_SHADOW_NONE</property>
+					      <property name="window_placement">GTK_CORNER_TOP_LEFT</property>
+
+					      <child>
+						<widget class="GtkTextView" id="textview1">
+						  <property name="width_request">120</property>
+						  <property name="visible">True</property>
+						  <property name="can_focus">True</property>
+						  <property name="editable">False</property>
+						  <property name="justification">GTK_JUSTIFY_LEFT</property>
+						  <property name="wrap_mode">GTK_WRAP_NONE</property>
+						  <property name="cursor_visible">False</property>
+						  <property name="pixels_above_lines">0</property>
+						  <property name="pixels_below_lines">0</property>
+						  <property name="pixels_inside_wrap">0</property>
+						  <property name="left_margin">0</property>
+						  <property name="right_margin">0</property>
+						  <property name="indent">0</property>
+						  <property name="text" translatable="yes"></property>
+						</widget>
+					      </child>
+					    </widget>
+					    <packing>
+					      <property name="padding">0</property>
+					      <property name="expand">True</property>
+					      <property name="fill">True</property>
+					    </packing>
+					  </child>
+					</widget>
+				      </child>
 				    </widget>
 				  </child>
 				</widget>
@@ -1274,60 +1429,6 @@
 				  <property name="expand">True</property>
 				  <property name="fill">True</property>
 				</packing>
-			      </child>
-			    </widget>
-			    <packing>
-			      <property name="padding">0</property>
-			      <property name="expand">True</property>
-			      <property name="fill">True</property>
-			    </packing>
-			  </child>
-
-			  <child>
-			    <widget class="GtkHButtonBox" id="hbuttonbox2">
-			      <property name="width_request">1</property>
-			      <property name="height_request">8</property>
-			      <property name="visible">True</property>
-			      <property name="layout_style">GTK_BUTTONBOX_SPREAD</property>
-			      <property name="spacing">5</property>
-
-			      <child>
-				<widget class="GtkButton" id="BT_UNDO">
-				  <property name="visible">True</property>
-				  <property name="tooltip" translatable="yes">Undo the last move</property>
-				  <property name="can_default">True</property>
-				  <property name="can_focus">True</property>
-				  <property name="label" translatable="yes">Undo</property>
-				  <property name="use_underline">True</property>
-				  <property name="relief">GTK_RELIEF_NORMAL</property>
-				  <signal name="clicked" handler="on_BT_UNDO_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:19 GMT"/>
-				</widget>
-			      </child>
-
-			      <child>
-				<widget class="GtkButton" id="BT_FORCEMOVE">
-				  <property name="visible">True</property>
-				  <property name="tooltip" translatable="yes">Force the computer to move</property>
-				  <property name="can_default">True</property>
-				  <property name="can_focus">True</property>
-				  <property name="label" translatable="yes">Force Move</property>
-				  <property name="use_underline">True</property>
-				  <property name="relief">GTK_RELIEF_NORMAL</property>
-				  <signal name="clicked" handler="on_BT_FORCEMOVE_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:30 GMT"/>
-				</widget>
-			      </child>
-
-			      <child>
-				<widget class="GtkButton" id="BT_AUTOFINISH">
-				  <property name="visible">True</property>
-				  <property name="tooltip" translatable="yes">Have the computer complete the game for you</property>
-				  <property name="can_default">True</property>
-				  <property name="can_focus">True</property>
-				  <property name="label" translatable="yes">Auto Finish</property>
-				  <property name="use_underline">True</property>
-				  <property name="relief">GTK_RELIEF_NORMAL</property>
-				  <signal name="clicked" handler="on_BT_AUTOFINISH_clicked" last_modification_time="Fri, 05 Jul 2002 21:48:52 GMT"/>
-				</widget>
 			      </child>
 			    </widget>
 			    <packing>
@@ -1378,7 +1479,7 @@
 </widget>
 
 <widget class="GtkWindow" id="PlayerSettings">
-  <property name="width_request">300</property>
+  <property name="width_request">370</property>
   <property name="height_request">185</property>
   <property name="visible">True</property>
   <property name="title" translatable="yes">Player Settings</property>
@@ -1406,7 +1507,7 @@
 
 	  <child>
 	    <widget class="GtkLabel" id="WhitePlayerLabel">
-	      <property name="width_request">85</property>
+	      <property name="width_request">100</property>
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes">White Player:</property>
 	      <property name="use_underline">False</property>
@@ -1428,7 +1529,7 @@
 
 	  <child>
 	    <widget class="GtkRadioButton" id="WhiteHumanRadio">
-	      <property name="width_request">65</property>
+	      <property name="width_request">85</property>
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label" translatable="yes">Human</property>
@@ -1480,7 +1581,7 @@
 
 	  <child>
 	    <widget class="GtkLabel" id="BlackPlayerLabel">
-	      <property name="width_request">85</property>
+	      <property name="width_request">100</property>
 	      <property name="visible">True</property>
 	      <property name="label" translatable="yes">Black Player: </property>
 	      <property name="use_underline">False</property>
@@ -1502,7 +1603,7 @@
 
 	  <child>
 	    <widget class="GtkRadioButton" id="BlackHumanRadio">
-	      <property name="width_request">65</property>
+	      <property name="width_request">85</property>
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
 	      <property name="label" translatable="yes">Human</property>
@@ -1600,7 +1701,7 @@
 
 		  <child>
 		    <widget class="GtkLabel" id="TimeLabel">
-		      <property name="width_request">95</property>
+		      <property name="width_request">121</property>
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Search Time: </property>
 		      <property name="use_underline">False</property>
@@ -1622,7 +1723,7 @@
 
 		  <child>
 		    <widget class="GtkLabel" id="SearchDepthLabel">
-		      <property name="width_request">101</property>
+		      <property name="width_request">127</property>
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Max Search Depth</property>
 		      <property name="use_underline">False</property>
@@ -1644,7 +1745,7 @@
 
 		  <child>
 		    <widget class="GtkLabel" id="SearchWidthLabel">
-		      <property name="width_request">90</property>
+		      <property name="width_request">112</property>
 		      <property name="visible">True</property>
 		      <property name="label" translatable="yes">Max Search Width</property>
 		      <property name="use_underline">False</property>
