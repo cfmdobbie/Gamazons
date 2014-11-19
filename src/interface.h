@@ -3,3 +3,4 @@
  */
 
 GtkWidget* create_GamazonsMain (void);
+GtkWidget* create_PlayerSettings (void);

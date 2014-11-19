@@ -95,6 +95,11 @@ struct options
 
 };
 
+// Different player choices
+enum {
+   AI,
+   HUMAN,
+};
 
 /* intersting statistic globals */
 int tt_overwrite;
@@ -132,7 +137,8 @@ int move_lookup(move *m, move movelist[], int move_count);
 void dup_state(state *s_old, state *s_new);
 #ifdef GAMAZONS
 int engine_init();
-
+void load_values_from_file();
+void store_values_in_file();
 
 #endif
 

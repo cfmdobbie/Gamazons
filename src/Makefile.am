@@ -5,7 +5,7 @@ INCLUDES = \
 	-DPACKAGE_LOCALE_DIR=\""$(datadir)/locale"\" \
 	@PACKAGE_CFLAGS@
 
-bin_PROGRAMS = gamazons amazons
+bin_PROGRAMS = gamazons 
 
 gamazons_SOURCES = \
 	main.c \
@@ -21,13 +21,6 @@ gamazons_SOURCES = \
 
 gamazons_INCLUDES = -DGAMAZONS=1
 
-amazons_SOURCES = \
-	eval.c \
-	moves.c \
-	unit-test.c unit-test.h \
-	amazons.h 
-
-amazons_INCLUDES = -DAMAZONS=1
 
 gamazons_LDADD = @PACKAGE_LIBS@
 

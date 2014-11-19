@@ -1,47 +1,15 @@
-* it looks like I can use gnome_canvas_item_move to move a queen already placed
-on the board.  Perhaps I should draw the board initially, registering all the
-callbacks with them, etc... and then just use that to move them.  But then what
-does the draw_board function do?  gnome-chess called it all the time.  
+================================================================================
+DONE
+================================================================================
 
-looks like gnome chess just used board_update to see if any pieces were taken
-and deletes them if they are.  I don't know if I need to draw the board after
-the initial draw.
-
-
-* Computer moving queens:  
-	Instead of having the queens just pop around on the board when the
-	computer is moving, the queen should slide so the human can see what
-	piece is moving.  I should be able to do some kind of move, maybe one
-	pixel at a time.  Just calculate the origin and the destination, and
-	they _should_ just be straight diagonal (increment x coord by 1,
-	increment y coord by 1, draw), or horiz or vert.  If moving by 1 is too
-	slow, we could make it 2 or whatever.
-
-* handling options:
-	Instead of having several dozen global variables, each covering a
-	different option, I could make one big structure, covering all options.
-	Then I can create sub structs for network, players, etc...
-
-* Keeping up with option/game changes
-	Some options may change during the middle of the game.  For example, the
-	autocomplete would make both players computer opponents.  The network
-	stuff wouldn't be able to change.  Each time the back end has to use one
-	of these changeable options, it should read it directly from the source.
-	
-	But if we had a setup mode, the user could switch off game playing, configure 
-	the board, and reenter game mode.  To accomplish this, I'd need to change game 
-	recognition from a linear model (W moved this queen here, so unmark the src 
-	and mark the dest as the WQ), to a discover mode (look at all the squares on 
-	the board and see what is on each).  That's not very efficient for most things,
-       	so perhaps just making a " discover_board" function that can be called when 
-	exiting setup mode.
-
-
-* Text mode vs GUI mode
-	I would like to maintain both versions, as each one has its place.
-	Everything that's text dependent should be bracketed with 
-	#ifndef GAMAZONS, and stuff that's GUI dependent should be bracketed
-	with #ifdef GAMAZONS.  
+* Website requirements:
+	Explain how I verified that my program works
+	Explain what it takes to compile and run the program
+		Requires Gnome2
+		tweak a header file to compile amazons instead of gamazons
+	Post source code
+		Include a copy of the GPL w/ the source
+	Explain what it takes to run the program and how to use it
 
 * Keeping the GUI & engine in sync
 	Currently, amazons has a state stucture that is local to main and passed
@@ -63,15 +31,14 @@ the initial draw.
 	need to use one worth the inconvenience of keeping both in sync during
 	every change? -- Ugh, keep two, just keep them in sync.
 	
-* Undo
-	Instead of having a straight state struct, maybe I should have an array
-	of 100 of them.  Then I could include a current move state and a max move
-	state so I could skip forward and backward.  
-
-	Hmm, should I keep 100 of both states? or just keep all those states on
-	the engine side, and use the GUI state only for the current state of the
-	board?  I'm currently inclined to just have the array on the engine
-	side.
+* User input while the AI is thinking...
+	I should set a flag at the beginning of move_ai() that sez the computer
+	is thinking.  Then at the beginning of all callbacks, I should check to
+	see if the AI is preparing to move and ignore all user input until it's
+	safe.  While I'm at it, I should also make a check that if it is a human
+	player who's turn it is to move, that the human is moving his own
+	pieces.  ie, if it's white's turn, he shouldn't be able to pick up black
+	pieces.
 
 * Playing the game
 	Once the board is drawn and all the signals are registered, call a
@@ -87,22 +54,80 @@ the initial draw.
 	I'll probably have two different functions for processing human moves
 	and AI moves, so I'd better make sure both work.
 
-* User input while the AI is thinking...
-	I should set a flag at the beginning of move_ai() that sez the computer
-	is thinking.  Then at the beginning of all callbacks, I should check to
-	see if the AI is preparing to move and ignore all user input until it's
-	safe.  While I'm at it, I should also make a check that if it is a human
-	player who's turn it is to move, that the human is moving his own
-	pieces.  ie, if it's white's turn, he shouldn't be able to pick up black
-	pieces.
+* Text mode vs GUI mode
+	I would like to maintain both versions, as each one has its place.
+	Everything that's text dependent should be bracketed with 
+	#ifndef GAMAZONS, and stuff that's GUI dependent should be bracketed
+	with #ifdef GAMAZONS.  
 
+* handling options:
+	Instead of having several dozen global variables, each covering a
+	different option, I could make one big structure, covering all options.
+	Then I can create sub structs for network, players, etc...
 
-* Website requirements:
-	Explain how I verified that my program works
-	Explain what it takes to compile and run the program
-		Requires Gnome2
-		tweak a header file to compile amazons instead of gamazons
-	Post source code
-		Include a copy of the GPL w/ the source
-	Explain what it takes to run the program and how to use it
+* Drawing the board
+   	it looks like I can use gnome_canvas_item_move to move a queen already placed
+       	on the board.  Perhaps I should draw the board initially, registering all the
+       	callbacks with them, etc... and then just use that to move them.  But then what
+       	does the draw_board function do?  gnome-chess called it all the time. 
+
+	looks like gnome chess just used board_update to see if any pieces were taken
+       	and deletes them if they are.  I don't know if I need to draw the board after
+       	the initial draw.
+
+================================================================================
+TODO
+================================================================================
+
+* Remembering values:
+	I need to store user options in a .gamazons file.  When the user presses
+	OK in the player preferences, the values should be stored in this file
+	as well as in the global options struct.  Then, init_engine() should read
+	in the values from a file (if it exists).
+
+* Computer moving queens:  
+	Instead of having the queens just pop around on the board when the
+	computer is moving, the queen should slide so the human can see what
+	piece is moving.  I should be able to do some kind of move, maybe one
+	pixel at a time.  Just calculate the origin and the destination, and
+	they _should_ just be straight diagonal (increment x coord by 1,
+	increment y coord by 1, draw), or horiz or vert.  If moving by 1 is too
+	slow, we could make it 2 or whatever.
+
+* Undo
+	Instead of having a straight state struct, maybe I should have an array
+	of 100 of them.  Then I could include a current move state and a max move
+	state so I could skip forward and backward.  
+
+	Hmm, should I keep 100 of both states? or just keep all those states on
+	the engine side, and use the GUI state only for the current state of the
+	board?  I'm currently inclined to just have the array on the engine
+	side.
+
+* Keeping up with option/game changes
+	Some options may change during the middle of the game.  For example, the
+	autocomplete would make both players computer opponents.  The network
+	stuff wouldn't be able to change.  Each time the back end has to use one
+	of these changeable options, it should read it directly from the source.
 	
+	But if we had a setup mode, the user could switch off game playing, configure 
+	the board, and reenter game mode.  To accomplish this, I'd need to change game 
+	recognition from a linear model (W moved this queen here, so unmark the src 
+	and mark the dest as the WQ), to a discover mode (look at all the squares on 
+	the board and see what is on each).  That's not very efficient for most things,
+       	so perhaps just making a " discover_board" function that can be called when 
+	exiting setup mode.
+
+
+* Different difficulty levels & Separate AI settings for each player
+	I want to create different difficulty levels for the AI player.
+	Starting with 0 = random and moving up to 10 or so, adding one more
+	heuristic at each level.  
+
+	But then I'd like to separate the AI level, time, width, and TT.  That
+	way I can pit one player up against the other without them "cheating" by
+	knowing what the other player will do.  
+
+
+
+

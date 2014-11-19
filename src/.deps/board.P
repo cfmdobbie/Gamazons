@@ -3,7 +3,9 @@ board.o: board.c /usr/include/time.h /usr/include/features.h \
   /usr/lib/gcc-lib/i386-redhat-linux/2.96/include/stddef.h \
   /usr/include/bits/time.h /usr/include/bits/types.h \
   /usr/include/bits/pthreadtypes.h /usr/include/bits/sched.h \
-  /usr/include/assert.h /home/yorgasor/garnome/include/gtk-2.0/gtk/gtk.h \
+  /usr/include/assert.h \
+  /home/yorgasor/garnome/include/libgnomeui-2.0/gnome.h \
+  /home/yorgasor/garnome/include/gtk-2.0/gtk/gtk.h \
   /home/yorgasor/garnome/include/gtk-2.0/gdk/gdk.h \
   /home/yorgasor/garnome/include/gtk-2.0/gdk/gdkcolor.h \
   /home/yorgasor/garnome/include/gtk-2.0/gdk/gdktypes.h \
@@ -275,7 +277,6 @@ board.o: board.c /usr/include/time.h /usr/include/features.h \
   /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvruler.h \
   /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvscale.h \
   /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvseparator.h \
-  /home/yorgasor/garnome/include/libgnomeui-2.0/gnome.h \
   /home/yorgasor/garnome/include/libgnome-2.0/libgnome/libgnome.h \
   /home/yorgasor/garnome/include/libgnome-2.0/libgnome/gnome-program.h \
   /usr/include/popt.h /usr/include/stdio.h /usr/include/libio.h \
@@ -376,7 +377,7 @@ board.o: board.c /usr/include/time.h /usr/include/features.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-popup-menu.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-propertybox.h \
   /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h \
-  amazons.h board.h position.h makros.h callbacks.h
+  amazons.h board.h callbacks.h
 board.c :
 /usr/include/time.h :
 /usr/include/features.h :
@@ -388,6 +389,7 @@ board.c :
 /usr/include/bits/pthreadtypes.h :
 /usr/include/bits/sched.h :
 /usr/include/assert.h :
+/home/yorgasor/garnome/include/libgnomeui-2.0/gnome.h :
 /home/yorgasor/garnome/include/gtk-2.0/gtk/gtk.h :
 /home/yorgasor/garnome/include/gtk-2.0/gdk/gdk.h :
 /home/yorgasor/garnome/include/gtk-2.0/gdk/gdkcolor.h :
@@ -662,7 +664,6 @@ board.c :
 /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvruler.h :
 /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvscale.h :
 /home/yorgasor/garnome/include/gtk-2.0/gtk/gtkvseparator.h :
-/home/yorgasor/garnome/include/libgnomeui-2.0/gnome.h :
 /home/yorgasor/garnome/include/libgnome-2.0/libgnome/libgnome.h :
 /home/yorgasor/garnome/include/libgnome-2.0/libgnome/gnome-program.h :
 /usr/include/popt.h :
@@ -780,6 +781,4 @@ board.c :
 /home/yorgasor/garnome/include/libgnomeui-2.0/libgnomeui/gnome-window-icon.h :
 amazons.h :
 board.h :
-position.h :
-makros.h :
 callbacks.h :

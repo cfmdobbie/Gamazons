@@ -28,7 +28,6 @@
 static GnomeUIInfo file1_menu_uiinfo[] =
 {
   GNOMEUIINFO_MENU_NEW_ITEM (N_("_New"), NULL, on_new1_activate, NULL),
-  GNOMEUIINFO_MENU_RESTART_GAME_ITEM (on_open1_activate, NULL),
   GNOMEUIINFO_SEPARATOR,
   GNOMEUIINFO_MENU_EXIT_ITEM (on_quit1_activate, NULL),
   GNOMEUIINFO_END
@@ -228,9 +227,8 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1, "menubar1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[0].widget, "file1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[0].widget, "new1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[1].widget, "open1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[2].widget, "separator1");
-  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[3].widget, "quit1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[1].widget, "separator1");
+  GLADE_HOOKUP_OBJECT (GamazonsMain, file1_menu_uiinfo[2].widget, "quit1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, menubar1_uiinfo[1].widget, "edit1");
   GLADE_HOOKUP_OBJECT (GamazonsMain, edit1_menu_uiinfo[0].widget, "undo_move2");
   GLADE_HOOKUP_OBJECT (GamazonsMain, edit1_menu_uiinfo[1].widget, "redo_move3");
@@ -259,5 +257,245 @@ create_GamazonsMain (void)
   GLADE_HOOKUP_OBJECT_NO_REF (GamazonsMain, tooltips, "tooltips");
 
   return GamazonsMain;
+}
+
+GtkWidget*
+create_PlayerSettings (void)
+{
+  GtkWidget *PlayerSettings;
+  GtkWidget *vbox5;
+  GtkWidget *hbox3;
+  GtkWidget *WhitePlayerLabel;
+  GtkWidget *WhiteHumanRadio;
+  GSList *WhiteHumanRadio_group = NULL;
+  GtkWidget *WhiteAIRadio;
+  GtkWidget *hbox4;
+  GtkWidget *BlackPlayerLabel;
+  GtkWidget *BlackHumanRadio;
+  GSList *BlackHumanRadio_group = NULL;
+  GtkWidget *BlackAIRadio;
+  GtkWidget *hseparator1;
+  GtkWidget *AISettings;
+  GtkWidget *hbox5;
+  GtkWidget *vbox6;
+  GtkWidget *hbox6;
+  GtkWidget *TimeLabel;
+  GtkWidget *SearchDepthLabel;
+  GtkWidget *SearchWidthLabel;
+  GtkWidget *hbox7;
+  GtkObject *TimeSpinner_adj;
+  GtkWidget *TimeSpinner;
+  GtkObject *DepthSpinner_adj;
+  GtkWidget *DepthSpinner;
+  GtkObject *WidthSpinner_adj;
+  GtkWidget *WidthSpinner;
+  GtkWidget *hbuttonbox3;
+  GtkWidget *PlayerOKButton;
+  GtkWidget *PlayerCancelButton;
+  GtkWidget *alignment1;
+  GtkWidget *hbox8;
+  GtkWidget *image1;
+  GtkWidget *label9;
+
+  PlayerSettings = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_widget_set_usize (PlayerSettings, 300, 185);
+  gtk_window_set_title (GTK_WINDOW (PlayerSettings), _("Player Settings"));
+  gtk_window_set_default_size (GTK_WINDOW (PlayerSettings), 300, 185);
+  gtk_window_set_resizable (GTK_WINDOW (PlayerSettings), FALSE);
+
+  vbox5 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox5);
+  gtk_container_add (GTK_CONTAINER (PlayerSettings), vbox5);
+  gtk_widget_set_usize (vbox5, -2, 70);
+
+  hbox3 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox3);
+  gtk_box_pack_start (GTK_BOX (vbox5), hbox3, TRUE, TRUE, 0);
+  gtk_widget_set_usize (hbox3, -2, 2);
+
+  WhitePlayerLabel = gtk_label_new (_("White Player:"));
+  gtk_widget_show (WhitePlayerLabel);
+  gtk_box_pack_start (GTK_BOX (hbox3), WhitePlayerLabel, FALSE, FALSE, 0);
+  gtk_widget_set_usize (WhitePlayerLabel, 85, -2);
+  gtk_label_set_justify (GTK_LABEL (WhitePlayerLabel), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (WhitePlayerLabel), 0.3, 0.5);
+
+  WhiteHumanRadio = gtk_radio_button_new_with_mnemonic (NULL, _("Human"));
+  gtk_widget_show (WhiteHumanRadio);
+  gtk_box_pack_start (GTK_BOX (hbox3), WhiteHumanRadio, FALSE, FALSE, 0);
+  gtk_widget_set_usize (WhiteHumanRadio, 65, -2);
+  gtk_radio_button_set_group (GTK_RADIO_BUTTON (WhiteHumanRadio), WhiteHumanRadio_group);
+  WhiteHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (WhiteHumanRadio));
+
+  WhiteAIRadio = gtk_radio_button_new_with_mnemonic (NULL, _("AI"));
+  gtk_widget_show (WhiteAIRadio);
+  gtk_box_pack_start (GTK_BOX (hbox3), WhiteAIRadio, FALSE, FALSE, 0);
+  gtk_radio_button_set_group (GTK_RADIO_BUTTON (WhiteAIRadio), WhiteHumanRadio_group);
+  WhiteHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (WhiteAIRadio));
+
+  hbox4 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox4);
+  gtk_box_pack_start (GTK_BOX (vbox5), hbox4, TRUE, TRUE, 0);
+  gtk_widget_set_usize (hbox4, -2, 2);
+
+  BlackPlayerLabel = gtk_label_new (_("Black Player: "));
+  gtk_widget_show (BlackPlayerLabel);
+  gtk_box_pack_start (GTK_BOX (hbox4), BlackPlayerLabel, FALSE, FALSE, 0);
+  gtk_widget_set_usize (BlackPlayerLabel, 85, -2);
+  gtk_label_set_justify (GTK_LABEL (BlackPlayerLabel), GTK_JUSTIFY_LEFT);
+
+  BlackHumanRadio = gtk_radio_button_new_with_mnemonic (NULL, _("Human"));
+  gtk_widget_show (BlackHumanRadio);
+  gtk_box_pack_start (GTK_BOX (hbox4), BlackHumanRadio, FALSE, FALSE, 0);
+  gtk_widget_set_usize (BlackHumanRadio, 65, -2);
+  gtk_radio_button_set_group (GTK_RADIO_BUTTON (BlackHumanRadio), BlackHumanRadio_group);
+  BlackHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (BlackHumanRadio));
+
+  BlackAIRadio = gtk_radio_button_new_with_mnemonic (NULL, _("AI"));
+  gtk_widget_show (BlackAIRadio);
+  gtk_box_pack_start (GTK_BOX (hbox4), BlackAIRadio, FALSE, FALSE, 0);
+  gtk_radio_button_set_group (GTK_RADIO_BUTTON (BlackAIRadio), BlackHumanRadio_group);
+  BlackHumanRadio_group = gtk_radio_button_group (GTK_RADIO_BUTTON (BlackAIRadio));
+
+  hseparator1 = gtk_hseparator_new ();
+  gtk_widget_show (hseparator1);
+  gtk_box_pack_start (GTK_BOX (vbox5), hseparator1, TRUE, TRUE, 0);
+  gtk_widget_set_usize (hseparator1, -2, 1);
+
+  AISettings = gtk_label_new (_("AI Settings:"));
+  gtk_widget_show (AISettings);
+  gtk_box_pack_start (GTK_BOX (vbox5), AISettings, FALSE, FALSE, 0);
+  gtk_widget_set_usize (AISettings, -2, 15);
+  gtk_label_set_justify (GTK_LABEL (AISettings), GTK_JUSTIFY_LEFT);
+
+  hbox5 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox5);
+  gtk_box_pack_start (GTK_BOX (vbox5), hbox5, TRUE, TRUE, 0);
+
+  vbox6 = gtk_vbox_new (FALSE, 0);
+  gtk_widget_show (vbox6);
+  gtk_box_pack_start (GTK_BOX (hbox5), vbox6, TRUE, TRUE, 0);
+  gtk_widget_set_usize (vbox6, -2, 28);
+
+  hbox6 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox6);
+  gtk_box_pack_start (GTK_BOX (vbox6), hbox6, TRUE, TRUE, 0);
+
+  TimeLabel = gtk_label_new (_("Search Time: "));
+  gtk_widget_show (TimeLabel);
+  gtk_box_pack_start (GTK_BOX (hbox6), TimeLabel, FALSE, FALSE, 0);
+  gtk_widget_set_usize (TimeLabel, 95, -2);
+  gtk_label_set_justify (GTK_LABEL (TimeLabel), GTK_JUSTIFY_LEFT);
+
+  SearchDepthLabel = gtk_label_new (_("Max Search Depth"));
+  gtk_widget_show (SearchDepthLabel);
+  gtk_box_pack_start (GTK_BOX (hbox6), SearchDepthLabel, FALSE, FALSE, 0);
+  gtk_widget_set_usize (SearchDepthLabel, 101, -2);
+
+  SearchWidthLabel = gtk_label_new (_("Max Search Width"));
+  gtk_widget_show (SearchWidthLabel);
+  gtk_box_pack_start (GTK_BOX (hbox6), SearchWidthLabel, FALSE, FALSE, 0);
+  gtk_widget_set_usize (SearchWidthLabel, 90, -2);
+  gtk_label_set_justify (GTK_LABEL (SearchWidthLabel), GTK_JUSTIFY_RIGHT);
+  gtk_misc_set_alignment (GTK_MISC (SearchWidthLabel), 1, 0.5);
+
+  hbox7 = gtk_hbox_new (FALSE, 0);
+  gtk_widget_show (hbox7);
+  gtk_box_pack_start (GTK_BOX (vbox6), hbox7, TRUE, TRUE, 0);
+
+  TimeSpinner_adj = gtk_adjustment_new (5, 1, 100, 1, 10, 10);
+  TimeSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (TimeSpinner_adj), 1, 0);
+  gtk_widget_show (TimeSpinner);
+  gtk_box_pack_start (GTK_BOX (hbox7), TimeSpinner, TRUE, TRUE, 10);
+  gtk_widget_set_usize (TimeSpinner, 10, -2);
+
+  DepthSpinner_adj = gtk_adjustment_new (0, 0, 100, 1, 10, 10);
+  DepthSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (DepthSpinner_adj), 1, 0);
+  gtk_widget_show (DepthSpinner);
+  gtk_box_pack_start (GTK_BOX (hbox7), DepthSpinner, TRUE, TRUE, 10);
+  gtk_widget_set_usize (DepthSpinner, 10, -2);
+
+  WidthSpinner_adj = gtk_adjustment_new (0, 0, 3000, 1, 10, 10);
+  WidthSpinner = gtk_spin_button_new (GTK_ADJUSTMENT (WidthSpinner_adj), 1, 0);
+  gtk_widget_show (WidthSpinner);
+  gtk_box_pack_start (GTK_BOX (hbox7), WidthSpinner, TRUE, TRUE, 10);
+  gtk_widget_set_usize (WidthSpinner, 10, -2);
+
+  hbuttonbox3 = gtk_hbutton_box_new ();
+  gtk_widget_show (hbuttonbox3);
+  gtk_box_pack_start (GTK_BOX (vbox5), hbuttonbox3, TRUE, TRUE, 0);
+  gtk_widget_set_usize (hbuttonbox3, -2, 25);
+  gtk_container_set_border_width (GTK_CONTAINER (hbuttonbox3), 39);
+  gtk_button_box_set_spacing (GTK_BUTTON_BOX (hbuttonbox3), 0);
+
+  PlayerOKButton = gtk_button_new_from_stock ("gtk-ok");
+  gtk_widget_show (PlayerOKButton);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox3), PlayerOKButton);
+  gtk_widget_set_usize (PlayerOKButton, 50, -2);
+  gtk_container_set_border_width (GTK_CONTAINER (PlayerOKButton), 10);
+  GTK_WIDGET_SET_FLAGS (PlayerOKButton, GTK_CAN_DEFAULT);
+
+  PlayerCancelButton = gtk_button_new ();
+  gtk_widget_show (PlayerCancelButton);
+  gtk_container_add (GTK_CONTAINER (hbuttonbox3), PlayerCancelButton);
+  gtk_container_set_border_width (GTK_CONTAINER (PlayerCancelButton), 10);
+  GTK_WIDGET_SET_FLAGS (PlayerCancelButton, GTK_CAN_DEFAULT);
+
+  alignment1 = gtk_alignment_new (0.5, 0.5, 0, 0);
+  gtk_widget_show (alignment1);
+  gtk_container_add (GTK_CONTAINER (PlayerCancelButton), alignment1);
+
+  hbox8 = gtk_hbox_new (FALSE, 2);
+  gtk_widget_show (hbox8);
+  gtk_container_add (GTK_CONTAINER (alignment1), hbox8);
+
+  image1 = gtk_image_new_from_stock ("gtk-cancel", GTK_ICON_SIZE_BUTTON);
+  gtk_widget_show (image1);
+  gtk_box_pack_start (GTK_BOX (hbox8), image1, FALSE, FALSE, 0);
+
+  label9 = gtk_label_new_with_mnemonic (_("Cancel"));
+  gtk_widget_show (label9);
+  gtk_box_pack_start (GTK_BOX (hbox8), label9, FALSE, FALSE, 0);
+  gtk_label_set_justify (GTK_LABEL (label9), GTK_JUSTIFY_LEFT);
+
+  gtk_signal_connect (GTK_OBJECT (PlayerOKButton), "clicked",
+                      GTK_SIGNAL_FUNC (on_PlayerOKButton_clicked),
+                      NULL);
+  gtk_signal_connect (GTK_OBJECT (PlayerCancelButton), "clicked",
+                      GTK_SIGNAL_FUNC (on_PlayerCancelButton_clicked),
+                      NULL);
+
+  /* Store pointers to all widgets, for use by lookup_widget(). */
+  GLADE_HOOKUP_OBJECT_NO_REF (PlayerSettings, PlayerSettings, "PlayerSettings");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, vbox5, "vbox5");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox3, "hbox3");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, WhitePlayerLabel, "WhitePlayerLabel");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, WhiteHumanRadio, "WhiteHumanRadio");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, WhiteAIRadio, "WhiteAIRadio");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox4, "hbox4");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, BlackPlayerLabel, "BlackPlayerLabel");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, BlackHumanRadio, "BlackHumanRadio");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, BlackAIRadio, "BlackAIRadio");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hseparator1, "hseparator1");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, AISettings, "AISettings");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox5, "hbox5");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, vbox6, "vbox6");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox6, "hbox6");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, TimeLabel, "TimeLabel");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, SearchDepthLabel, "SearchDepthLabel");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, SearchWidthLabel, "SearchWidthLabel");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox7, "hbox7");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, TimeSpinner, "TimeSpinner");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, DepthSpinner, "DepthSpinner");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, WidthSpinner, "WidthSpinner");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbuttonbox3, "hbuttonbox3");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, PlayerOKButton, "PlayerOKButton");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, PlayerCancelButton, "PlayerCancelButton");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, alignment1, "alignment1");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, hbox8, "hbox8");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, image1, "image1");
+  GLADE_HOOKUP_OBJECT (PlayerSettings, label9, "label9");
+
+  return PlayerSettings;
 }
 

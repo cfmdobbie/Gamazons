@@ -1,12 +1,9 @@
 #include <time.h>
 #include <assert.h>
-#include <gtk/gtk.h>
 #include <gnome.h>
 
 #include "amazons.h"
 #include "board.h"
-#include "position.h"
-#include "makros.h"
 #include "callbacks.h"
 
 /* local Prototypes */
@@ -24,6 +21,7 @@ extern struct game_states states;
 extern int ok;
 extern time_t start;
 Square legal_moves[100];
+int state_hash;
 
 void init_game_board(GtkWidget *GamazonsMain)
 {
@@ -446,21 +444,34 @@ void square_contains(Square sq)
  * move_ai
  *
  * Checks to see if an AI oppenent is next to move.  If it is, it starts the 
- * move process.  If not,
+ * move process, and checks for a win afterwards.  If not, it just checks for 
+ * the win.  Returns TRUE if an AI opponent moves next.  False if human.
  *
+ * NOTE: If you have 2 AI players, this function would just keep thinking and 
+ * never let the board update or respond.  So there are several checks to see
+ * if any new events occured that should be handled, or critical changes have
+ * been made (like starting a new game, etc..).  If something critical has changed
+ * the function will exit after learning about it.
  */
 int move_ai()
 {
    state *s = states.s[states.current_state];
    move temp;
+   move movelist[3000];
    int ai = FALSE;
+   int current_hash;
 
+   current_hash = state_hash = create_hash(s);
+
+   //update the board
    while (gtk_events_pending())
       gtk_main_iteration();
+   if (current_hash != state_hash)
+      return FALSE;
 
    //gnome_canvas_item_request_update(board->canvas);
-   if (((states.s[states.current_state]->turn == WHITE_PLAYER) && (options.white_player == FALSE)) ||
-       ((states.s[states.current_state]->turn == BLACK_PLAYER) && (options.black_player == FALSE)))
+   if (((states.s[states.current_state]->turn == WHITE_PLAYER) && (options.white_player == AI)) ||
+       ((states.s[states.current_state]->turn == BLACK_PLAYER) && (options.black_player == AI)))
      {
       what_next = WAIT_FOR_AI;
       ok = 1;
@@ -470,6 +481,14 @@ int move_ai()
       if (s->winner)
 	 return FALSE;
       makemove(s,temp);
+
+      //update the board before drawing the new move
+      //the program would segfault if you closed it while it was thinking
+      while (gtk_events_pending())
+	 gtk_main_iteration();
+      if (current_hash != state_hash)
+	 return FALSE;
+
       //register move on graphical board
       move_piece(temp);
       dup_state(s, states.s[++(states.current_state)]);
@@ -482,11 +501,18 @@ int move_ai()
      {
       printf("the AI doesn't move next:\n");
      }
-   if (options.white_player == FALSE)
+   if (options.white_player == AI)
       printf("White is AI\n");
-   if (options.black_player == FALSE)
+   if (options.black_player == AI)
       printf("Black is AI\n");
    printf("Turn is %d\n", states.s[states.current_state]->turn );
+
+   //check for gameover
+   if (children(s, movelist) == 0)
+     {
+      printf("player %d wins!\n", s->turn^3);
+      s->winner = s->turn^3;
+     }
 
    return ai;
 }
@@ -723,6 +749,91 @@ int is_move_legal(Square sq)
 	}
      }
 
-   printf("can't move to square %d\n", sq);
+   printf("Can't move to square.  Legal moves are: %d\n", sq);
+   i=0;
+   while (legal_moves[i] < 100)
+      printf(" %d", legal_moves[i++]);
+   printf("\n");
    return FALSE;
+}
+
+/*==============================================================================
+ * count_queens
+ *
+ * DEBUG - counts the number of queens on the GUI representation and prints
+ * out a bunch of XXXX's whenever there are not 4 of both kinds.
+ */ 
+void count_queens()
+{
+   int black=0, white=0;
+   int i,j;
+
+   for(i=0; i<10; i++)
+     {
+      for(j=0; j<10; j++)
+	{
+	 if (board->squares[i][j] == WHITE)
+	    white++;
+	 if (board->squares[i][j] == BLACK)
+	    black++;
+	}
+     }
+   if (black > 4) 
+      printf("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n");
+   if (white > 4)
+      printf("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n");
+   if (black < 4)
+      printf("XYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYXYX\n");
+   if (white < 4)
+      printf("ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ\n");
+}
+
+
+
+/*==============================================================================
+ * free_all_memory
+ *
+ * When a new game is started, we want to free all the memory we've allocated
+ * so we can start all over without leaking all the memory.
+ */
+void free_all_memory()
+{
+   int i;
+
+   //free states
+   for (i=0; i< states.max_state; i++)
+      free (states.s[i]);
+
+   //Oh, this is ugly!  Do I really want to do this?
+   /*
+   if(tt)
+     {
+      for (i=0; i<TT; i++)
+       	{
+	 if (tt[i])
+	    free(tt[i]);
+       	}
+     }
+     */
+
+
+
+}
+
+
+/*==============================================================================
+ * create_hash
+ *
+ * Creates a hash value for the current state.  On the GUI side it's used to 
+ * see if the state has changed recently.
+ */
+int create_hash(state *s)
+{
+
+   ull board_u, board_l;
+
+   board_u = s->white_bd[1] | s->black_bd[1] | s->blocks_bd[1];
+   board_l = s->white_bd[0] | s->black_bd[0] | s->blocks_bd[0];
+
+   return( (board_u ^ board_l) % TT);
 }

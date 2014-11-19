@@ -66,6 +66,9 @@ time_t start;                    // global, start of search, used for timeout
 struct options options;
 struct game_states states;
 
+#ifdef GAMAZONS
+extern int state_hash;
+#endif
 
 // command line flags -- set defaults here
 /*
@@ -812,6 +815,7 @@ move search(state *s, int depth, int alpha, int beta, int tdepth, int think)
    int index=0;
    move stemp;
    move temp;
+   int randomizer;
    //    int tt_yes=0;
    //    int tt_no=0;
 
@@ -971,6 +975,16 @@ move search(state *s, int depth, int alpha, int beta, int tdepth, int think)
 	 done = 1;
        	}
      }
+
+   /* XXX
+   printf("movelist index = %d\n", index);
+   if (movecount > 3)
+     {
+      randomizer = rand() %3;
+      printf("randomizer = %d\n", randomizer);
+     }
+     */
+
    return movelist[index];
 }
 
@@ -1008,7 +1022,7 @@ int pboard(state s)
      {
       col = s.white_q_x[i];
       row = s.white_q_y[i];
-      if (options.white_player) board[col][row] = i+48;
+      if (options.white_player == HUMAN) board[col][row] = i+48;
       else board[col][row] = 'W';
      }
 
@@ -1017,7 +1031,7 @@ int pboard(state s)
      {
       col = s.black_q_x[i];
       row = s.black_q_y[i];
-      if (options.black_player) board[col][row] = i+48;
+      if (options.black_player == HUMAN) board[col][row] = i+48;
       else  board[col][row] = 'B';
      }
 
@@ -1624,7 +1638,7 @@ int main(int argc, char *argv[])
       if (states.current_state > states.max_state)
 	 states.max_state = states.current_state;
 
-      if (options.white_player)
+      if (options.white_player == HUMAN)
        	{
 	 temp = getmove(s, 1);
 	 makemove(s, temp);
@@ -1648,7 +1662,7 @@ int main(int argc, char *argv[])
       if (states.current_state > states.max_state)
 	 states.max_state = states.current_state;
 
-      if (options.black_player)
+      if (options.black_player == HUMAN)
        	{
 	 temp = getmove(s, 2);
 	 makemove(s, temp);
@@ -1675,6 +1689,7 @@ int main(int argc, char *argv[])
 #endif //ifndef GAMAZONS
 
 
+#ifdef GAMAZONS
 /*==============================================================================
  * init_engine
  *
@@ -1686,6 +1701,8 @@ void init_engine()
    move temp;
    int i;
 
+   srand(time(NULL));
+
    // Initialize game states
    for (i=0; i<100; i++)
       states.s[i] = (state *) malloc(sizeof(state));
@@ -1695,6 +1712,7 @@ void init_engine()
    s = states.s[0];
    s->turn = WHITE_PLAYER;
    s->winner = 0;
+   state_hash = create_hash(s);
 
 
    meta_init();
@@ -1703,15 +1721,111 @@ void init_engine()
 
    /* set default options */
    options.engine.maxdepth=20;
-   options.engine.maxwidth=5000;
-   options.engine.timeout=5;
-   options.white_player=TRUE;
-   options.black_player=FALSE;
+   options.engine.maxwidth=3000;
+   options.engine.timeout=1;
+   options.white_player=HUMAN;
+   options.black_player=HUMAN;
    options.print_statistics=FALSE;
+
+   load_values_from_file();
 
 }
 
 
+/*==============================================================================
+ * load_values_from_file
+ *
+ * If a .gamazons file is found in the user's home directory, it will attempt to
+ * load the values stored therein.  Any variables it doesn't recognize will be
+ * silently ignored.
+ */
+void load_values_from_file()
+{
+   char *home, file[256];
+   FILE *rc_fd;
+   char variable[256];
+   int value;
+   char ch;
+
+
+   if (!(home = getenv("HOME")))
+      return;
+
+   strcpy(file, home);
+   strcat(file, "/.gamazons");
+   printf("looking for the file %s\n", file);
+
+   rc_fd = fopen(file, "r");
+   if(rc_fd == NULL)
+      return;
+
+   while (fscanf(rc_fd, "%s", variable) != EOF)
+     {
+      while (ch = fgetc(rc_fd))
+	{
+	 if (ch == EOF)
+	    return;
+	 if (ch == '=')
+	    break;
+	}
+      fscanf(rc_fd, "%d", &value);
+
+      if (strcmp(variable, "WHITE_PLAYER") == 0)
+	 options.white_player = value;
+      else if (strcmp(variable, "BLACK_PLAYER") == 0)
+	 options.black_player = value;
+      else if (strcmp(variable, "TIMEOUT") == 0)
+	 options.engine.timeout = value;
+      else if (strcmp(variable, "MAXWIDTH") == 0)
+	 options.engine.maxwidth = value;
+      else if (strcmp(variable, "MAXDEPTH") == 0)
+	 options.engine.maxdepth = value;
+     }
+
+   fclose(rc_fd);
+
+}
+
+/*==============================================================================
+ * store_values_in_file
+ *
+ * Creates/overwrites a .gamazons file in the user's home directory.  Stores
+ * the values in the options struct in it.
+ */
+void store_values_in_file()
+{
+   char *home, file[256];
+   FILE *rc_fd;
+
+   if (!(home = getenv("HOME")))
+      return;
+
+   strcpy(file, home);
+   strcat(file, "/.gamazons");
+   printf("looking for the file %s\n", file);
+
+   rc_fd = fopen(file, "w");
+   if (rc_fd == NULL)
+      return;
+   
+   fprintf(rc_fd, "WHITE_PLAYER = ");
+   fprintf(rc_fd, "%d\n", options.white_player);
+
+   fprintf(rc_fd, "BLACK_PLAYER = ");
+   fprintf(rc_fd, "%d\n", options.black_player);
+
+   fprintf(rc_fd, "TIMEOUT = ");
+   fprintf(rc_fd, "%d\n", options.engine.timeout);
+
+   fprintf(rc_fd, "MAXWIDTH = ");
+   fprintf(rc_fd, "%d\n", options.engine.maxwidth);
+
+   fprintf(rc_fd, "MAXDEPTH = ");
+   fprintf(rc_fd, "%d\n", options.engine.maxdepth);
+
+   fclose(rc_fd);
+}
+#endif
 
 /*============================================================================== 
  * print_usage_menu 
@@ -1746,8 +1860,8 @@ void parse_args(int argc, char *argv[])
    options.engine.maxdepth=20;
    options.engine.maxwidth=5000;
    options.engine.timeout=2;
-   options.white_player=FALSE;
-   options.black_player=FALSE;
+   options.white_player=HUMAN;
+   options.black_player=AI;
    options.print_statistics=FALSE;
 
 
@@ -1764,9 +1878,9 @@ void parse_args(int argc, char *argv[])
 	      exit(0);
 	  case 'p':
 	      if (atoi(argv[++i]) == 1)
-		 options.white_player = TRUE;
+		 options.white_player = HUMAN;
 	      else
-		 options.black_player = TRUE;
+		 options.black_player = HUMAN;
 	      i++;
 	      break;
 	  case 'f':

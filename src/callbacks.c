@@ -17,15 +17,20 @@ extern int what_next;
 extern Square legal_moves[100];
 extern int ok;
 extern GtkWidget *main_window;
+extern state_hash;
 int grabbed_queen;
+
+int allow_auto_finish;
+GtkWidget *PlayerSettingsWindow;
 
 
 void
 on_new1_activate                       (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
-   init_game_board(main_window);
+   free_all_memory();
    init_engine();
+   init_game_board(main_window);
    while (move_ai());  //if both players are AI, keeps on running
 }
 
@@ -58,6 +63,8 @@ void
 on_quit1_activate                      (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+
+   state_hash = 0;
    gtk_main_quit();
 
 }
@@ -146,6 +153,39 @@ void
 on_player1_activate                    (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+   GtkWidget *time, *width, *depth;
+   GtkWidget *white_ai, *white_h, *black_ai, *black_h;
+
+
+   PlayerSettingsWindow = create_PlayerSettings();
+
+   /* grab all the widgets */
+   time = lookup_widget(PlayerSettingsWindow, "TimeSpinner");
+   width = lookup_widget(PlayerSettingsWindow, "WidthSpinner");
+   depth = lookup_widget(PlayerSettingsWindow, "DepthSpinner");
+   white_ai = lookup_widget(PlayerSettingsWindow, "WhiteAIRadio");
+   white_h = lookup_widget(PlayerSettingsWindow, "WhiteHumanRadio");
+   black_ai = lookup_widget(PlayerSettingsWindow, "BlackAIRadio");
+   black_h = lookup_widget(PlayerSettingsWindow, "BlackHumanRadio");
+
+
+   /* Load current values */
+   gtk_spin_button_set_value( (GtkSpinButton *)time, options.engine.timeout);
+   gtk_spin_button_set_value( (GtkSpinButton *)width, options.engine.maxwidth);
+   gtk_spin_button_set_value( (GtkSpinButton *)depth, options.engine.maxdepth);
+
+   if (options.white_player == HUMAN)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(white_h), TRUE);
+   else
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(white_ai), TRUE);
+
+   if (options.black_player == HUMAN)
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(black_h), TRUE);
+   else
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(black_ai), TRUE);
+
+
+   gtk_widget_show(PlayerSettingsWindow);
 
 }
 
@@ -192,11 +232,14 @@ void
 on_BT_AUTOFINISH_clicked               (GtkButton       *button,
                                         gpointer         user_data)
 {
-   options.white_player = FALSE;
-   options.white_player = FALSE;
-   options.engine.timeout = 1;
-   options.engine.maxwidth = 15;
-   while (move_ai());  //if both players are AI, keeps on running
+   if (allow_auto_finish)
+     {
+      options.white_player = AI;
+      options.black_player = AI;
+      options.engine.timeout = 1;
+      options.engine.maxwidth = 15;
+      while (move_ai());  //if both players are AI, keeps on running
+     }
 
 }
 
@@ -205,7 +248,9 @@ void
 on_GamazonsMain_destroy                (GtkObject       *object,
                                         gpointer         user_data)
 {
-  gtk_main_quit(); 
+
+   state_hash = 0;
+   gtk_main_quit(); 
 
 }
 
@@ -238,6 +283,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   from_col = get_x_int_from_square(from);
 	   from_row = get_y_int_from_square(from);
 
+//DEBUG: print board
    for (i=0; i<BOARD_SIZE; i++)
      {
       for (j=0; j<BOARD_SIZE; j++)
@@ -256,6 +302,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   if ((board->squares[from_row][from_col] == WHITE && what_next == MOVE_WHITE_QUEEN) ||
 	       (board->squares[from_row][from_col] == BLACK && what_next == MOVE_BLACK_QUEEN))
 	     {
+	      //Human is moving a queen
 	      printf("board->squares = %d, what_next = %d\n", board->squares[from_row][from_col], what_next);
 	      grabbed_queen = TRUE;
 	      gen_legal_moves(from);
@@ -310,7 +357,7 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   drop_x = event->button.x;
 	   drop_y = event->button.y;
 
-	   //something funny here
+	   //something funny here?
 	   if (is_queen_square(get_square (drop_x, drop_y)))
 	     {
 	      try_move (board, item);
@@ -346,7 +393,8 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 	   to_col = get_x_int_from_square(board->to);
 	   to_row = get_y_int_from_square(board->to);
 	   printf("setting square %d%d to hold %d\n", to_row, to_col, board->squares[from_row][from_col]);
-	   board->squares[to_row][to_col] = board->squares[from_row][from_col];
+
+	   //Queen is being moved to a different square
 	   if (board->to != board->from) 
 	     {
 	      //put the piece back if it's not a legal move
@@ -356,10 +404,14 @@ board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 		 try_move(board, item);
 		 break;
 		}
-
-	      board->squares[from_row][from_col] = NOTHING;
-	      gen_legal_moves(board->to); //prepare moves for arrow
-	      what_next = FIRE_ARROW;
+	      else
+		{
+		 what_next = FIRE_ARROW;
+		 allow_auto_finish = FALSE;
+		 board->squares[to_row][to_col] = board->squares[from_row][from_col];
+		 board->squares[from_row][from_col] = NOTHING;
+		 gen_legal_moves(board->to); //prepare moves for arrow
+		}
 	     }
 
 	   square_contains(board->to);
@@ -390,7 +442,9 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    int sq;
    int row, col;
    state *s;
+   move movelist[3000];
 
+   count_queens();
    switch (event->type) 
      {
        case GDK_BUTTON_PRESS:
@@ -418,11 +472,30 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
 
 	   fire_arrow(sq);
 	   s = states.s[states.current_state];
-	   if (s->turn == WHITE_PLAYER)
-	      what_next = MOVE_WHITE_QUEEN;
-	   if (s->turn == BLACK_PLAYER)
-	      what_next = MOVE_BLACK_QUEEN;
 	   register_move_with_engine(sq);
+
+	   if (s->turn == WHITE_PLAYER)
+	     {
+	      what_next = MOVE_WHITE_QUEEN;
+	      printf("white moves next\n");
+	     }
+	   else if (s->turn == BLACK_PLAYER)
+	     {
+	      what_next = MOVE_BLACK_QUEEN;
+	      printf("black moves next\n");
+	     }
+	   else
+	      printf("XXXXXXXXXXXXXXX  BLARGH!  I don't know who's turn it is!\n");
+
+	   //check for gameover
+	   if (children(s, movelist) == 0)
+	     {
+	      printf("player %d wins!\n", s->turn^3);
+	      s->winner = s->turn^3;
+	      break;
+	     }
+
+	   allow_auto_finish = TRUE;
 	   dup_state(s, states.s[++(states.current_state)]);
 	   move_ai();
        default:
@@ -431,3 +504,55 @@ int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data)
    return 0;
 
 }
+
+void
+on_PlayerOKButton_clicked              (GtkButton       *button,
+                                        gpointer         user_data)
+{
+   GtkWidget *time, *width, *depth;
+   GtkWidget *white_ai, *white_h, *black_ai, *black_h;
+
+
+   /* grab all the widgets */
+   time = lookup_widget(PlayerSettingsWindow, "TimeSpinner");
+   width = lookup_widget(PlayerSettingsWindow, "WidthSpinner");
+   depth = lookup_widget(PlayerSettingsWindow, "DepthSpinner");
+   white_ai = lookup_widget(PlayerSettingsWindow, "WhiteAIRadio");
+   white_h = lookup_widget(PlayerSettingsWindow, "WhiteHumanRadio");
+   black_ai = lookup_widget(PlayerSettingsWindow, "BlackAIRadio");
+   black_h = lookup_widget(PlayerSettingsWindow, "BlackHumanRadio");
+
+   /* Store new values */
+   options.engine.timeout = gtk_spin_button_get_value_as_int( (GtkSpinButton *)time);
+   options.engine.maxwidth = gtk_spin_button_get_value_as_int( (GtkSpinButton *)width);
+   options.engine.maxdepth = gtk_spin_button_get_value_as_int( (GtkSpinButton *)depth);
+
+   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(white_h)))
+      options.white_player = HUMAN;
+   else
+      options.white_player = AI;
+
+   if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(black_h)))
+      options.black_player = HUMAN;
+   else
+      options.black_player = AI;
+
+   store_values_in_file();
+   gtk_widget_destroy(PlayerSettingsWindow);
+
+   //checks to see if the AI is supposed to move after changes to the player have been made
+   while(move_ai());
+
+
+
+}
+
+
+void
+on_PlayerCancelButton_clicked          (GtkButton       *button,
+                                        gpointer         user_data)
+{
+   gtk_widget_destroy(PlayerSettingsWindow);
+
+}
+

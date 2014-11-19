@@ -93,3 +93,11 @@ int
 board_press_cb (GnomeCanvasItem *item, GdkEvent *event, gpointer data);
 
 int arrow_fire_cb(GnomeCanvasItem *item, GdkEvent *event, gpointer data);
+
+void
+on_PlayerOKButton_clicked              (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_PlayerCancelButton_clicked          (GtkButton       *button,
+                                        gpointer         user_data);

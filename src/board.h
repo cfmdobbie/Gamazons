@@ -112,6 +112,9 @@ void register_move_with_engine(Square arrow_sq);
 void gen_legal_moves(Square sq);
 int is_move_legal(Square sq);
 int is_queen_square(Square sq);
+void free_all_memory();
+int create_hash(state *s);
+
 
 // Coordinate conversion routines
 double get_x_from_square(int sq);
@@ -129,4 +132,5 @@ void draw_a_line(GnomeCanvasGroup *group,
 
 void fire_arrow(Square sq);
 void square_contains(Square sq);
+void count_queens();
 

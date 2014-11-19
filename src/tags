@@ -4,21 +4,21 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.2.2	//
-A1	makros.h	108;"	d
-A10	makros.h	207;"	d
-A2	makros.h	119;"	d
-A3	makros.h	130;"	d
-A4	makros.h	141;"	d
-A5	makros.h	152;"	d
-A6	makros.h	163;"	d
-A7	makros.h	174;"	d
-A8	makros.h	185;"	d
-A9	makros.h	196;"	d
+A1	makros.h	105;"	d
+A10	makros.h	204;"	d
+A2	makros.h	116;"	d
+A3	makros.h	127;"	d
+A4	makros.h	138;"	d
+A5	makros.h	149;"	d
+A6	makros.h	160;"	d
+A7	makros.h	171;"	d
+A8	makros.h	182;"	d
+A9	makros.h	193;"	d
 AB_ZUGL	makros.h	35;"	d
 AB_ZUG_S	makros.h	36;"	d
 ACLOCAL	Makefile	/^ACLOCAL = aclocal$/;"	m
 AM_INSTALL_PROGRAM_FLAGS	Makefile	/^	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install$/;"	m
-ANALYSE	makros.h	59;"	d
+ANALYSE	makros.h	56;"	d
 ARG_0	chess-board.c	/^   ARG_0,$/;"	e	file:
 ARG_DARK_COLOR_RGBA	chess-board.c	/^   ARG_DARK_COLOR_RGBA,$/;"	e	file:
 ARG_LIGHT_COLOR_RGBA	chess-board.c	/^   ARG_LIGHT_COLOR_RGBA,$/;"	e	file:
@@ -27,25 +27,24 @@ ARROW	main-boarddrawn.c	/^   ARROW$/;"	e	file:
 AUTOCONF	Makefile	/^AUTOCONF = autoconf$/;"	m
 AUTOHEADER	Makefile	/^AUTOHEADER = autoheader$/;"	m
 AUTOMAKE	Makefile	/^AUTOMAKE = automake$/;"	m
-AUTOPLAY	makros.h	58;"	d
-B1	makros.h	109;"	d
-B10	makros.h	208;"	d
-B2	makros.h	120;"	d
-B3	makros.h	131;"	d
-B4	makros.h	142;"	d
-B5	makros.h	153;"	d
-B6	makros.h	164;"	d
-B7	makros.h	175;"	d
-B8	makros.h	186;"	d
-B9	makros.h	197;"	d
-BB	makros.h	94;"	d
-BK	makros.h	97;"	d
+AUTOPLAY	makros.h	55;"	d
+B1	makros.h	106;"	d
+B10	makros.h	205;"	d
+B2	makros.h	117;"	d
+B3	makros.h	128;"	d
+B4	makros.h	139;"	d
+B5	makros.h	150;"	d
+B6	makros.h	161;"	d
+B7	makros.h	172;"	d
+B8	makros.h	183;"	d
+B9	makros.h	194;"	d
+BB	makros.h	91;"	d
+BK	makros.h	94;"	d
 BLACK	board.h	/^   BLACK,$/;"	e
 BLACK	main-boarddrawn.c	/^   BLACK,$/;"	e	file:
-BLACK	makros.h	40;"	d
-BLACKQUEENS	moves.c	44;"	d	file:
+BLACKQUEENS	moves.c	47;"	d	file:
 BLACK_PLAYER	amazons.h	13;"	d
-BN	makros.h	93;"	d
+BN	makros.h	90;"	d
 BOARD	board.h	49;"	d
 BOARD	chess-board.h	37;"	d
 BOARD_BORDER	board.h	9;"	d
@@ -57,25 +56,25 @@ BOARD_NAME	board.h	4;"	d
 BOARD_NAME	main-boarddrawn.c	16;"	d	file:
 BOARD_SIZE	board.h	7;"	d
 BOARD_SIZE	main-boarddrawn.c	20;"	d	file:
-BORDER	makros.h	99;"	d
-BP	makros.h	92;"	d
-BPIECE	makros.h	102;"	d
-BQ	makros.h	96;"	d
-BR	makros.h	95;"	d
+BORDER	makros.h	96;"	d
+BP	makros.h	89;"	d
+BPIECE	makros.h	99;"	d
+BQ	makros.h	93;"	d
+BR	makros.h	92;"	d
 Board	board.h	/^typedef struct amazon_board Board;$/;"	t
 Board	chess-board.h	/^typedef struct _Board        Board;$/;"	t
 BoardClass	chess-board.h	/^typedef struct _BoardClass   BoardClass;$/;"	t
 BoardPrivate	chess-board.h	/^typedef struct _BoardPrivate BoardPrivate;$/;"	t
-C1	makros.h	110;"	d
-C10	makros.h	209;"	d
-C2	makros.h	121;"	d
-C3	makros.h	132;"	d
-C4	makros.h	143;"	d
-C5	makros.h	154;"	d
-C6	makros.h	165;"	d
-C7	makros.h	176;"	d
-C8	makros.h	187;"	d
-C9	makros.h	198;"	d
+C1	makros.h	107;"	d
+C10	makros.h	206;"	d
+C2	makros.h	118;"	d
+C3	makros.h	129;"	d
+C4	makros.h	140;"	d
+C5	makros.h	151;"	d
+C6	makros.h	162;"	d
+C7	makros.h	173;"	d
+C8	makros.h	184;"	d
+C9	makros.h	195;"	d
 CATALOGS	Makefile	/^CATALOGS = $/;"	m
 CATOBJEXT	Makefile	/^CATOBJEXT = .gmo$/;"	m
 CC	Makefile	/^CC = gcc$/;"	m
@@ -86,24 +85,24 @@ CELL_SIZE	board.h	11;"	d
 CELL_SIZE	main-boarddrawn.c	24;"	d	file:
 CFLAGS	Makefile	/^CFLAGS = -g -O2$/;"	m
 COMPILE	Makefile	/^COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)$/;"	m
-COMPUTER_BLACK	makros.h	56;"	d
-COMPUTER_WHITE	makros.h	57;"	d
+COMPUTER_BLACK	makros.h	53;"	d
+COMPUTER_WHITE	makros.h	54;"	d
 CONFIG_CLEAN_FILES	Makefile	/^CONFIG_CLEAN_FILES = $/;"	m
 CONFIG_FILES	Makefile	/^	  && CONFIG_FILES=$(subdir)\/$@ CONFIG_HEADERS= $(SHELL) .\/config.status$/;"	m
 CONFIG_HEADER	Makefile	/^CONFIG_HEADER = ..\/config.h$/;"	m
 CONFIG_HEADERS	Makefile	/^	  && CONFIG_FILES=$(subdir)\/$@ CONFIG_HEADERS= $(SHELL) .\/config.status$/;"	m
-COORD	makros.h	44;"	d
+COORD	makros.h	41;"	d
 CPPFLAGS	Makefile	/^CPPFLAGS = $/;"	m
-D1	makros.h	111;"	d
-D10	makros.h	210;"	d
-D2	makros.h	122;"	d
-D3	makros.h	133;"	d
-D4	makros.h	144;"	d
-D5	makros.h	155;"	d
-D6	makros.h	166;"	d
-D7	makros.h	177;"	d
-D8	makros.h	188;"	d
-D9	makros.h	199;"	d
+D1	makros.h	108;"	d
+D10	makros.h	207;"	d
+D2	makros.h	119;"	d
+D3	makros.h	130;"	d
+D4	makros.h	141;"	d
+D5	makros.h	152;"	d
+D6	makros.h	163;"	d
+D7	makros.h	174;"	d
+D8	makros.h	185;"	d
+D9	makros.h	196;"	d
 DATADIRNAME	Makefile	/^DATADIRNAME = share$/;"	m
 DEFS	Makefile	/^DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..$/;"	m
 DEPS_MAGIC	Makefile	/^DEPS_MAGIC := $(shell mkdir .deps > \/dev\/null 2>&1 || :)$/;"	m
@@ -111,47 +110,48 @@ DEP_FILES	Makefile	/^DEP_FILES =  .deps\/board.P .deps\/callbacks.P .deps\/eval.
 DESTDIR	Makefile	/^DESTDIR =$/;"	m
 DISTFILES	Makefile	/^DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)$/;"	m
 DIST_COMMON	Makefile	/^DIST_COMMON =  Makefile.am Makefile.in$/;"	m
-E1	makros.h	112;"	d
-E10	makros.h	211;"	d
-E2	makros.h	123;"	d
-E3	makros.h	134;"	d
-E4	makros.h	145;"	d
-E5	makros.h	156;"	d
-E6	makros.h	167;"	d
-E7	makros.h	178;"	d
-E8	makros.h	189;"	d
-E9	makros.h	200;"	d
-EMPTY	makros.h	98;"	d
-F1	makros.h	113;"	d
-F10	makros.h	212;"	d
-F2	makros.h	124;"	d
-F3	makros.h	135;"	d
-F4	makros.h	146;"	d
-F5	makros.h	157;"	d
-F6	makros.h	168;"	d
-F7	makros.h	179;"	d
-F8	makros.h	190;"	d
-F9	makros.h	201;"	d
+E1	makros.h	109;"	d
+E10	makros.h	208;"	d
+E2	makros.h	120;"	d
+E3	makros.h	131;"	d
+E4	makros.h	142;"	d
+E5	makros.h	153;"	d
+E6	makros.h	164;"	d
+E7	makros.h	175;"	d
+E8	makros.h	186;"	d
+E9	makros.h	197;"	d
+EMPTY	makros.h	95;"	d
+F1	makros.h	110;"	d
+F10	makros.h	209;"	d
+F2	makros.h	121;"	d
+F3	makros.h	132;"	d
+F4	makros.h	143;"	d
+F5	makros.h	154;"	d
+F6	makros.h	165;"	d
+F7	makros.h	176;"	d
+F8	makros.h	187;"	d
+F9	makros.h	198;"	d
 FALSE	amazons.h	10;"	d
+FIRE_ARROW	board.h	/^   FIRE_ARROW,$/;"	e
 FLIP_SIGNAL	chess-board.c	/^   FLIP_SIGNAL,$/;"	e	file:
-G1	makros.h	114;"	d
-G10	makros.h	213;"	d
-G2	makros.h	125;"	d
-G3	makros.h	136;"	d
-G4	makros.h	147;"	d
-G5	makros.h	158;"	d
-G6	makros.h	169;"	d
-G7	makros.h	180;"	d
-G8	makros.h	191;"	d
-G9	makros.h	202;"	d
+G1	makros.h	111;"	d
+G10	makros.h	210;"	d
+G2	makros.h	122;"	d
+G3	makros.h	133;"	d
+G4	makros.h	144;"	d
+G5	makros.h	155;"	d
+G6	makros.h	166;"	d
+G7	makros.h	177;"	d
+G8	makros.h	188;"	d
+G9	makros.h	199;"	d
 GAMAZONS	amazons.h	18;"	d
-GAME_ABORTED	makros.h	50;"	d
-GAME_BLACK	makros.h	52;"	d
-GAME_DRAW	makros.h	53;"	d
-GAME_NONE	makros.h	47;"	d
-GAME_PAUSED	makros.h	48;"	d
-GAME_PROGRESS	makros.h	49;"	d
-GAME_WHITE	makros.h	51;"	d
+GAME_ABORTED	makros.h	47;"	d
+GAME_BLACK	makros.h	49;"	d
+GAME_DRAW	makros.h	50;"	d
+GAME_NONE	makros.h	44;"	d
+GAME_PAUSED	makros.h	45;"	d
+GAME_PROGRESS	makros.h	46;"	d
+GAME_WHITE	makros.h	48;"	d
 GETTEXT_PACKAGE	Makefile	/^GETTEXT_PACKAGE = gamazons$/;"	m
 GET_BDIAG	amazons.h	193;"	d
 GET_BDIAG_LEN	amazons.h	200;"	d
@@ -170,28 +170,28 @@ GMOFILES	Makefile	/^GMOFILES = $/;"	m
 GMSGFMT	Makefile	/^GMSGFMT = \/usr\/bin\/msgfmt$/;"	m
 GZIP_ENV	Makefile	/^GZIP_ENV = --best$/;"	m
 GameBoard	main-boarddrawn.c	/^int GameBoard[BOARD_SIZE][BOARD_SIZE];$/;"	v
-H1	makros.h	115;"	d
-H10	makros.h	214;"	d
-H2	makros.h	126;"	d
-H3	makros.h	137;"	d
-H4	makros.h	148;"	d
-H5	makros.h	159;"	d
-H6	makros.h	170;"	d
-H7	makros.h	181;"	d
-H8	makros.h	192;"	d
-H9	makros.h	203;"	d
-HEVAL	moves.c	30;"	d	file:
-HUMANS	makros.h	60;"	d
-I1	makros.h	116;"	d
-I10	makros.h	215;"	d
-I2	makros.h	127;"	d
-I3	makros.h	138;"	d
-I4	makros.h	149;"	d
-I5	makros.h	160;"	d
-I6	makros.h	171;"	d
-I7	makros.h	182;"	d
-I8	makros.h	193;"	d
-I9	makros.h	204;"	d
+H1	makros.h	112;"	d
+H10	makros.h	211;"	d
+H2	makros.h	123;"	d
+H3	makros.h	134;"	d
+H4	makros.h	145;"	d
+H5	makros.h	156;"	d
+H6	makros.h	167;"	d
+H7	makros.h	178;"	d
+H8	makros.h	189;"	d
+H9	makros.h	200;"	d
+HEVAL	moves.c	33;"	d	file:
+HUMANS	makros.h	57;"	d
+I1	makros.h	113;"	d
+I10	makros.h	212;"	d
+I2	makros.h	124;"	d
+I3	makros.h	135;"	d
+I4	makros.h	146;"	d
+I5	makros.h	157;"	d
+I6	makros.h	168;"	d
+I7	makros.h	179;"	d
+I8	makros.h	190;"	d
+I9	makros.h	201;"	d
 INCLUDES	Makefile	/^INCLUDES = \\$/;"	m
 INSTALL	Makefile	/^INSTALL = \/usr\/bin\/install -c$/;"	m
 INSTALL_DATA	Makefile	/^INSTALL_DATA = ${INSTALL} -m 644$/;"	m
@@ -206,30 +206,32 @@ IS_BOARD	chess-board.h	39;"	d
 IS_BOARD_CLASS	board.h	52;"	d
 IS_BOARD_CLASS	chess-board.h	40;"	d
 IS_POSITION	board.h	29;"	d
-J1	makros.h	117;"	d
-J10	makros.h	216;"	d
-J2	makros.h	128;"	d
-J3	makros.h	139;"	d
-J4	makros.h	150;"	d
-J5	makros.h	161;"	d
-J6	makros.h	172;"	d
-J7	makros.h	183;"	d
-J8	makros.h	194;"	d
-J9	makros.h	205;"	d
+J1	makros.h	114;"	d
+J10	makros.h	213;"	d
+J2	makros.h	125;"	d
+J3	makros.h	136;"	d
+J4	makros.h	147;"	d
+J5	makros.h	158;"	d
+J6	makros.h	169;"	d
+J7	makros.h	180;"	d
+J8	makros.h	191;"	d
+J9	makros.h	202;"	d
 LAST_SIGNAL	chess-board.c	/^   LAST_SIGNAL$/;"	e	file:
 LDFLAGS	Makefile	/^LDFLAGS = $/;"	m
-LI	makros.h	67;"	d
+LI	makros.h	64;"	d
 LIBS	Makefile	/^LIBS = $/;"	m
 LINK	Makefile	/^LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@$/;"	m
 MAINT	Makefile	/^MAINT = #$/;"	m
 MAKEINFO	Makefile	/^MAKEINFO = makeinfo$/;"	m
-MAX	moves.c	38;"	d	file:
+MAX	moves.c	41;"	d	file:
 MAX_TT_SEARCH	amazons.h	7;"	d
-MIN	moves.c	37;"	d	file:
-MINDEPTH	moves.c	31;"	d	file:
+MIN	moves.c	40;"	d	file:
+MINDEPTH	moves.c	34;"	d	file:
 MKINSTALLDIRS	Makefile	/^MKINSTALLDIRS = .\/mkinstalldirs$/;"	m
-MMSET	moves.c	39;"	d	file:
+MMSET	moves.c	42;"	d	file:
+MOVE_BLACK_QUEEN	board.h	/^   MOVE_BLACK_QUEEN,$/;"	e
 MOVE_SIGNAL	chess-board.c	/^   MOVE_SIGNAL,$/;"	e	file:
+MOVE_WHITE_QUEEN	board.h	/^   MOVE_WHITE_QUEEN,$/;"	e
 NONE	makros.h	32;"	d
 NORMAL_INSTALL	Makefile	/^NORMAL_INSTALL = :$/;"	m
 NORMAL_UNINSTALL	Makefile	/^NORMAL_UNINSTALL = :$/;"	m
@@ -237,14 +239,14 @@ NOTHING	board.h	/^   NOTHING,$/;"	e
 NOTHING	main-boarddrawn.c	/^   NOTHING,$/;"	e	file:
 NOTHINK	amazons.h	15;"	d
 OBJECTS	Makefile	/^OBJECTS = $(gamazons_OBJECTS) $(amazons_OBJECTS)$/;"	m
-OL	makros.h	64;"	d
-OM	makros.h	65;"	d
-OR	makros.h	66;"	d
+OL	makros.h	61;"	d
+OM	makros.h	62;"	d
+OR	makros.h	63;"	d
 OWN_VALUE	eval.c	20;"	d	file:
 PACKAGE	Makefile	/^PACKAGE = gamazons$/;"	m
 PACKAGE_CFLAGS	Makefile	/^PACKAGE_CFLAGS =  -I\/home\/yorgasor\/garnome\/include\/libgnomeui-2.0 -I\/home\/yorgasor\/garnome\/include\/libgnome-2.0 -I\/home\/yorgasor\/garnome\/include\/libgnomecanvas-2.0 -I\/home\/yorgasor\/garnome\/include\/gtk-2.0 -I\/home\/yorgasor\/garnome\/include\/libart-2.0 -I\/home\/yorgasor\/garnome\/include\/gconf\/2 -I\/home\/yorgasor\/garnome\/include\/libbonoboui-2.0 -I\/home\/yorgasor\/garnome\/include\/glib-2.0 -I\/home\/yorgasor\/garnome\/lib\/glib-2.0\/include -I\/home\/yorgasor\/garnome\/include\/orbit-2.0 -I\/home\/yorgasor\/garnome\/include\/libbonobo-2.0 -I\/home\/yorgasor\/garnome\/include\/gnome-vfs-2.0 -I\/home\/yorgasor\/garnome\/lib\/gnome-vfs-2.0\/include -I\/home\/yorgasor\/garnome\/include\/linc-1.0 -I\/home\/yorgasor\/garnome\/include\/bonobo-activation-2.0 -I\/home\/yorgasor\/garnome\/include\/libxml2 -I\/home\/yorgasor\/garnome\/include\/pango-1.0 -I\/home\/yorgasor\/garnome\/include -I\/home\/yorgasor\/garnome\/include\/freetype2 -I\/home\/yorgasor\/garnome\/lib\/gtk-2.0\/include -I\/home\/yorgasor\/garnome\/include\/atk-1.0 -I\/usr\/X11R6\/include  $/;"	m
 PACKAGE_LIBS	Makefile	/^PACKAGE_LIBS =  -L\/home\/yorgasor\/garnome\/lib -L\/usr\/X11R6\/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  $/;"	m
-PIECE_SIZE	makros.h	62;"	d
+PIECE_SIZE	makros.h	59;"	d
 PKG_CONFIG	Makefile	/^PKG_CONFIG = \/home\/yorgasor\/garnome\/bin\/pkg-config$/;"	m
 POFILES	Makefile	/^POFILES = $/;"	m
 POSITION	board.h	27;"	d
@@ -267,8 +269,8 @@ QUEEN_DANGER	eval.c	17;"	d	file:
 QUEEN_LOSS	eval.c	16;"	d	file:
 QUEEN_OFFSET	board.h	19;"	d
 RANLIB	Makefile	/^RANLIB = ranlib$/;"	m
-RE	makros.h	68;"	d
-SAN	makros.h	43;"	d
+RE	makros.h	65;"	d
+SAN	makros.h	40;"	d
 SHELL	Makefile	/^SHELL = \/bin\/sh$/;"	m
 SOURCES	Makefile	/^SOURCES = $(gamazons_SOURCES) $(amazons_SOURCES)$/;"	m
 SQUARE_COLOR_1	board.h	15;"	d
@@ -280,31 +282,31 @@ TAR	Makefile	/^TAR = gtar$/;"	m
 THICKNESS	board.h	18;"	d
 THICKNESS	main-boarddrawn.c	31;"	d	file:
 THINK	amazons.h	16;"	d
-TIMED	moves.c	33;"	d	file:
+TIMED	moves.c	36;"	d	file:
 TRUE	amazons.h	9;"	d
 TT	amazons.h	6;"	d
 TYPE_BOARD	board.h	48;"	d
 TYPE_BOARD	chess-board.h	36;"	d
 TYPE_POSITION	board.h	26;"	d
-UL	makros.h	69;"	d
-UM	makros.h	70;"	d
-UR	makros.h	71;"	d
+UL	makros.h	66;"	d
+UM	makros.h	67;"	d
+UR	makros.h	68;"	d
 USE_NLS	Makefile	/^USE_NLS = yes$/;"	m
-VERBOSE	moves.c	32;"	d	file:
+VERBOSE	moves.c	35;"	d	file:
 VERSION	Makefile	/^VERSION = 0.1$/;"	m
+WAIT_FOR_AI	board.h	/^   WAIT_FOR_AI,$/;"	e
 WARN_CFLAGS	Makefile	/^WARN_CFLAGS =  $/;"	m
-WB	makros.h	88;"	d
+WB	makros.h	85;"	d
 WHITE	board.h	/^   WHITE,$/;"	e
 WHITE	main-boarddrawn.c	/^   WHITE,$/;"	e	file:
-WHITE	makros.h	39;"	d
-WHITEQUEENS	moves.c	43;"	d	file:
+WHITEQUEENS	moves.c	46;"	d	file:
 WHITE_PLAYER	amazons.h	12;"	d
-WK	makros.h	91;"	d
-WN	makros.h	87;"	d
-WP	makros.h	86;"	d
-WPIECE	makros.h	101;"	d
-WQ	makros.h	90;"	d
-WR	makros.h	89;"	d
+WK	makros.h	88;"	d
+WN	makros.h	84;"	d
+WP	makros.h	83;"	d
+WPIECE	makros.h	98;"	d
+WQ	makros.h	87;"	d
+WR	makros.h	86;"	d
 XY_TO_POS	amazons.h	175;"	d
 _Board	chess-board.h	/^struct _Board {$/;"	s
 _BoardClass	chess-board.h	/^struct _BoardClass {$/;"	s
@@ -313,6 +315,7 @@ _MAKROS_H_	makros.h	20;"	d
 _POSITION_H_	position.h	26;"	d
 _Position	board.h	/^struct _Position {$/;"	s
 _PositionClass	board.h	/^struct _PositionClass {$/;"	s
+allow_auto_finish	callbacks.c	/^int allow_auto_finish;$/;"	v
 alpha	amazons.h	/^    short alpha;$/;"	m	struct:state_t
 amazon_board	board.h	/^struct amazon_board {$/;"	s
 amazons_DEPENDENCIES	Makefile	/^amazons_DEPENDENCIES = $/;"	m
@@ -366,9 +369,11 @@ clear_square	board.c	/^void clear_square (GnomeCanvasItem **square)$/;"	f
 clear_square	chess-board.c	/^clear_square (GnomeCanvasItem **square)$/;"	f	file:
 count_bits	eval.c	/^int count_bits(ull board_l, ull board_u)$/;"	f
 count_contig_bits	eval.c	/^int count_contig_bits(ushort stream, int len)$/;"	f
+count_queens	board.c	/^void count_queens()$/;"	f
 countchildren	moves.c	/^int countchildren(state *s)$/;"	f
 countobst	moves.c	/^int countobst(state *s)$/;"	f
 create_GamazonsMain	interface.c	/^create_GamazonsMain (void)$/;"	f
+create_PlayerSettings	interface.c	/^create_PlayerSettings (void)$/;"	f
 create_pixbuf	support.c	/^create_pixbuf                          (const gchar     *filename)$/;"	f
 create_pixmap	support.c	/^create_pixmap                          (GtkWidget       *widget,$/;"	f
 curr_x	board.h	/^   double curr_x;$/;"	m	struct:amazon_board
@@ -417,6 +422,7 @@ gamazons_OBJECTS	Makefile	/^gamazons_OBJECTS =  main.o support.o interface.o cal
 gamazons_SOURCES	Makefile	/^gamazons_SOURCES = \\$/;"	m
 game_states	amazons.h	/^struct game_states $/;"	s
 gen_dirs_board	eval.c	/^void gen_dirs_board(ull *board_l, ull *board_u, int pos)$/;"	f
+gen_legal_moves	board.c	/^void gen_legal_moves(Square sq)$/;"	f
 gen_web_board	eval.c	/^void gen_web_board(ull *web_l, ull *web_u, ull board_l, ull board_u, int pos)$/;"	f
 gen_web_board_count	eval.c	/^int gen_web_board_count(ull *web_l, ull *web_u, ull board_l, ull board_u, int pos)$/;"	f
 gen_web_stream	eval.c	/^ushort gen_web_stream(ushort stream, int pos, int len)$/;"	f
@@ -436,6 +442,7 @@ get_y_from_square	board.c	/^double get_y_from_square(int sq)$/;"	f
 get_y_int_from_square	board.c	/^int get_y_int_from_square(int sq)$/;"	f
 getmove	moves.c	/^move getmove(state *s, int player)$/;"	f
 glade_set_atk_action_description	support.c	/^glade_set_atk_action_description       (AtkAction       *action,$/;"	f
+grabbed_queen	callbacks.c	/^int grabbed_queen;$/;"	v
 help1_menu_uiinfo	interface.c	/^static GnomeUIInfo help1_menu_uiinfo[] =$/;"	v	file:
 here	Makefile	/^	here=`cd $(top_builddir) && pwd`; \\$/;"	m
 here	Makefile	/^	here=`pwd` && cd $(srcdir) \\$/;"	m
@@ -451,7 +458,10 @@ init	moves.c	/^int init(state *s)$/;"	f
 init_engine	moves.c	/^void init_engine()$/;"	f
 init_game_board	board.c	/^void init_game_board(GtkWidget *GamazonsMain)$/;"	f
 init_game_board	main-boarddrawn.c	/^static void init_game_board(GtkWidget *GamazonsMain)$/;"	f	file:
+is_move_legal	board.c	/^int is_move_legal(Square sq)$/;"	f
+is_queen_square	board.c	/^int is_queen_square(Square sq)$/;"	f
 isearch	moves.c	/^move isearch(state *s, int think)$/;"	f
+legal_moves	board.c	/^Square legal_moves[100];$/;"	v
 libdir	Makefile	/^libdir = ${exec_prefix}\/lib$/;"	m
 libexecdir	Makefile	/^libexecdir = ${exec_prefix}\/libexec$/;"	m
 light_rgba	chess-board.c	/^   guint light_rgba;$/;"	m	struct:_BoardPrivate	file:
@@ -462,6 +472,7 @@ lookup_widget	support.c	/^lookup_widget                          (GtkWidget     
 main	main-boarddrawn.c	/^main (int argc, char *argv[])$/;"	f
 main	main.c	/^int main (int argc, char *argv[])$/;"	f
 main	moves.c	/^int main(int argc, char *argv[])$/;"	f
+main_window	main.c	/^GtkWidget *main_window;$/;"	v
 makemove	moves.c	/^int makemove(state *s, move m)$/;"	f
 mandir	Makefile	/^mandir = ${prefix}\/man$/;"	m
 mark_square	board.c	/^void mark_square (GnomeCanvasItem *square)$/;"	f
@@ -492,6 +503,7 @@ on_BT_AUTOFINISH_clicked	callbacks.c	/^on_BT_AUTOFINISH_clicked               (G
 on_BT_FORCEMOVE_clicked	callbacks.c	/^on_BT_FORCEMOVE_clicked                (GtkButton       *button,$/;"	f
 on_BT_UNDO_clicked	callbacks.c	/^on_BT_UNDO_clicked                     (GtkButton       *button,$/;"	f
 on_GamazonsMain_destroy	callbacks.c	/^on_GamazonsMain_destroy                (GtkObject       *object,$/;"	f
+on_PlayerOKButton_clicked	callbacks.c	/^on_PlayerOKButton_clicked              (GtkButton       *button,$/;"	f
 on_about1_activate	callbacks.c	/^on_about1_activate                     (GtkMenuItem     *menuitem,$/;"	f
 on_clear1_activate	callbacks.c	/^on_clear1_activate                     (GtkMenuItem     *menuitem,$/;"	f
 on_copy1_activate	callbacks.c	/^on_copy1_activate                      (GtkMenuItem     *menuitem,$/;"	f
@@ -555,6 +567,7 @@ selected	board.h	/^   GnomeCanvasItem *selected;$/;"	m	struct:amazon_board
 selected	chess-board.c	/^   GnomeCanvasItem *selected;$/;"	m	struct:_BoardPrivate	file:
 selected_from	board.h	/^   Square selected_from;$/;"	m	struct:amazon_board
 selected_from	chess-board.c	/^   Square selected_from;$/;"	m	struct:_BoardPrivate	file:
+selected_queen	board.h	/^   GnomeCanvasItem *selected_queen;$/;"	m	struct:amazon_board
 set_arg	chess-board.c	/^set_arg (GtkObject *object, GtkArg *arg, guint arg_id)$/;"	f	file:
 set_colors	chess-board.c	/^set_colors (Board *board) $/;"	f	file:
 sharedstatedir	Makefile	/^sharedstatedir = ${prefix}\/com$/;"	m
@@ -618,6 +631,7 @@ value	amazons.h	/^    short value;$/;"	m	struct:state_s
 value	amazons.h	/^    short value;$/;"	m	struct:state_t
 wallcol	amazons.h	/^    uchar wallcol, wallrow;$/;"	m	struct:move_s
 wallrow	amazons.h	/^    uchar wallcol, wallrow;$/;"	m	struct:move_s
+what_next	board.c	/^int what_next;	\/\/$/;"	v
 white_bd	amazons.h	/^    ull white_bd[2];$/;"	m	struct:state_s
 white_bd	amazons.h	/^    ull white_bd[2];$/;"	m	struct:state_t
 white_misc	eval.c	/^int black_misc = 0, white_misc = 0;  	\/\/miscellaneous heuristic values$/;"	v

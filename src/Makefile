@@ -89,7 +89,7 @@ INCLUDES = \
 	 -I/home/yorgasor/garnome/include/libgnomeui-2.0 -I/home/yorgasor/garnome/include/libgnome-2.0 -I/home/yorgasor/garnome/include/libgnomecanvas-2.0 -I/home/yorgasor/garnome/include/gtk-2.0 -I/home/yorgasor/garnome/include/libart-2.0 -I/home/yorgasor/garnome/include/gconf/2 -I/home/yorgasor/garnome/include/libbonoboui-2.0 -I/home/yorgasor/garnome/include/glib-2.0 -I/home/yorgasor/garnome/lib/glib-2.0/include -I/home/yorgasor/garnome/include/orbit-2.0 -I/home/yorgasor/garnome/include/libbonobo-2.0 -I/home/yorgasor/garnome/include/gnome-vfs-2.0 -I/home/yorgasor/garnome/lib/gnome-vfs-2.0/include -I/home/yorgasor/garnome/include/linc-1.0 -I/home/yorgasor/garnome/include/bonobo-activation-2.0 -I/home/yorgasor/garnome/include/libxml2 -I/home/yorgasor/garnome/include/pango-1.0 -I/home/yorgasor/garnome/include -I/home/yorgasor/garnome/include/freetype2 -I/home/yorgasor/garnome/lib/gtk-2.0/include -I/home/yorgasor/garnome/include/atk-1.0 -I/usr/X11R6/include  
 
 
-bin_PROGRAMS = gamazons amazons
+bin_PROGRAMS = gamazons 
 
 gamazons_SOURCES = \
 	main.c \
@@ -106,15 +106,6 @@ gamazons_SOURCES = \
 
 gamazons_INCLUDES = -DGAMAZONS=1
 
-amazons_SOURCES = \
-	eval.c \
-	moves.c \
-	unit-test.c unit-test.h \
-	amazons.h 
-
-
-amazons_INCLUDES = -DAMAZONS=1
-
 gamazons_LDADD =  -L/home/yorgasor/garnome/lib -L/usr/X11R6/lib -lgnomeui-2 -lSM -lICE -lbonoboui-2 -lgnomecanvas-2 -lgnome-2 -lart_lgpl_2 -lpangoft2-1.0 -lgtk-x11-2.0 -lgdk-x11-2.0 -latk-1.0 -lgdk_pixbuf-2.0 -lpangoxft-1.0 -lpangox-1.0 -lpango-1.0 -lbonobo-2 -lgconf-2 -lgnomevfs-2 -lbonobo-activation -lORBit-2 -lxml2 -lz -lm -llinc -lgmodule-2.0 -ldl -lgobject-2.0 -lgthread-2.0 -lpthread -lglib-2.0  
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h
@@ -130,10 +121,6 @@ gamazons_OBJECTS =  main.o support.o interface.o callbacks.o board.o \
 eval.o moves.o unit-test.o
 gamazons_DEPENDENCIES = 
 gamazons_LDFLAGS = 
-amazons_OBJECTS =  eval.o moves.o unit-test.o
-amazons_LDADD = $(LDADD)
-amazons_DEPENDENCIES = 
-amazons_LDFLAGS = 
 CFLAGS = -g -O2
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
@@ -148,8 +135,8 @@ GZIP_ENV = --best
 DEP_FILES =  .deps/board.P .deps/callbacks.P .deps/eval.P \
 .deps/interface.P .deps/main.P .deps/moves.P .deps/support.P \
 .deps/unit-test.P
-SOURCES = $(gamazons_SOURCES) $(amazons_SOURCES)
-OBJECTS = $(gamazons_OBJECTS) $(amazons_OBJECTS)
+SOURCES = $(gamazons_SOURCES)
+OBJECTS = $(gamazons_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
@@ -206,10 +193,6 @@ maintainer-clean-compile:
 gamazons: $(gamazons_OBJECTS) $(gamazons_DEPENDENCIES)
 	@rm -f gamazons
 	$(LINK) $(gamazons_LDFLAGS) $(gamazons_OBJECTS) $(gamazons_LDADD) $(LIBS)
-
-amazons: $(amazons_OBJECTS) $(amazons_DEPENDENCIES)
-	@rm -f amazons
-	$(LINK) $(amazons_LDFLAGS) $(amazons_OBJECTS) $(amazons_LDADD) $(LIBS)
 
 tags: TAGS
 
